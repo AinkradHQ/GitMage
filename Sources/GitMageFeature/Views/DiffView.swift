@@ -1,6 +1,48 @@
 import SwiftUI
 import AinkradAppKit
 
+/// A parsed diff plus everything the view needs to derive from it, computed
+/// ONCE per diff instead of four times per render.
+///
+/// WHY this exists: `DiffView.body` previously called `Self.parse(diff.body)`
+/// inline, then walked the result three more times (two `filter`s for the
+/// header counts, one `map`/`max` for the column width). SwiftUI re-evaluates
+/// `body` on every dependency change, so a 5,000-line diff paid four full
+/// passes each time — before `ForEach` built 5,000 views.
+struct DiffRows: Equatable {
+    let rows: [DiffView.Row]
+    let additions: Int
+    let deletions: Int
+    let codeWidth: CGFloat
+    let hasTextualChanges: Bool
+
+    init(body: String, fontSize: Double) {
+        let rows = DiffView.parse(body)
+        self.rows = rows
+
+        // One pass for all four derived values, rather than three passes.
+        var additions = 0
+        var deletions = 0
+        var maxLength = 0
+        var hasTextual = false
+        for row in rows {
+            switch row.kind {
+            case .add: additions += 1
+            case .remove: deletions += 1
+            default: break
+            }
+            if row.kind != .meta {
+                hasTextual = true
+                maxLength = max(maxLength, DiffView.displayText(row).count)
+            }
+        }
+        self.additions = additions
+        self.deletions = deletions
+        self.hasTextualChanges = hasTextual
+        self.codeWidth = max(CGFloat(maxLength) * CGFloat(fontSize) * 0.62 + 10, 80)
+    }
+}
+
 struct DiffView: View {
     let diff: GitDiffSnapshot?
     let tokens: HostThemeTokens
@@ -14,8 +56,8 @@ struct DiffView: View {
     private let signWidth: CGFloat = 16
     private var gutterWidth: CGFloat { numberWidth * 2 + 8 }
 
-    private enum LineKind { case hunk, add, remove, context, meta }
-    private struct Row: Identifiable {
+    enum LineKind { case hunk, add, remove, context, meta }
+    struct Row: Identifiable, Equatable {
         let id: Int
         let kind: LineKind
         let oldNo: Int?
@@ -25,13 +67,14 @@ struct DiffView: View {
 
     var body: some View {
         if let diff {
-            let rows = Self.parse(diff.body)
+            // Computed once per (diff, fontSize) rather than four times per render.
+            let parsed = DiffRows(body: diff.body, fontSize: fontSize)
             VStack(alignment: .leading, spacing: 0) {
                 if showHeader {
-                    header(title: diff.title, rows: rows)
+                    header(title: diff.title, parsed: parsed)
                     GlowRule(tokens: tokens)
                 }
-                content(rows)
+                content(parsed)
             }
             .frame(maxWidth: .infinity, maxHeight: embedded ? nil : .infinity, alignment: .topLeading)
         } else if !embedded {
@@ -41,36 +84,36 @@ struct DiffView: View {
         }
     }
 
-    private func header(title: String, rows: [Row]) -> some View {
-        let additions = rows.filter { $0.kind == .add }.count
-        let deletions = rows.filter { $0.kind == .remove }.count
-        return HStack(spacing: 8) {
+    private func header(title: String, parsed: DiffRows) -> some View {
+        HStack(spacing: 8) {
             Image(systemName: "doc.text").font(.system(size: 11)).foregroundStyle(tokens.accentSecondary)
             Text(title)
                 .font(AinkradFont.mono(11, weight: .medium))
                 .foregroundStyle(tokens.foreground.opacity(0.75))
                 .lineLimit(1).truncationMode(.middle)
             Spacer(minLength: 8)
-            if additions > 0 {
-                Text("+\(additions)").font(AinkradFont.mono(10, weight: .semibold)).foregroundStyle(GMColor.diffAdd(tokens))
+            if parsed.additions > 0 {
+                Text("+\(parsed.additions)").font(AinkradFont.mono(10, weight: .semibold)).foregroundStyle(GMColor.diffAdd(tokens))
             }
-            if deletions > 0 {
-                Text("−\(deletions)").font(AinkradFont.mono(10, weight: .semibold)).foregroundStyle(GMColor.diffRemove(tokens))
+            if parsed.deletions > 0 {
+                Text("−\(parsed.deletions)").font(AinkradFont.mono(10, weight: .semibold)).foregroundStyle(GMColor.diffRemove(tokens))
             }
         }
         .padding(.horizontal, 14).padding(.vertical, 9)
     }
 
-    @ViewBuilder private func content(_ rows: [Row]) -> some View {
-        if rows.contains(where: { $0.kind != .meta }) {
-            // Uniform code width so add/remove tints line up like GitHub, and
-            // long lines scroll horizontally without wrapping.
-            let maxLen = rows.filter { $0.kind != .meta }
-                .map { displayText($0).count }.max() ?? 0
-            let codeWidth = max(CGFloat(maxLen) * CGFloat(fontSize) * 0.62 + 10, 80)
-            let stack = VStack(alignment: .leading, spacing: 0) {
-                ForEach(rows) { row($0, codeWidth: codeWidth) }
+    @ViewBuilder private func content(_ parsed: DiffRows) -> some View {
+        if parsed.hasTextualChanges {
+            // LazyVStack: a 5,000-line diff builds only the rows on screen.
+            // `alignment` and `spacing` match the VStack this replaced so the
+            // layout is unchanged. The explicit `.frame(width:)` keeps the
+            // horizontal scroll extent correct — unrealised lazy rows have no
+            // width otherwise, and this view sits inside a horizontally
+            // scrolling ScrollView.
+            let stack = LazyVStack(alignment: .leading, spacing: 0) {
+                ForEach(parsed.rows) { row($0, codeWidth: parsed.codeWidth) }
             }
+            .frame(width: parsed.codeWidth + gutterWidth + signWidth, alignment: .leading)
             .padding(.vertical, 4)
             .textSelection(.enabled)
 
@@ -111,7 +154,7 @@ struct DiffView: View {
                     .font(AinkradFont.mono(fontSize))
                     .foregroundStyle(signColor(r.kind))
                     .frame(width: signWidth, alignment: .center)
-                Text(SyntaxHighlighter.highlight(displayText(r), tokens: tokens))
+                Text(SyntaxHighlighter.highlight(Self.displayText(r), tokens: tokens))
                     .font(AinkradFont.mono(fontSize))
                     .lineLimit(1)
                     .frame(width: codeWidth, alignment: .leading)
@@ -135,7 +178,7 @@ struct DiffView: View {
     }
 
     /// Tab-expanded text for a row (tabs → 4 spaces) so columns align.
-    private func displayText(_ r: Row) -> String {
+    static func displayText(_ r: Row) -> String {
         r.text.replacingOccurrences(of: "\t", with: "    ")
     }
 
@@ -165,7 +208,8 @@ struct DiffView: View {
 
     // MARK: - Parsing
 
-    private static func parse(_ body: String) -> [Row] {
+    static func parse(_ body: String) -> [Row] {
+        if body.isEmpty { return [] }
         var rows: [Row] = []
         var oldLine = 0
         var newLine = 0

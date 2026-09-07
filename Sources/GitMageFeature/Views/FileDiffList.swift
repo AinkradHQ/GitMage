@@ -78,7 +78,7 @@ struct FileDiffList: View {
 
     var body: some View {
         ScrollView {
-            VStack(alignment: .leading, spacing: 6) {
+            LazyVStack(alignment: .leading, spacing: 6) {
                 if files.isEmpty {
                     EmptyStateView(icon: "doc.text", title: "No changes",
                                    message: "This diff has no files to show.", tokens: tokens)

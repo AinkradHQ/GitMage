@@ -6,9 +6,6 @@ struct ChangesContextPane: View {
     let tokens: HostThemeTokens
     let accent: Color
 
-    private var staged: [GitChange] { model.snapshot?.changes.filter { $0.hasStagedComponent } ?? [] }
-    private var unstaged: [GitChange] { model.snapshot?.changes.filter { $0.hasUnstagedComponent } ?? [] }
-
     /// Group-scoped selection key ("staged:<id>" / "unstaged:<id>") so a file that
     /// appears in both groups only highlights the side the user actually clicked.
     /// The VM's `selectedChangeID` (plain change id) still drives which change the
@@ -16,6 +13,13 @@ struct ChangesContextPane: View {
     @State private var selectedRowID: String?
 
     var body: some View {
+        // Computed once per render — previously `staged`/`unstaged` were
+        // computed properties re-filtering the whole change list on every
+        // access (three times: the empty check, the two groups, and the
+        // commit box's staged count).
+        let allChanges = model.snapshot?.changes ?? []
+        let staged = allChanges.filter { $0.hasStagedComponent }
+        let unstaged = allChanges.filter { $0.hasUnstagedComponent }
         VStack(spacing: 0) {
             if staged.isEmpty && unstaged.isEmpty {
                 EmptyStateView(
@@ -27,7 +31,7 @@ struct ChangesContextPane: View {
                 .frame(maxWidth: .infinity, maxHeight: .infinity)
             } else {
                 ScrollView {
-                    VStack(alignment: .leading, spacing: 16) {
+                    LazyVStack(alignment: .leading, spacing: 16) {
                         group(title: "STAGED", changes: staged, staged: true)
                         group(title: "UNSTAGED", changes: unstaged, staged: false)
                     }
@@ -40,7 +44,7 @@ struct ChangesContextPane: View {
 
     @ViewBuilder private func group(title: String, changes: [GitChange], staged: Bool) -> some View {
         if !changes.isEmpty {
-            VStack(alignment: .leading, spacing: 5) {
+            LazyVStack(alignment: .leading, spacing: 5) {
                 HStack(spacing: 8) {
                     Text(title)
                         .font(AinkradFont.display(10, weight: .semibold)).kerning(2)

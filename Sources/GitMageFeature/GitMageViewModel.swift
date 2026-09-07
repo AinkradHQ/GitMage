@@ -50,9 +50,14 @@ final class GitMageViewModel: ObservableObject {
     private let log: PluginLogger
     private var didBootstrap = false
 
+    /// Files Git Mage's notifications. Generation 9 onward; every host that
+    /// can load this bundle supplies one.
+    private let reporter: GitMageSignalReporter
+
     init(host: HostServices) {
         self.workspaceStore = GitMageWorkspaceStore(documents: host.documents)
         self.log = host.log
+        self.reporter = GitMageSignalReporter(signals: host.signals)
         let library = workspaceStore.loadLibrary()
         self.repos = library.repos
         self.activeRepoID = library.activeRepoID ?? library.repos.first?.id
@@ -495,17 +500,59 @@ final class GitMageViewModel: ObservableObject {
         isLoading = true
         activeOperation = context
         errorMessage = nil
+        // Captured before the work starts, and the repo path with it: the
+        // active repo can change while a long fetch runs, and reporting the
+        // outcome against whatever is selected when it lands would attribute
+        // one repository's failure to another.
+        let startedAt = Date()
+        let repository = repositoryPath
         Task { @MainActor in
             do {
                 try await action()
-                log.info("Completed \(context) in \(repositoryPath)")
+                log.info("Completed \(context) in \(repository)")
                 refresh()
+                let elapsed = Date().timeIntervalSince(startedAt)
+                // Success only past the threshold: a 200ms status refresh is
+                // not news, a four-minute clone is the thing the user walked
+                // away from.
+                if elapsed >= GitMageSignalReporter.successThreshold {
+                    reporter.operationFinished(operation: context, repository: repository,
+                                               duration: elapsed)
+                }
+                // Conflicts are checked AFTER the refresh, on the state the
+                // refresh produced. A conflict is not a thrown error — the
+                // command did what it was asked — so this is the only place it
+                // can be observed.
+                reportConflictsIfAny(operation: context, repository: repository)
             } catch {
                 isLoading = false
                 activeOperation = nil
                 report(error, context: context)
+                reporter.operationFailed(operation: context, repository: repository,
+                                         reason: Self.describe(error))
             }
         }
+    }
+
+    /// Files a conflict row when the working tree has conflicted entries.
+    ///
+    /// Reads `snapshot`, which `refresh()` has just repopulated. Silent when
+    /// there are none, so this is safe to call after every operation rather
+    /// than only after the ones that can conflict — a list of "operations that
+    /// can conflict" is exactly the kind of thing that goes stale.
+    private func reportConflictsIfAny(operation: String, repository: String) {
+        guard let snapshot else { return }
+        let conflicted = snapshot.changes
+            .filter { $0.kind == .conflicted }
+            .map(\.path)
+        reporter.conflictsDetected(operation: operation, repository: repository,
+                                   files: conflicted)
+    }
+
+    /// The same text `report(_:context:)` shows in the UI, so the feed row and
+    /// the banner cannot disagree about what went wrong.
+    private static func describe(_ error: Error) -> String {
+        (error as? LocalizedError)?.errorDescription ?? error.localizedDescription
     }
 
     private func report(_ error: Error, context: String) {

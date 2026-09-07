@@ -75,6 +75,12 @@ final class FakeHostServices: HostServices {
     let presentation: PluginPresentationControl = FakePresentation()
     let context: PluginContextRegistry
     let actions: AgentActionProvider
+    /// Generation 9 added `HostServices.signals`. Plugins CONSUME HostServices
+    /// and never implement it in production — this fake is the exception, and
+    /// it is the documented cost of adding a protocol requirement: a compiled
+    /// bundle keeps loading, but a plugin's test double needs the new member.
+    /// `NoopSignalEmitter` is what the SDK ships for exactly this.
+    let signals: PluginSignalEmitter = NoopSignalEmitter()
     init(context: PluginContextRegistry, actions: AgentActionProvider = RecordingActionRegistry()) {
         self.context = context
         self.actions = actions
