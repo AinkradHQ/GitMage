@@ -20,8 +20,12 @@ struct MarkdownText: View {
     }
 
     var body: some View {
-        VStack(alignment: .leading, spacing: 6) {
-            ForEach(Array(Self.parse(markdown).enumerated()), id: \.offset) { _, block in
+        // Computed once per render rather than inline inside ForEach, and
+        // wrapped in LazyVStack so a long issue/PR body doesn't build one
+        // live view per block up front.
+        let blocks = Self.parse(markdown)
+        LazyVStack(alignment: .leading, spacing: 6) {
+            ForEach(Array(blocks.enumerated()), id: \.offset) { _, block in
                 blockView(block)
             }
         }

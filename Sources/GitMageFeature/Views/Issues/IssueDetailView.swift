@@ -13,7 +13,7 @@ struct IssueDetailView: View {
         VStack(spacing: 0) {
             if let detail = model.detail {
                 ScrollView {
-                    VStack(alignment: .leading, spacing: 12) {
+                    LazyVStack(alignment: .leading, spacing: 12) {
                         header(detail)
                         editors(detail)
                         DiscussionCard(author: detail.author, timestamp: detail.createdAt,

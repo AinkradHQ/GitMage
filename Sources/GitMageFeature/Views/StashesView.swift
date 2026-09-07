@@ -31,7 +31,7 @@ struct StashesContextPane: View {
                 .frame(maxWidth: .infinity, maxHeight: .infinity)
             } else {
                 ScrollView {
-                    VStack(alignment: .leading, spacing: 4) {
+                    LazyVStack(alignment: .leading, spacing: 4) {
                         ForEach(model.stashes) { stash in
                             StashRow(
                                 stash: stash,
