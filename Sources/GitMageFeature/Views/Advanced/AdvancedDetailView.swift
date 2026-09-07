@@ -169,7 +169,7 @@ struct AdvancedDetailView: View {
                         .foregroundStyle(tokens.foreground.opacity(0.45))
                 } else {
                     ScrollView {
-                        VStack(alignment: .leading, spacing: 3) {
+                        LazyVStack(alignment: .leading, spacing: 3) {
                             ForEach(model.tags) { tag in
                                 TagRow(tag: tag, tokens: tokens) { Task { await model.deleteTag(tag.name) } }
                             }

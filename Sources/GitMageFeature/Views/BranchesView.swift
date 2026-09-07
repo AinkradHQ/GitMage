@@ -27,7 +27,7 @@ struct BranchesContextPane: View {
                 .frame(maxWidth: .infinity, maxHeight: .infinity)
             } else {
                 ScrollView {
-                    VStack(alignment: .leading, spacing: 3) {
+                    LazyVStack(alignment: .leading, spacing: 3) {
                         ForEach(model.branches) { branch in
                             BranchPaneRow(
                                 branch: branch,
