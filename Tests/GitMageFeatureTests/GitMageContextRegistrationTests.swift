@@ -77,6 +77,8 @@ final class FakeHostServices: HostServices {
     /// `signals` at generation 9: a compiled bundle keeps loading, but this
     /// test double needs the new member.
     let mode: PluginModeControl = FakeMode()
+    /// Generation 11, added alongside the overlay-size control.
+    let overlaySize: PluginOverlaySizeControl = FakeOverlaySize()
     let context: PluginContextRegistry
     let actions: AgentActionProvider
     /// Generation 9 added `HostServices.signals`. Plugins CONSUME HostServices
@@ -147,5 +149,12 @@ final class GitMageContextRegistrationTests: XCTestCase {
 private struct FakeMode: PluginModeControl {
     var current: PluginMode { .basic }
     func set(_ mode: PluginMode) {}
+    func reset() {}
+}
+
+@MainActor
+private struct FakeOverlaySize: PluginOverlaySizeControl {
+    var current: PluginOverlaySize { .medium }
+    func set(_ size: PluginOverlaySize) {}
     func reset() {}
 }

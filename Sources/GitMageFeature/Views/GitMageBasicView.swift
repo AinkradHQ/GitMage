@@ -24,6 +24,30 @@ struct GitMageBasicView: View {
         AinkradBasicShell(icon: "wand.and.stars",
                           title: model.activeRepo?.name ?? "Git Mage",
                           subtitle: subtitle) {
+            // Switching repo belongs in basic mode: "which repo" is half of
+            // what Fetch and Pull even mean, and sending someone to advanced to
+            // answer it defeats the point of the mode. The kit's grouped select
+            // rather than a local menu — it is searchable, which matters at 14
+            // repos, and the design system forbids rolling one here.
+            if model.repos.count > 1 {
+                AinkradGroupedSelect(
+                    sections: [AinkradGroupedSection(
+                        header: "Repositories",
+                        rows: model.repos.map {
+                            AinkradGroupedRow(value: $0.id, title: $0.name,
+                                              detail: $0.path, icon: "wand.and.stars")
+                        })],
+                    selection: Binding(
+                        get: { model.activeRepoID ?? "" },
+                        // `selectRepository` owns the whole switch — persisting
+                        // the outgoing repo's state, resetting transient state
+                        // and refreshing. In basic that refresh is the scoped
+                        // branches-only one, so switching stays cheap.
+                        set: { model.selectRepository($0) }),
+                    triggerLabel: model.activeRepo?.name ?? "Repository",
+                    searchPlaceholder: "Search repositories")
+                .frame(maxWidth: 220)
+            }
             AinkradButton(title: "Fetch", style: .secondary, icon: "arrow.down") {
                 model.fetch()
             }
