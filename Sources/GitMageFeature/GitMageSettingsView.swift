@@ -19,6 +19,7 @@ struct GitMageSettingsView: View {
     var body: some View {
         ScrollView {
             VStack(alignment: .leading, spacing: 22) {
+                surfaceSection
                 appearanceSection
                 typographySection
                 shortcutsSection
@@ -35,6 +36,17 @@ struct GitMageSettingsView: View {
             if auth.token() != nil {
                 githubStatus = "A token is saved."
             }
+        }
+    }
+
+    /// How the host surfaces Git Mage. First, above appearance: it decides what
+    /// you get when you open the app, which matters before what colour it is.
+    private var surfaceSection: some View {
+        VStack(alignment: .leading, spacing: 12) {
+            AinkradSectionHeader(title: "SURFACE")
+            AinkradSurfaceSettings(appName: "Git Mage",
+                                   presentation: host.presentation,
+                                   mode: host.mode)
         }
     }
 
