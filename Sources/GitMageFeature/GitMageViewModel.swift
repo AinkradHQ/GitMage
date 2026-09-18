@@ -45,6 +45,22 @@ final class GitMageViewModel: ObservableObject {
     @Published var showClonePrompt = false
     @Published var cloneRemoteURL = ""
 
+    /// How much `refresh()` loads.
+    ///
+    /// Basic mode needs the branch list and nothing else: `loadBranches` alone
+    /// carries the current branch (`%(HEAD)`) and its ahead/behind
+    /// (`%(upstream:trackshort)`), which is everything Fetch, Pull and the
+    /// branch switcher display.
+    ///
+    /// It matters because git's cost here is dominated by process spawn, not by
+    /// work: measured on this repo, each `git` invocation costs ~12ms of spawn
+    /// against ~2-9ms of actual work, so the full refresh's five subprocesses
+    /// (status, branches, stashes, rev-parse, and a diff of the first changed
+    /// file) are ~73ms where basic's two are ~26ms. Trimming the VIEW alone
+    /// would have saved none of it — the load is what costs.
+    enum LoadScope { case basic, full }
+    var loadScope: LoadScope = .full
+
     private let workspaceStore: GitMageWorkspaceStore
     private let client = GitRepositoryClient()
     private let log: PluginLogger
@@ -249,12 +265,33 @@ final class GitMageViewModel: ObservableObject {
 
     // MARK: - Snapshot / refresh
 
+    /// The basic-mode load: branches, and nothing else.
+    ///
+    /// Deliberately does NOT clear `snapshot`, `commits` or `stashes`. Switching
+    /// a pane basic -> advanced keeps this model, and wiping what advanced
+    /// already loaded would make the switch look like a reload every time.
+    private func refreshBranchesOnly(at path: String) {
+        isLoading = true
+        errorMessage = nil
+        Task { @MainActor in
+            let loaded = (try? await client.loadBranches(at: path)) ?? []
+            branches = loaded
+            if let current = loaded.first(where: { $0.isCurrent }) {
+                selectedBranchName = current.name
+            }
+            isLoading = false
+            activeOperation = nil
+        }
+    }
+
     func refresh() {
         let path = repositoryPath
         guard !path.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty else {
             errorMessage = GitRepositoryError.missingPath.localizedDescription
             return
         }
+
+        if loadScope == .basic { refreshBranchesOnly(at: path); return }
 
         isLoading = true
         errorMessage = nil
