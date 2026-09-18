@@ -73,6 +73,10 @@ final class FakeHostServices: HostServices {
     let log: PluginLogger = FakeLogger()
     let apps: PluginAppLauncher = FakeAppLauncher()
     let presentation: PluginPresentationControl = FakePresentation()
+    /// Generation 11 added `HostServices.mode`, the same documented cost as
+    /// `signals` at generation 9: a compiled bundle keeps loading, but this
+    /// test double needs the new member.
+    let mode: PluginModeControl = FakeMode()
     let context: PluginContextRegistry
     let actions: AgentActionProvider
     /// Generation 9 added `HostServices.signals`. Plugins CONSUME HostServices
@@ -137,4 +141,11 @@ final class GitMageContextRegistrationTests: XCTestCase {
         XCTAssertEqual(r1.sources.count, 1)
         XCTAssertEqual(r2.sources.count, 1)
     }
+}
+
+@MainActor
+private struct FakeMode: PluginModeControl {
+    var current: PluginMode { .basic }
+    func set(_ mode: PluginMode) {}
+    func reset() {}
 }

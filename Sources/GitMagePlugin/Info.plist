@@ -26,6 +26,8 @@
   <integer>7</integer>
   <key>NSPrincipalClass</key>
   <string>GitMageEntryPoint</string>
+  <key>AinkradMode</key>
+  <string>basic</string>
 </dict>
 </plist>
 
