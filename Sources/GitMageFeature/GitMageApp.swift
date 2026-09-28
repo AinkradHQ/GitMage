@@ -10,6 +10,11 @@ public struct GitMageApp: AinkradApp {
         makeRootView(host: host, mode: .advanced)
     }
 
+    public static func settingsCatalog(host: HostServices) -> SettingsPage? {
+        GitMageSettingsCatalog.page(store: GitMageRuntime.settingsStore(for: host),
+                                    state: GitMageRuntime.settingsPageState(for: host), host: host)
+    }
+
     public static func makeSettingsView(host: HostServices) -> AnyView {
         AnyView(GitMageSettingsView(
             settingsStore: GitMageRuntime.settingsStore(for: host),
