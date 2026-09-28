@@ -275,6 +275,7 @@ final class GitMageViewModel: ObservableObject {
         errorMessage = nil
         Task { @MainActor in
             let loaded = (try? await client.loadBranches(at: path)) ?? []
+            guard repositoryPath == path else { return }   // switched repos mid-load
             branches = loaded
             if let current = loaded.first(where: { $0.isCurrent }) {
                 selectedBranchName = current.name
@@ -284,7 +285,9 @@ final class GitMageViewModel: ObservableObject {
         }
     }
 
-    func refresh() {
+    /// `includeHistory: false` is the lighter reload after an action that
+    /// cannot move HEAD (stage, unstage, discard, stash): history is kept.
+    func refresh(includeHistory: Bool = true) {
         let path = repositoryPath
         guard !path.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty else {
             errorMessage = GitRepositoryError.missingPath.localizedDescription
@@ -298,17 +301,26 @@ final class GitMageViewModel: ObservableObject {
 
         Task { @MainActor in
             do {
-                let newSnapshot = try await client.loadSnapshot(at: path)
-                let newBranches = (try? await client.loadBranches(at: path)) ?? []
-                let newStashes = (try? await client.loadStashes(in: path)) ?? []
+                // Concurrent: the three loads are independent read-only commands.
+                async let loadedSnapshot = client.loadSnapshot(at: path)
+                async let loadedBranches = try? client.loadBranches(at: path)
+                async let loadedStashes = try? client.loadStashes(in: path)
+                let newSnapshot = try await loadedSnapshot
+                let newBranches = await loadedBranches ?? []
+                let newStashes = await loadedStashes ?? []
+                // The user switched repos while this ran: painting these results
+                // would show one repository's state under another's name.
+                guard repositoryPath == path else { return }
                 snapshot = newSnapshot
                 branches = newBranches
                 stashes = newStashes
                 selectedStashDiff = nil
-                commits = []
-                selectedCommitID = nil
-                commitDiff = nil
-                if selectedArea == .history { loadCommits() }
+                if includeHistory {
+                    commits = []
+                    selectedCommitID = nil
+                    commitDiff = nil
+                    if selectedArea == .history { loadCommits() }
+                }
                 if selectedBranchName.isEmpty || !newBranches.contains(where: { $0.name == selectedBranchName }) {
                     selectedBranchName = newSnapshot.branchName
                 }
@@ -316,17 +328,19 @@ final class GitMageViewModel: ObservableObject {
                 log.info("Loaded repository snapshot for \(path)")
                 isLoading = false
                 activeOperation = nil
+                // Only the change the user already picked is re-diffed. No eager
+                // first-file diff: it cost a spawn on every open for a diff the
+                // user may never look at.
                 if let selectedChangeID,
                    let existingChange = newSnapshot.changes.first(where: { $0.id == selectedChangeID }) {
                     selectChange(existingChange)
-                } else if let firstChange = newSnapshot.changes.first {
-                    selectedChangeID = firstChange.id
-                    selectChange(firstChange)
                 } else {
                     selectedChangeID = nil
                     diffSnapshot = nil
                 }
             } catch {
+                guard repositoryPath == path else { return }
+                await client.forgetRoot(for: path)
                 snapshot = nil
                 branches = []
                 stashes = []
@@ -437,19 +451,19 @@ final class GitMageViewModel: ObservableObject {
     // MARK: - Stash
 
     func stashChanges() {
-        run(context: "stash changes") { [self] in try await client.stashPush(in: repositoryPath) }
+        run(context: "stash changes", movesHead: false) { [self] in try await client.stashPush(in: repositoryPath) }
     }
 
     func popLatestStash() {
-        run(context: "pop stash") { [self] in try await client.stashPop(in: repositoryPath) }
+        run(context: "pop stash", movesHead: false) { [self] in try await client.stashPop(in: repositoryPath) }
     }
 
     func applyStash(_ entry: GitStashEntry) {
-        run(context: "apply \(entry.id)") { [self] in try await client.stashApply(entry, in: repositoryPath) }
+        run(context: "apply \(entry.id)", movesHead: false) { [self] in try await client.stashApply(entry, in: repositoryPath) }
     }
 
     func dropStash(_ entry: GitStashEntry) {
-        run(context: "drop \(entry.id)") { [self] in try await client.stashDrop(entry, in: repositoryPath) }
+        run(context: "drop \(entry.id)", movesHead: false) { [self] in try await client.stashDrop(entry, in: repositoryPath) }
     }
 
     func selectStash(_ entry: GitStashEntry) {
@@ -493,26 +507,26 @@ final class GitMageViewModel: ObservableObject {
     // MARK: - Staging
 
     func stageAllChanges() {
-        run(context: "stage all changes") { [self] in try await client.stageAllChanges(in: repositoryPath) }
+        run(context: "stage all changes", movesHead: false) { [self] in try await client.stageAllChanges(in: repositoryPath) }
     }
 
     func unstageAllChanges() {
-        run(context: "unstage all changes") { [self] in try await client.unstageAllChanges(in: repositoryPath) }
+        run(context: "unstage all changes", movesHead: false) { [self] in try await client.unstageAllChanges(in: repositoryPath) }
     }
 
     func stageSelectedChange() {
         guard let change = selectedChange else { return }
-        run(context: "stage \(change.filePath)") { [self] in try await client.stage(change: change, in: repositoryPath) }
+        run(context: "stage \(change.filePath)", movesHead: false) { [self] in try await client.stage(change: change, in: repositoryPath) }
     }
 
     func unstageSelectedChange() {
         guard let change = selectedChange else { return }
-        run(context: "unstage \(change.filePath)") { [self] in try await client.unstage(change: change, in: repositoryPath) }
+        run(context: "unstage \(change.filePath)", movesHead: false) { [self] in try await client.unstage(change: change, in: repositoryPath) }
     }
 
     func discardSelectedChange() {
         guard let change = selectedChange else { return }
-        run(context: "discard \(change.filePath)") { [self] in try await client.discard(change: change, in: repositoryPath) }
+        run(context: "discard \(change.filePath)", movesHead: false) { [self] in try await client.discard(change: change, in: repositoryPath) }
     }
 
     func commitChanges() {
@@ -532,7 +546,10 @@ final class GitMageViewModel: ObservableObject {
     // MARK: - Helpers
 
     /// Runs a mutating git action, then refreshes on success or reports on failure.
-    private func run(context: String, _ action: @escaping () async throws -> Void) {
+    /// `movesHead: false` for actions that cannot change history, so the
+    /// follow-up refresh keeps the loaded commits instead of reloading them.
+    private func run(context: String, movesHead: Bool = true,
+                     _ action: @escaping () async throws -> Void) {
         guard hasActiveRepo else { return }
         isLoading = true
         activeOperation = context
@@ -547,7 +564,7 @@ final class GitMageViewModel: ObservableObject {
             do {
                 try await action()
                 log.info("Completed \(context) in \(repository)")
-                refresh()
+                refresh(includeHistory: movesHead)
                 let elapsed = Date().timeIntervalSince(startedAt)
                 // Success only past the threshold: a 200ms status refresh is
                 // not news, a four-minute clone is the thing the user walked

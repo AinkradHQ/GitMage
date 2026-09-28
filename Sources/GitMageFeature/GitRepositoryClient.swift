@@ -53,32 +53,35 @@ actor GitRepositoryClient {
     }
 
     func loadSnapshot(at path: String) async throws -> GitRepositorySnapshot {
-        let repositoryURL = try await validateRepositoryPath(path)
-        let rootPath = try await runGit(["rev-parse", "--show-toplevel"], in: repositoryURL).trimmingCharacters(in: .whitespacesAndNewlines)
-        let statusOutput = try await runGit(["status", "--short", "--branch"], in: URL(fileURLWithPath: rootPath))
-        let lastCommitSummary = try? await runGit(["log", "-1", "--pretty=format:%s"], in: URL(fileURLWithPath: rootPath)).trimmingCharacters(in: .whitespacesAndNewlines)
+        let rootURL = try await repositoryRootURL(for: path)
+        // Both read-only, so they share the concurrent lane and run together.
+        // `GIT_OPTIONAL_LOCKS=0` stops `status` opportunistically rewriting the
+        // index — that write is what could collide with a concurrent stage.
+        async let status = runGit(["status", "--short", "--branch"], in: rootURL,
+                                  environment: Self.noOptionalLocks, readOnly: true)
+        async let summary = try? runGit(["log", "-1", "--pretty=format:%s"], in: rootURL, readOnly: true)
+        let statusOutput = try await status
+        let lastCommitSummary = await summary?.trimmingCharacters(in: .whitespacesAndNewlines)
         return GitStatusParser.parse(
             statusOutput: statusOutput,
-            repositoryRoot: rootPath,
+            repositoryRoot: rootURL.path,
             lastCommitSummary: lastCommitSummary?.isEmpty == true ? nil : lastCommitSummary
         )
     }
 
     func loadBranches(at path: String) async throws -> [GitBranchSummary] {
-        let repositoryURL = try await validateRepositoryPath(path)
-        let rootPath = try await runGit(["rev-parse", "--show-toplevel"], in: repositoryURL).trimmingCharacters(in: .whitespacesAndNewlines)
+        let rootURL = try await repositoryRootURL(for: path)
         let output = try await runGit([
             "for-each-ref",
             "--format=%(HEAD)\t%(refname:short)\t%(upstream:short)\t%(upstream:trackshort)",
             "refs/heads"
-        ], in: URL(fileURLWithPath: rootPath))
+        ], in: rootURL, readOnly: true)
         return GitBranchParser.parse(output: output)
     }
 
     func checkoutBranch(_ branchName: String, in path: String) async throws {
-        let repositoryURL = try await validateRepositoryPath(path)
-        let rootPath = try await runGit(["rev-parse", "--show-toplevel"], in: repositoryURL).trimmingCharacters(in: .whitespacesAndNewlines)
-        _ = try await runGit(["checkout", branchName], in: URL(fileURLWithPath: rootPath))
+        let rootURL = try await repositoryRootURL(for: path)
+        _ = try await runGit(["checkout", branchName], in: rootURL)
     }
 
     func stageAllChanges(in path: String) async throws {
@@ -212,7 +215,7 @@ actor GitRepositoryClient {
 
     func loadStashes(in path: String) async throws -> [GitStashEntry] {
         let rootURL = try await repositoryRootURL(for: path)
-        let output = try await runGit(["stash", "list", "--format=%gd%x09%gs"], in: rootURL)
+        let output = try await runGit(["stash", "list", "--format=%gd%x09%gs"], in: rootURL, readOnly: true)
         return GitStashParser.parse(output: output)
     }
 
@@ -267,9 +270,7 @@ actor GitRepositoryClient {
     }
 
     func loadDiff(for change: GitChange, in path: String) async throws -> GitDiffSnapshot {
-        let repositoryURL = try await validateRepositoryPath(path)
-        let rootPath = try await runGit(["rev-parse", "--show-toplevel"], in: repositoryURL).trimmingCharacters(in: .whitespacesAndNewlines)
-        let rootURL = URL(fileURLWithPath: rootPath)
+        let rootURL = try await repositoryRootURL(for: path)
         let title = change.kind == .renamed ? "\(change.sourcePath ?? change.path) → \(change.filePath)" : change.filePath
 
         let arguments: [String]
@@ -428,6 +429,8 @@ actor GitRepositoryClient {
         _ = try await runGit(["branch", "-d", trimmed], in: rootURL)   // safe delete; refuses unmerged
     }
 
+    /// The repository ROOT for `path` — `rev-parse --show-toplevel` already
+    /// answers both "is this a repo" and "where is its root", so one spawn does both.
     private func validateRepositoryPath(_ path: String) async throws -> URL {
         guard !path.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty else {
             throw GitRepositoryError.missingPath
@@ -441,8 +444,8 @@ actor GitRepositoryClient {
 
         let url = URL(fileURLWithPath: expanded, isDirectory: isDirectory.boolValue)
         do {
-            _ = try await runGit(["rev-parse", "--show-toplevel"], in: url)
-            return url
+            let root = try await runGit(["rev-parse", "--show-toplevel"], in: url, readOnly: true)
+            return URL(fileURLWithPath: root.trimmingCharacters(in: .whitespacesAndNewlines))
         } catch {
             throw GitRepositoryError.notARepository(path)
         }
@@ -452,10 +455,15 @@ actor GitRepositoryClient {
         if let cached = rootCache[path] {
             return URL(fileURLWithPath: cached)
         }
-        let repositoryURL = try await validateRepositoryPath(path)
-        let rootPath = try await runGit(["rev-parse", "--show-toplevel"], in: repositoryURL).trimmingCharacters(in: .whitespacesAndNewlines)
-        rootCache[path] = rootPath
-        return URL(fileURLWithPath: rootPath)
+        let rootURL = try await validateRepositoryPath(path)
+        rootCache[path] = rootURL.path
+        return rootURL
+    }
+
+    /// Drops the cached root, so the next call re-validates. For a refresh that
+    /// failed: the folder may have moved or stopped being a repository.
+    func forgetRoot(for path: String) {
+        rootCache[path] = nil
     }
 
     func hasHead(in repositoryURL: URL) async throws -> Bool {
@@ -487,22 +495,34 @@ actor GitRepositoryClient {
     /// on a continuation frees the cooperative thread for the duration. The
     /// queue stays serial: git operations on one repo must not interleave, and
     /// this preserves the ordering the actor already guaranteed.
+    /// Serial: every command that can write (the index, refs, the worktree), so
+    /// two actions never race git's `index.lock`.
     private static let gitQueue = DispatchQueue(label: "com.ainkrad.gitmage.git", qos: .userInitiated)
+    /// Concurrent: read-only commands, so a refresh's loads run side by side
+    /// instead of paying one spawn after another.
+    private static let readQueue = DispatchQueue(label: "com.ainkrad.gitmage.git.read",
+                                                 qos: .userInitiated, attributes: .concurrent)
+    static let noOptionalLocks = ["GIT_OPTIONAL_LOCKS": "0"]
+
+    /// Commands spawned by this client — observable by tests.
+    private(set) var spawnCount = 0
 
     /// Runs `git` with `arguments`, suspending rather than blocking.
     func runGit(
         _ arguments: [String],
         in repositoryURL: URL,
         acceptedExitCodes: Set<Int32> = [0],
-        environment: [String: String]? = nil
+        environment: [String: String]? = nil,
+        readOnly: Bool = false
     ) async throws -> String {
         // Validate before leaving the actor — a rejected argument must never
         // reach the spawn path at all.
         if let rejected = GitArgumentGuard.rejectedArgument(in: arguments) {
             throw GitRepositoryError.unsafeArgument(rejected)
         }
+        spawnCount += 1
         return try await withCheckedThrowingContinuation { continuation in
-            Self.gitQueue.async {
+            (readOnly ? Self.readQueue : Self.gitQueue).async {
                 do {
                     continuation.resume(returning: try Self.runGitBlocking(
                         arguments, in: repositoryURL,
