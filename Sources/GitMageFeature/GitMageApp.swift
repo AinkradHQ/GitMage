@@ -7,7 +7,7 @@ public struct GitMageApp: AinkradApp {
     public static let icon = "wand.and.stars"
 
     public static func makeRootView(host: HostServices) -> AnyView {
-        AnyView(GitMageShell(host: host, settingsStore: GitMageRuntime.settingsStore(for: host)))
+        makeRootView(host: host, mode: .advanced)
     }
 
     public static func makeSettingsView(host: HostServices) -> AnyView {
@@ -49,5 +49,37 @@ extension GitMageApp: AinkradAppMCP {
 extension GitMageApp: AinkradAppTeardown {
     public static func teardown(instance: PluginInstanceID) {
         GitMageRuntime.teardown(instance: instance, host: nil)
+    }
+}
+
+/// Generation 11: Git Mage's basic mode is repo, branch, Fetch, Pull.
+extension GitMageApp: AinkradAppModes {
+    public static func makeRootView(host: HostServices, mode: PluginMode) -> AnyView {
+        switch mode {
+        case .basic:
+            return AnyView(GitMageBasicRoot(host: host))
+        case .advanced:
+            return AnyView(GitMageShell(host: host, settingsStore: GitMageRuntime.settingsStore(for: host)))
+        // Resilient enum: fall back to advanced, never to a stripped view for a
+        // mode this build does not understand.
+        @unknown default:
+            return AnyView(GitMageShell(host: host, settingsStore: GitMageRuntime.settingsStore(for: host)))
+        }
+    }
+}
+
+/// Owns the basic view's model, so it lives for the pane rather than being
+/// rebuilt on every render — `BlockView` calls `makeRootView` each body pass.
+private struct GitMageBasicRoot: View {
+    let host: HostServices
+    @StateObject private var model: GitMageViewModel
+
+    init(host: HostServices) {
+        self.host = host
+        _model = StateObject(wrappedValue: GitMageViewModel(host: host))
+    }
+
+    var body: some View {
+        GitMageBasicView(host: host, model: model)
     }
 }
