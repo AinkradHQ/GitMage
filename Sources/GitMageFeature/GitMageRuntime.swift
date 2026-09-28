@@ -39,6 +39,13 @@ enum GitMageRuntime {
         stores.value(for: instance(of: host)) { GitMageSettingsStore(documents: host.documents) }
     }
 
+    private static let pageStates = PluginInstanceStorage<GitMageSettingsPageState>()
+
+    /// The declared settings page's transient state — see `GitMageSettingsPageState`.
+    static func settingsPageState(for host: HostServices) -> GitMageSettingsPageState {
+        pageStates.value(for: instance(of: host)) { GitMageSettingsPageState() }
+    }
+
     private static let bridges = PluginInstanceStorage<GitMageContextBridge>()
 
     /// The per-host agent-context bridge. Created and **registered with the host
@@ -99,6 +106,7 @@ enum GitMageRuntime {
     /// live for the rest of the process.
     static func teardown(instance: PluginInstanceID, host: HostServices?) {
         stores.remove(instance)
+        pageStates.remove(instance)?.stopRecording()
         bridges.remove(instance)
         mcpServers.remove(instance)
         if let token = contextTokens.remove(instance) { host?.context.remove(token) }
