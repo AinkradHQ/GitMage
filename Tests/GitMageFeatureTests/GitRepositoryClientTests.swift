@@ -17,6 +17,23 @@ final class GitRepositoryClientTests: XCTestCase {
         XCTAssertTrue(snapshot.changes.isEmpty)
     }
 
+    /// An open's loads — snapshot, branches, stashes — cost one `rev-parse`
+    /// for the whole set, not one (or two) per load. Was 10 before the root
+    /// was resolved once; each extra spawn is ~12ms of pure overhead.
+    func testOpenLoadsResolveTheRootOnce() async throws {
+        let repoURL = try makeTemporaryRepository()
+        let client = GitRepositoryClient()
+
+        _ = try await client.loadSnapshot(at: repoURL.path)
+        async let branches = client.loadBranches(at: repoURL.path)
+        async let stashes = client.loadStashes(in: repoURL.path)
+        _ = try await (branches, stashes)
+
+        // rev-parse + status + log + for-each-ref + stash list
+        let spawns = await client.spawnCount
+        XCTAssertEqual(spawns, 5)
+    }
+
     func testRejectsEmptyCommitMessage() async throws {
         let repoURL = try makeTemporaryRepository()
         let client = GitRepositoryClient()
