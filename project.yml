@@ -21,7 +21,7 @@ packages:
     # host is generation 11.
     # 43868c9: AinkradSurfaceSettings -- the shared Open as / Open in rows.
     # 15b5799: PluginOverlaySize -- overlay size as a third per-app axis.
-    revision: 2d8c31d08fae964901904f5232b58c5c142d706e
+    revision: ebeeb02ad56fcb10902fd13f4c3ade1da42daa61
 
 targets:
   GitMageFeature:
