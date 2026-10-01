@@ -10,16 +10,15 @@ import AinkradAppKit
 final class GitMageSettingsStore {
     private(set) var settings: GitMageSettings
     private let documents: PluginDocumentStore
+    private var canSave = true
     private static let key = GitMageSettings.documentID
 
     init(documents: PluginDocumentStore) {
         self.documents = documents
-        if let data = documents.data(forKey: Self.key),
-           let decoded = try? JSONDecoder().decode(GitMageSettings.self, from: data) {
-            self.settings = decoded
-        } else {
-            self.settings = GitMageSettings()
-        }
+        let loaded = loadDocument(
+            GitMageSettings.self, key: Self.key, from: documents, app: "gitmage")
+        self.settings = loaded.value ?? GitMageSettings()
+        self.canSave = loaded.canSave
         applyTypography()
     }
 
@@ -28,6 +27,11 @@ final class GitMageSettingsStore {
         mutate(&updated)
         settings = updated
         applyTypography()
+        guard canSave else {
+            AinkradLog.logger(app: "gitmage", area: "persistence")
+                .error("saving is off: the loaded document did not decode and could not be set aside")
+            return
+        }
         if let data = try? JSONEncoder().encode(updated) {
             documents.setData(data, forKey: Self.key)
         }
