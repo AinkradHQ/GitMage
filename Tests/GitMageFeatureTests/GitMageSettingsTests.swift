@@ -46,4 +46,17 @@ final class MemoryDocumentStore: PluginDocumentStore {
     private var storage: [String: Data] = [:]
     func data(forKey key: String) -> Data? { storage[key] }
     func setData(_ data: Data?, forKey key: String) { storage[key] = data }
+    var keys: [String] { Array(storage.keys) }
+}
+
+/// An in-memory `PluginDocumentStore` whose `setData` ignores backup keys,
+/// simulating a failed verification read-back after the set-aside write.
+final class RejectingCorruptDocs: PluginDocumentStore {
+    private var storage: [String: Data] = [:]
+    func data(forKey key: String) -> Data? { storage[key] }
+    func setData(_ data: Data?, forKey key: String) {
+        if key.contains(".corrupt-") { return }
+        storage[key] = data
+    }
+    var keys: [String] { Array(storage.keys) }
 }
