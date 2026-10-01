@@ -40,6 +40,30 @@ final class GitMageSettingsTests: XCTestCase {
         let custom = GitMageAppearanceResolver.resolve(settings: GitMageSettings(followThemeAccent: false), tokens: tokens)
         XCTAssertEqual(custom.accent, Color.purple)
     }
+
+    func testCorruptSettingsAreSetAsideNotOverwritten() {
+        let seed = Data("{not json".utf8)
+        let documents = MemoryDocumentStore()
+        documents.setData(seed, forKey: GitMageSettings.documentID)
+        let store = GitMageSettingsStore(documents: documents)
+        store.update { $0.backgroundOpacity = 0.5 }
+
+        let backups = documents.keys.filter { $0.hasPrefix("\(GitMageSettings.documentID).corrupt-") }
+        XCTAssertEqual(backups.count, 1, "corrupt bytes were not set aside")
+        XCTAssertEqual(documents.data(forKey: backups.first ?? ""), seed, "backup does not hold the seed bytes")
+    }
+
+    func testUnverifiableSettingsSetAsideKeepsOriginalAndStopsSaving() {
+        let seed = Data("{not json".utf8)
+        let documents = RejectingCorruptDocs()
+        documents.setData(seed, forKey: GitMageSettings.documentID)
+        let store = GitMageSettingsStore(documents: documents)
+        store.update { $0.backgroundOpacity = 0.5 }
+
+        XCTAssertEqual(
+            documents.data(forKey: GitMageSettings.documentID), seed,
+            "the only copy of the user's data was overwritten")
+    }
 }
 
 final class MemoryDocumentStore: PluginDocumentStore {
