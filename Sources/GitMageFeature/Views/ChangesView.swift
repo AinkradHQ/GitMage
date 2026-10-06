@@ -99,6 +99,7 @@ struct ChangeRow: View {
     let onUnstage: () -> Void
     let onDiscard: () -> Void
     @State private var hovering = false
+    @Environment(\.ainkradSkin) private var skin
     @Environment(\.ainkradReduceMotion) private var reduceMotion
 
     private var fileName: String { (change.path as NSString).lastPathComponent }
@@ -109,7 +110,7 @@ struct ChangeRow: View {
 
     private var status: GMFileStatus { GMFileStatus(change.kind) }
     private var badgeLetter: String { status.letter }
-    private var badgeColor: Color { status.color(tokens) }
+    private var badgeColor: Color { status.color(tokens, skin) }
 
     var body: some View {
         // The kit row owns the hover wash and selection; this one only reveals the actions.

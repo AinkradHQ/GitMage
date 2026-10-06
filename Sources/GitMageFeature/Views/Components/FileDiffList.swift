@@ -127,10 +127,11 @@ struct FileDisclosureRow: View {
     let fontSize: Double
     let onToggle: () -> Void
     @State private var hovering = false
+    @Environment(\.ainkradSkin) private var skin
 
     private var badgeStatus: GMFileStatus { GMFileStatus(forgeStatus: status) }
     private var badgeLetter: String { badgeStatus.letter }
-    private var badgeColor: Color { badgeStatus.color(tokens) }
+    private var badgeColor: Color { badgeStatus.color(tokens, skin) }
 
     var body: some View {
         VStack(spacing: 0) {

@@ -51,6 +51,7 @@ struct DiffView: View {
     /// and no header — the diff flows in the parent's scroll.
     var embedded: Bool = false
     var showHeader: Bool = true
+    @Environment(\.ainkradSkin) private var skin
 
     private let numberWidth: CGFloat = 34
     private let signWidth: CGFloat = 16
@@ -95,11 +96,11 @@ struct DiffView: View {
             Spacer(minLength: 8)
             if parsed.additions > 0 {
                 Text("+\(parsed.additions)").font(AinkradFont.mono(10, weight: .semibold)).foregroundStyle(
-                    GMColor.diffAdd(tokens))
+                    GMColor.diffAdd(skin))
             }
             if parsed.deletions > 0 {
                 Text("−\(parsed.deletions)").font(AinkradFont.mono(10, weight: .semibold)).foregroundStyle(
-                    GMColor.diffRemove(tokens))
+                    GMColor.diffRemove(skin))
             }
         }
         .padding(.horizontal, 14).padding(.vertical, 9)
@@ -159,7 +160,7 @@ struct DiffView: View {
                     .font(AinkradFont.mono(fontSize))
                     .foregroundStyle(signColor(r.kind))
                     .frame(width: signWidth, alignment: .center)
-                Text(SyntaxHighlighter.highlight(Self.displayText(r), tokens: tokens))
+                Text(SyntaxHighlighter.highlight(Self.displayText(r), tokens: tokens, skin: skin))
                     .font(AinkradFont.mono(fontSize))
                     .lineLimit(1)
                     .frame(width: codeWidth, alignment: .leading)
@@ -189,16 +190,16 @@ struct DiffView: View {
 
     private func signColor(_ kind: LineKind) -> Color {
         switch kind {
-        case .add: return GMColor.diffAdd(tokens)
-        case .remove: return GMColor.diffRemove(tokens)
+        case .add: return GMColor.diffAdd(skin)
+        case .remove: return GMColor.diffRemove(skin)
         default: return tokens.foreground.opacity(0.3)
         }
     }
 
     private func lineBackground(_ kind: LineKind) -> Color {
         switch kind {
-        case .add: return GMColor.diffAdd(tokens).opacity(0.12)
-        case .remove: return GMColor.diffRemove(tokens).opacity(0.12)
+        case .add: return GMColor.diffAdd(skin).opacity(0.12)
+        case .remove: return GMColor.diffRemove(skin).opacity(0.12)
         default: return .clear
         }
     }

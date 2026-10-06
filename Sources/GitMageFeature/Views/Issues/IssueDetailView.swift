@@ -115,7 +115,7 @@ private struct LabelsEditor: View {
                 ),
                 label: { $0 },
                 swatch: { name in
-                    model.repoLabels.first { $0.name == name }.map { Color(hex: $0.color) }
+                    model.repoLabels.first { $0.name == name }.flatMap { Color(hex: $0.color) }  // design-lint: allow hex-color GitHub label data
                 }
             )
 

@@ -63,6 +63,7 @@ struct ForgeFilterToolbar<Filter: Hashable, Trailing: View>: View {
     let toggleLabel: (String) -> Void
     let load: () -> Void
     @ViewBuilder var trailing: () -> Trailing
+    @Environment(\.ainkradSkin) private var skin
 
     var body: some View {
         VStack(spacing: 8) {
@@ -91,7 +92,7 @@ struct ForgeFilterToolbar<Filter: Hashable, Trailing: View>: View {
                         ForEach(labels) { label in
                             AinkradSwatchChip(
                                 label: label.name,
-                                swatch: Color(hex: label.color),
+                                swatch: Color(hex: label.color) ?? skin.color(skin.text.muted),  // design-lint: allow hex-color GitHub label data
                                 isOn: selectedLabels.contains(label.name),
                                 onTap: { toggleLabel(label.name) }
                             )

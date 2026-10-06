@@ -20,17 +20,19 @@ enum SyntaxHighlighter {
         "namespace", "template", "virtual", "operator", "unsigned", "signed", "bool", "double", "float", "long", "char",
     ]
 
-    private static func color(_ kind: Kind, _ tokens: HostThemeTokens) -> Color {
+    private static func color(_ kind: Kind, _ tokens: HostThemeTokens, _ skin: AinkradSkin) -> Color {
+        // The skin's syntax hues are toned for the surface they sit on.
+        let onDark = tokens.background.relativeLuminance < 0.5
         switch kind {
-        case .keyword: return Color(red: 0.80, green: 0.52, blue: 0.92)
-        case .string: return Color(red: 0.50, green: 0.78, blue: 0.56)
-        case .comment: return tokens.foreground.opacity(0.4)
-        case .number: return Color(red: 0.92, green: 0.64, blue: 0.38)
-        case .plain: return tokens.foreground.opacity(0.88)
+        case .keyword: return skin.color(skin.syntax.color(.keyword, onDark: onDark))
+        case .string: return skin.color(skin.syntax.color(.string, onDark: onDark))
+        case .comment: return skin.color(skin.syntax.color(.comment, onDark: onDark))
+        case .number: return skin.color(skin.syntax.color(.number, onDark: onDark))
+        case .plain: return tokens.foreground.opacity(skin.opacity.o88)
         }
     }
 
-    static func highlight(_ code: String, tokens: HostThemeTokens) -> AttributedString {
+    static func highlight(_ code: String, tokens: HostThemeTokens, skin: AinkradSkin) -> AttributedString {
         var result = AttributedString()
         let chars = Array(code)
         let n = chars.count
@@ -38,7 +40,7 @@ enum SyntaxHighlighter {
 
         func emit(_ text: String, _ kind: Kind) {
             var piece = AttributedString(text)
-            piece.foregroundColor = color(kind, tokens)
+            piece.foregroundColor = color(kind, tokens, skin)
             result += piece
         }
 

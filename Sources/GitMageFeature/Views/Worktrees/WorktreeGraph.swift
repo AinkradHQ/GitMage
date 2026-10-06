@@ -7,9 +7,9 @@ enum GraphPalette {
     static func color(_ index: Int, _ tokens: HostThemeTokens) -> Color {
         let base: [Color] = [
             tokens.accentPrimary, tokens.accentSecondary, tokens.accentTertiary,
-            Color(red: 0.38, green: 0.80, blue: 0.52),
-            Color(red: 0.92, green: 0.62, blue: 0.32),
-            Color(red: 0.60, green: 0.52, blue: 0.92),
+            Color(red: 0.38, green: 0.80, blue: 0.52),  // design-lint: allow raw-color token-gap graphLane
+            Color(red: 0.92, green: 0.62, blue: 0.32),  // design-lint: allow raw-color token-gap graphLane
+            Color(red: 0.60, green: 0.52, blue: 0.92),  // design-lint: allow raw-color token-gap graphLane
         ]
         return base[((index % base.count) + base.count) % base.count]
     }

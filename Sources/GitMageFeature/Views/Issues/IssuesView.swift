@@ -115,8 +115,10 @@ struct LabelChipsRow: View {
 /// detail's editable labels control).
 struct ColoredLabelChip: View {
     let label: IssueLabel
+    @Environment(\.ainkradSkin) private var skin
 
     var body: some View {
-        AinkradSwatchChip(label: label.name, swatch: Color(hex: label.color))  // design-lint: allow hex-color GitHub label data
+        AinkradSwatchChip(
+            label: label.name, swatch: Color(hex: label.color) ?? skin.color(skin.text.muted))  // design-lint: allow hex-color GitHub label data
     }
 }
