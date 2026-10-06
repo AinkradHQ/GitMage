@@ -120,14 +120,9 @@ struct GraphCommitRow: View {
                     .font(AinkradFont.display(12))
                     .foregroundStyle(tokens.foreground.opacity(isSelected ? 1 : 0.9))
                     .lineLimit(1)
-                HStack(spacing: 8) {
-                    Text(row.commit.shortSHA).font(AinkradFont.mono(9, weight: .medium)).foregroundStyle(
-                        tokens.accentSecondary)
-                    Text(row.commit.author).font(AinkradFont.display(9)).foregroundStyle(tokens.foreground.opacity(0.5))
-                        .lineLimit(1)
-                    Text(row.commit.relativeDate).font(AinkradFont.display(9)).foregroundStyle(
-                        tokens.foreground.opacity(0.4))
-                }
+                GMCommitMeta(
+                    sha: row.commit.shortSHA, author: row.commit.author, date: row.commit.relativeDate,
+                    tokens: tokens)
             }
             Spacer(minLength: 4)
         }

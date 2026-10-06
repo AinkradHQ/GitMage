@@ -236,17 +236,8 @@ private struct PRCommitRow: View {
                     .font(AinkradFont.display(12))
                     .foregroundStyle(tokens.foreground.opacity(0.9))
                     .lineLimit(1)
-                HStack(spacing: 8) {
-                    Text(commit.shortSHA)
-                        .font(AinkradFont.mono(9, weight: .medium))
-                        .foregroundStyle(tokens.accentSecondary)
-                    Text(commit.author)
-                        .font(AinkradFont.display(9))
-                        .foregroundStyle(tokens.foreground.opacity(0.5)).lineLimit(1)
-                    Text(ForgeDate.short(commit.date))
-                        .font(AinkradFont.display(9))
-                        .foregroundStyle(tokens.foreground.opacity(0.4))
-                }
+                GMCommitMeta(
+                    sha: commit.shortSHA, author: commit.author, date: ForgeDate.short(commit.date), tokens: tokens)
             }
             Spacer()
         }
