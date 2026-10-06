@@ -81,6 +81,9 @@ extension GitRepositoryClient {
 /// `limit` bounds how much is retained; bytes past the limit are read and
 /// discarded, which keeps the child unblocked (the deadlock returns the moment
 /// anything stops reading) while bounding memory.
+///
+/// `@unchecked Sendable`: the retained bytes are only touched under `lock`, and
+/// the drain itself runs on this instance's own serial `queue`.
 private final class PipeDrain: @unchecked Sendable {
     private let handle: FileHandle
     private let limit: Int
