@@ -22,11 +22,10 @@ struct ChangesContextPane: View {
         let unstaged = allChanges.filter { $0.hasUnstagedComponent }
         VStack(spacing: 0) {
             if staged.isEmpty && unstaged.isEmpty {
-                EmptyStateView(
+                AinkradEmptyState(
                     icon: "checkmark.seal",
                     title: "Working tree clean",
-                    message: "No changes to stage or commit.",
-                    tokens: tokens
+                    message: "No changes to stage or commit."
                 )
                 .frame(maxWidth: .infinity, maxHeight: .infinity)
             } else {

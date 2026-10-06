@@ -35,9 +35,9 @@ struct IssueDetailView: View {
                 }
                 composer(detail)
             } else {
-                EmptyStateView(
+                AinkradEmptyState(
                     icon: "smallcircle.filled.circle", title: "No issue",
-                    message: "Select an issue to read and respond to it.", tokens: tokens
+                    message: "Select an issue to read and respond to it."
                 )
                 .frame(maxWidth: .infinity, maxHeight: .infinity)
             }

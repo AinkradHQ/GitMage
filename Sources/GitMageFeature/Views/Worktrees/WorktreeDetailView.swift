@@ -27,9 +27,9 @@ struct WorktreeDetailView: View {
     }
 
     private var emptyState: some View {
-        EmptyStateView(
+        AinkradEmptyState(
             icon: "rectangle.split.3x1", title: "Worktrees",
-            message: "Select a worktree to browse its commit graph.", tokens: tokens)
+            message: "Select a worktree to browse its commit graph.")
     }
 
     // MARK: - Graph view
@@ -42,9 +42,9 @@ struct WorktreeDetailView: View {
                 AinkradSpinner(size: 22)
                     .frame(maxWidth: .infinity, maxHeight: .infinity)
             } else if model.graphRows.isEmpty {
-                EmptyStateView(
+                AinkradEmptyState(
                     icon: "point.3.connected.trianglepath.dotted", title: "No history",
-                    message: "This worktree has no commits yet.", tokens: tokens
+                    message: "This worktree has no commits yet."
                 )
                 .frame(maxWidth: .infinity, maxHeight: .infinity)
             } else {

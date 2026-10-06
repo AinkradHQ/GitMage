@@ -42,7 +42,7 @@ struct ForgeMessage: View {
     let tokens: HostThemeTokens
 
     var body: some View {
-        EmptyStateView(icon: icon, title: title, message: message, tokens: tokens)
+        AinkradEmptyState(icon: icon, title: title, message: message)
             .frame(maxWidth: .infinity, maxHeight: .infinity)
     }
 }

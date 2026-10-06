@@ -22,11 +22,10 @@ struct StashesContextPane: View {
             }
 
             if model.stashes.isEmpty {
-                EmptyStateView(
+                AinkradEmptyState(
                     icon: "tray.2",
                     title: "No stashes",
-                    message: "Stash your working changes to set them aside.",
-                    tokens: tokens
+                    message: "Stash your working changes to set them aside."
                 )
                 .frame(maxWidth: .infinity, maxHeight: .infinity)
             } else {

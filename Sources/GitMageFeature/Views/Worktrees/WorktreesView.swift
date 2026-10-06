@@ -29,12 +29,12 @@ struct WorktreesContextPane: View {
             AinkradSpinner(size: 22)
                 .frame(maxWidth: .infinity, maxHeight: .infinity)
         } else if let errorMessage = model.errorMessage {
-            EmptyStateView(icon: "rectangle.split.3x1", title: "Worktrees", message: errorMessage, tokens: tokens)
+            AinkradEmptyState(icon: "rectangle.split.3x1", title: "Worktrees", message: errorMessage)
                 .frame(maxWidth: .infinity, maxHeight: .infinity)
         } else if model.worktrees.isEmpty {
-            EmptyStateView(
+            AinkradEmptyState(
                 icon: "rectangle.split.3x1", title: "No worktrees",
-                message: "Add a linked worktree to work on multiple branches at once.", tokens: tokens
+                message: "Add a linked worktree to work on multiple branches at once."
             )
             .frame(maxWidth: .infinity, maxHeight: .infinity)
         } else {

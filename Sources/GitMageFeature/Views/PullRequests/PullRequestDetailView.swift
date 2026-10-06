@@ -40,9 +40,9 @@ struct PullRequestDetailView: View {
                     filesTab
                 }
             } else {
-                EmptyStateView(
+                AinkradEmptyState(
                     icon: "arrow.triangle.pull", title: "No pull request",
-                    message: "Select a pull request to see its conversation and files.", tokens: tokens
+                    message: "Select a pull request to see its conversation and files."
                 )
                 .frame(maxWidth: .infinity, maxHeight: .infinity)
             }
@@ -132,9 +132,9 @@ struct PullRequestDetailView: View {
         ScrollView {
             VStack(alignment: .leading, spacing: 3) {
                 if model.commits.isEmpty {
-                    EmptyStateView(
+                    AinkradEmptyState(
                         icon: "clock.arrow.circlepath", title: "No commits",
-                        message: "This pull request has no commits.", tokens: tokens
+                        message: "This pull request has no commits."
                     )
                     .frame(maxWidth: .infinity, minHeight: 160)
                 } else {

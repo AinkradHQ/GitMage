@@ -15,9 +15,9 @@ struct AdvancedContextPane: View {
             }
 
             if model.commits.isEmpty {
-                EmptyStateView(
+                AinkradEmptyState(
                     icon: "clock.arrow.circlepath", title: "No commits",
-                    message: "This repository has no history yet.", tokens: tokens
+                    message: "This repository has no history yet."
                 )
                 .frame(maxWidth: .infinity, maxHeight: .infinity)
             } else {

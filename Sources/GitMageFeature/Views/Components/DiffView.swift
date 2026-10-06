@@ -77,9 +77,9 @@ struct DiffView: View {
             }
             .frame(maxWidth: .infinity, maxHeight: embedded ? nil : .infinity, alignment: .topLeading)
         } else if !embedded {
-            EmptyStateView(
+            AinkradEmptyState(
                 icon: "doc.text.magnifyingglass", title: "No file selected",
-                message: "Select a file, commit, or stash to inspect its diff.", tokens: tokens
+                message: "Select a file, commit, or stash to inspect its diff."
             )
             .frame(maxWidth: .infinity, maxHeight: .infinity)
         }
@@ -126,9 +126,9 @@ struct DiffView: View {
                 ScrollView([.vertical, .horizontal]) { stack }
             }
         } else if !embedded {
-            EmptyStateView(
+            AinkradEmptyState(
                 icon: "doc.text", title: "No textual changes",
-                message: "This change has no line-level diff to show.", tokens: tokens
+                message: "This change has no line-level diff to show."
             )
             .frame(maxWidth: .infinity, maxHeight: .infinity)
         } else {
