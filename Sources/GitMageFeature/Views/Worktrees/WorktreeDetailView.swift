@@ -39,8 +39,7 @@ struct WorktreeDetailView: View {
             header(for: wt)
 
             if model.isLoadingGraph {
-                AinkradSpinner(size: 22)
-                    .frame(maxWidth: .infinity, maxHeight: .infinity)
+                AinkradLoadingState()
             } else if model.graphRows.isEmpty {
                 AinkradEmptyState(
                     icon: "point.3.connected.trianglepath.dotted", title: "No history",

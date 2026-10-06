@@ -42,14 +42,7 @@ struct HistoryContextPane: View {
                             }
                         }
 
-                        if model.isLoadingCommits {
-                            HStack {
-                                Spacer()
-                                AinkradSpinner(size: 16)
-                                Spacer()
-                            }
-                            .padding(.vertical, 12)
-                        }
+                        if model.isLoadingCommits { AinkradLoadingState() }
                     }
                     .padding(.horizontal, 12)
                     .padding(.bottom, 12)

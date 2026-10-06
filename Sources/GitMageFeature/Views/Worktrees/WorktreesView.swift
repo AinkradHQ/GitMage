@@ -26,8 +26,7 @@ struct WorktreesContextPane: View {
 
     @ViewBuilder private var content: some View {
         if model.isLoading {
-            AinkradSpinner(size: 22)
-                .frame(maxWidth: .infinity, maxHeight: .infinity)
+            AinkradLoadingState()
         } else if let errorMessage = model.errorMessage {
             AinkradEmptyState(icon: "rectangle.split.3x1", title: "Worktrees", message: errorMessage)
                 .frame(maxWidth: .infinity, maxHeight: .infinity)

@@ -135,8 +135,7 @@ struct ForgeItemList<Item: Identifiable, Row: View>: View {
 
     var body: some View {
         if isLoading {
-            AinkradSpinner(size: 22)
-                .frame(maxWidth: .infinity, maxHeight: .infinity)
+            AinkradLoadingState()
         } else if let errorMessage {
             ForgeMessage(icon: icon, title: areaTitle, message: errorMessage, tokens: tokens)
         } else if items.isEmpty {
@@ -148,14 +147,7 @@ struct ForgeItemList<Item: Identifiable, Row: View>: View {
                         row(item)
                             .onAppear { if index == items.count - 1 { loadMore() } }
                     }
-                    if isLoadingMore {
-                        HStack {
-                            Spacer()
-                            AinkradSpinner(size: 16)
-                            Spacer()
-                        }
-                        .padding(.vertical, 12)
-                    }
+                    if isLoadingMore { AinkradLoadingState() }
                 }
                 .padding(.horizontal, 12).padding(.bottom, 12)
             }
