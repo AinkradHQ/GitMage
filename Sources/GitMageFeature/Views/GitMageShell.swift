@@ -219,8 +219,8 @@ struct GitMageShell: View {
             Text("Add a local folder or clone one to begin.").font(AinkradFont.display(12)).foregroundStyle(
                 tokens.foreground.opacity(0.5))
             HStack {
-                Button("Add…") { model.addRepositoryFolder() }.font(AinkradFont.display(12))
-                Button("Clone…") { model.startClone() }.font(AinkradFont.display(12))
+                AinkradButton(title: "Add…", style: .primary, icon: "plus") { model.addRepositoryFolder() }
+                AinkradButton(title: "Clone…", style: .secondary, icon: "arrow.down.doc") { model.startClone() }
             }
         }
     }
