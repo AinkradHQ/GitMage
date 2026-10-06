@@ -144,7 +144,7 @@ extension GitMageViewModel {
         Task { @MainActor in
             do {
                 try await action()
-                log.info("Completed \(context) in \(repository)")
+                Log.store.info("Completed \(context) in \(repository)")
                 await refresh(includeHistory: movesHead)?.value
                 let elapsed = Date().timeIntervalSince(startedAt)
                 // Success only past the threshold: a 200ms status refresh is

@@ -62,7 +62,6 @@ final class GitMageViewModel: ObservableObject {
 
     private let workspaceStore: GitMageWorkspaceStore
     let client = GitRepositoryClient()
-    let log: PluginLogger
     private var didBootstrap = false
     /// In-flight read loads that write state after an await. Cancelled when the
     /// active repo changes, so a slow load never outlives the repo it was for.
@@ -92,7 +91,6 @@ final class GitMageViewModel: ObservableObject {
 
     init(host: HostServices) {
         self.workspaceStore = GitMageWorkspaceStore(documents: host.documents)
-        self.log = host.log
         self.reporter = GitMageSignalReporter(signals: host.signals)
         let library = workspaceStore.loadLibrary()
         self.repos = library.repos
@@ -220,7 +218,7 @@ final class GitMageViewModel: ObservableObject {
                     selectedBranchName = newSnapshot.branchName
                 }
                 persistLibrary()
-                log.info("Loaded repository snapshot for \(path)")
+                Log.store.info("Loaded repository snapshot for \(path)")
                 isLoading = false
                 activeOperation = nil
                 // Only the change the user already picked is re-diffed. No eager
@@ -270,7 +268,7 @@ final class GitMageViewModel: ObservableObject {
                     body: error.displayMessage,
                     isEmpty: true
                 )
-                log.error("Failed to load diff for \(change.filePath): \(error.localizedDescription)")
+                Log.store.error("Failed to load diff for \(change.filePath): \(error.displayMessage)")
             }
         }
     }
@@ -280,6 +278,6 @@ final class GitMageViewModel: ObservableObject {
 
     func report(_ error: Error, context: String) {
         errorMessage = error.displayMessage
-        log.error("Failed to \(context): \(error.localizedDescription)")
+        Log.store.error("Failed to \(context): \(error.displayMessage)")
     }
 }

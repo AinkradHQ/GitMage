@@ -30,7 +30,7 @@ extension GitMageViewModel {
         Task { @MainActor in
             do {
                 try await client.initRepository(at: path)
-                log.info("Initialized new repository at \(path)")
+                Log.store.info("Initialized new repository at \(path)")
                 registerRepository(path: path)
             } catch {
                 report(error, context: "initialize repository at \(path)")
@@ -69,7 +69,7 @@ extension GitMageViewModel {
             do {
                 let destination = try await client.clone(remoteURL: remote, into: parent.path)
                 cloneRemoteURL = ""
-                log.info("Cloned \(remote) into \(destination)")
+                Log.store.info("Cloned \(remote) into \(destination)")
                 registerRepository(path: destination)
             } catch {
                 isLoading = false

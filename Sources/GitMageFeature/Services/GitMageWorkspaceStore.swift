@@ -43,12 +43,14 @@ struct GitMageWorkspaceStore {
 
     func saveLibrary(_ state: GitMageLibraryState) {
         guard saveGate.canSave else {
-            AinkradLog.logger(app: "gitmage", area: "persistence")
-                .error("saving is off: the loaded document did not decode and could not be set aside")
+            Log.persistence.error("saving is off: the loaded document did not decode and could not be set aside")
             return
         }
-        guard let data = try? JSONEncoder().encode(state) else { return }
-        documents.setData(data, forKey: libraryKey)
+        do {
+            documents.setData(try JSONEncoder().encode(state), forKey: libraryKey)
+        } catch {
+            Log.persistence.error("the library was not saved: \(error.displayMessage)")
+        }
     }
 
     private func migrateLegacyIfPresent() -> GitMageLibraryState? {

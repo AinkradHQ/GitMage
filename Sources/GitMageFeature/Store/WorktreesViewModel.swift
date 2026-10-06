@@ -177,5 +177,6 @@ final class WorktreesViewModel: ObservableObject {
 
     private func report(_ error: Error) {
         errorMessage = error.displayMessage
+        Log.store.error("Worktree action failed: \(error.displayMessage)")
     }
 }
