@@ -102,7 +102,7 @@ private struct WorktreeRow: View {
         .ainkradRowBackground(isSelected: isSelected, isHovered: hovering)
         .contentShape(Rectangle())
         .onHover { hovering = $0 }
-        .animation(reduceMotion ? nil : .easeOut(duration: 0.12), value: hovering)
+        .animation(reduceMotion ? nil : .easeOut(duration: skin.motion.durations.d0_12), value: hovering)
         .onTapGesture(count: 2, perform: onOpen)
         .onTapGesture(perform: onSelect)
     }
