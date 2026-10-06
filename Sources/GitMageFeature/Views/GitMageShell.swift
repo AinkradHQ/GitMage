@@ -4,13 +4,13 @@ import SwiftUI
 struct GitMageShell: View {
     let host: HostServices
     let settingsStore: GitMageSettingsStore
-    @StateObject private var model: GitMageViewModel
-    @State private var prModel: PullRequestsViewModel?
-    @State private var prHasGitHubRemote = false
-    @State private var issuesModel: IssuesViewModel?
-    @State private var issuesHasGitHubRemote = false
-    @State private var worktreesModel: WorktreesViewModel?
-    @State private var advancedModel: AdvancedViewModel?
+    @StateObject var model: GitMageViewModel
+    @State var prModel: PullRequestsViewModel?
+    @State var prHasGitHubRemote = false
+    @State var issuesModel: IssuesViewModel?
+    @State var issuesHasGitHubRemote = false
+    @State var worktreesModel: WorktreesViewModel?
+    @State var advancedModel: AdvancedViewModel?
     @State private var management: GitMageManagementKind?
     @Namespace private var navNamespace
     @Environment(\.ainkradReduceMotion) private var reduceMotion
@@ -21,7 +21,7 @@ struct GitMageShell: View {
         _model = StateObject(wrappedValue: GitMageViewModel(host: host))
     }
 
-    private var tokens: HostThemeTokens { host.theme.tokens }
+    var tokens: HostThemeTokens { host.theme.tokens }
     /// Changes whenever typography settings change — drives a content rebuild
     /// so font edits apply live without needing another interaction.
     private var typographyToken: String {
@@ -39,7 +39,7 @@ struct GitMageShell: View {
         let s = settingsStore.settings
         return AinkradTypography(fontFamilyName: s.displayFontName, scale: CGFloat(s.textScale))
     }
-    private var appearance: GitMageRenderAppearance {
+    var appearance: GitMageRenderAppearance {
         GitMageAppearanceResolver.resolve(settings: settingsStore.settings, tokens: tokens)
     }
     private var contextBridge: GitMageContextBridge { GitMageRuntime.contextBridge(for: host) }
@@ -221,187 +221,6 @@ struct GitMageShell: View {
         .animation(reduceMotion ? nil : .spring(response: 0.32, dampingFraction: 0.74), value: model.selectedArea)
     }
 
-    @ViewBuilder private var contextPane: some View {
-        switch model.selectedArea {
-        case .changes: ChangesContextPane(model: model, tokens: tokens, accent: appearance.accent)
-        case .history: HistoryContextPane(model: model, tokens: tokens)
-        case .branches: BranchesContextPane(model: model, tokens: tokens)
-        case .stashes: StashesContextPane(model: model, tokens: tokens)
-        case .pullRequests:
-            if let prModel {
-                PullRequestsContextPane(model: prModel, tokens: tokens, hasGitHubRemote: prHasGitHubRemote)
-            } else {
-                ComingSoonView(area: model.selectedArea, tokens: tokens)
-            }
-        case .issues:
-            if let issuesModel {
-                IssuesContextPane(model: issuesModel, tokens: tokens, hasGitHubRemote: issuesHasGitHubRemote)
-            } else {
-                ComingSoonView(area: model.selectedArea, tokens: tokens)
-            }
-        case .worktrees:
-            if let worktreesModel {
-                WorktreesContextPane(model: worktreesModel, tokens: tokens)
-            } else {
-                selectRepoPlaceholder
-            }
-        case .advanced:
-            if let advancedModel {
-                AdvancedContextPane(model: advancedModel, tokens: tokens)
-            } else {
-                selectRepoPlaceholder
-            }
-        default: EmptyView()
-        }
-    }
-
-    @ViewBuilder private var detailPane: some View {
-        switch model.selectedArea {
-        case .changes: DiffView(diff: model.diffSnapshot, tokens: tokens, fontSize: appearance.diffFontSize)
-        case .history:
-            if let commitDiff = model.commitDiff {
-                FileDiffList(
-                    files: DiffFileSplitter.split(commitDiff.body), tokens: tokens,
-                    fontSize: appearance.diffFontSize, fallbackTitle: commitDiff.title)
-            } else {
-                EmptyStateView(
-                    icon: "clock.arrow.circlepath", title: "History",
-                    message: "Select a commit to inspect its changed files.", tokens: tokens)
-            }
-        case .branches:
-            EmptyStateView(
-                icon: "arrow.triangle.branch",
-                title: model.selectedBranchName.isEmpty ? "Branches" : model.selectedBranchName,
-                message: "Select a branch to check out from the list.",
-                tokens: tokens
-            )
-        case .stashes:
-            if let selectedStashDiff = model.selectedStashDiff {
-                FileDiffList(
-                    files: DiffFileSplitter.split(selectedStashDiff.body), tokens: tokens,
-                    fontSize: appearance.diffFontSize, fallbackTitle: selectedStashDiff.title)
-            } else {
-                EmptyStateView(
-                    icon: "tray.2",
-                    title: "Stashes",
-                    message: "Select a stash to preview its changed files.",
-                    tokens: tokens
-                )
-            }
-        case .pullRequests:
-            if let prModel {
-                PullRequestDetailView(model: prModel, tokens: tokens, fontSize: appearance.diffFontSize)
-            } else {
-                ComingSoonView(area: model.selectedArea, tokens: tokens)
-            }
-        case .issues:
-            if let issuesModel {
-                IssueDetailView(model: issuesModel, tokens: tokens)
-            } else {
-                ComingSoonView(area: model.selectedArea, tokens: tokens)
-            }
-        case .worktrees:
-            if let worktreesModel {
-                WorktreeDetailView(model: worktreesModel, tokens: tokens, fontSize: appearance.diffFontSize)
-            } else {
-                selectRepoPlaceholder
-            }
-        case .advanced:
-            if let advancedModel {
-                AdvancedDetailView(model: advancedModel, tokens: tokens)
-            } else {
-                selectRepoPlaceholder
-            }
-        default: ComingSoonView(area: model.selectedArea, tokens: tokens)
-        }
-    }
-
-    private var selectRepoPlaceholder: some View {
-        VStack(spacing: 10) {
-            Image(systemName: "rectangle.split.3x1")
-                .font(.system(size: 28, weight: .light))
-                .foregroundStyle(tokens.accentPrimary.opacity(0.5))
-            Text("Select a repository.")
-                .font(AinkradFont.display(12))
-                .foregroundStyle(tokens.foreground.opacity(0.6))
-        }
-        .frame(maxWidth: .infinity, maxHeight: .infinity)
-    }
-
-    private struct PRTaskKey: Equatable {
-        let area: NavArea
-        let repoID: String?
-    }
-
-    private struct IssuesTaskKey: Equatable {
-        let area: NavArea
-        let repoID: String?
-    }
-
-    private struct WorktreesTaskKey: Equatable {
-        let isActive: Bool
-        let repoID: String?
-    }
-
-    private struct AdvancedTaskKey: Equatable {
-        let isActive: Bool
-        let repoID: String?
-    }
-
-    private func buildPRModelIfNeeded() async {
-        guard model.selectedArea == .pullRequests else { return }
-        let remote = await model.currentRemote()
-        prHasGitHubRemote = remote?.host.lowercased().contains("github.com") == true
-        let auth = GitForgeAuth(secrets: host.secrets)
-        let token = auth.token()
-        let provider: GitForgeProvider? = token.map { GitHubProvider(token: $0) }
-        let newModel = PullRequestsViewModel(repo: remote, provider: provider, auth: auth)
-        prModel = newModel
-        await newModel.verify()
-        if remote != nil && token != nil {
-            await newModel.load()
-        }
-    }
-
-    private func buildIssuesModelIfNeeded() async {
-        guard model.selectedArea == .issues else { return }
-        let remote = await model.currentRemote()
-        issuesHasGitHubRemote = remote?.host.lowercased().contains("github.com") == true
-        let auth = GitForgeAuth(secrets: host.secrets)
-        let token = auth.token()
-        let provider: GitForgeProvider? = token.map { GitHubProvider(token: $0) }
-        let newModel = IssuesViewModel(repo: remote, provider: provider, auth: auth)
-        issuesModel = newModel
-        await newModel.verify()
-        if remote != nil && token != nil {
-            await newModel.load()
-        }
-    }
-
-    private func buildWorktreesModelIfNeeded() async {
-        guard model.selectedArea == .worktrees, model.hasActiveRepo else { return }
-        let newModel = WorktreesViewModel(
-            client: GitRepositoryClient(),
-            repositoryPath: model.repositoryPath,
-            currentRoot: model.snapshot?.rootPath ?? "",
-            branches: model.branches,
-            onOpen: { path in model.openRepositoryPath(path) }
-        )
-        worktreesModel = newModel
-        await newModel.load()
-    }
-
-    private func buildAdvancedModelIfNeeded() async {
-        guard model.selectedArea == .advanced, model.hasActiveRepo else { return }
-        let newModel = AdvancedViewModel(
-            client: GitRepositoryClient(),
-            repositoryPath: model.repositoryPath,
-            branches: model.branches,
-            onChanged: { Task { @MainActor in model.refresh() } }
-        )
-        advancedModel = newModel
-        await newModel.load()
-    }
 
     private var emptyLibraryState: some View {
         VStack(spacing: 12) {
@@ -415,26 +234,5 @@ struct GitMageShell: View {
                 Button("Clone…") { model.startClone() }.font(AinkradFont.display(12))
             }
         }
-    }
-
-    private var cloneSheet: some View {
-        VStack(alignment: .leading, spacing: 16) {
-            Text("Clone a Repository").font(AinkradFont.display(18, weight: .semibold))
-            Text("Enter a Git remote URL. You'll then choose a destination folder.")
-                .font(AinkradFont.display(12)).foregroundStyle(tokens.foreground.opacity(0.7))
-            AinkradTextField(
-                text: $model.cloneRemoteURL,
-                placeholder: "https://github.com/owner/repo.git"
-            )
-            .frame(minWidth: 380)
-            HStack {
-                Spacer()
-                AinkradButton(title: "Cancel", style: .secondary) { model.showClonePrompt = false }
-                AinkradButton(title: "Choose Destination & Clone", style: .primary) { model.performClone() }
-                    .disabled(model.cloneRemoteURL.trimmingCharacters(in: .whitespaces).isEmpty)
-            }
-        }
-        .frame(maxWidth: .infinity, alignment: .leading)
-        .foregroundStyle(tokens.foreground)
     }
 }
