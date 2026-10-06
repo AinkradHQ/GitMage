@@ -58,7 +58,6 @@ struct GitMageLibraryState: Codable, Equatable {
 /// A single entry from `git stash list`.
 struct GitStashEntry: Identifiable, Equatable {
     let id: String  // e.g. "stash@{0}"
-    let index: Int
     let message: String
 }
 
@@ -79,8 +78,6 @@ struct GitRepositorySnapshot: Equatable {
     let behindCount: Int
     let lastCommitSummary: String?
     let changes: [GitChange]
-
-    var isDirty: Bool { !changes.isEmpty }
 
     var headline: String {
         if let lastCommitSummary, !lastCommitSummary.isEmpty {
@@ -126,6 +123,19 @@ struct GitDiffSnapshot: Equatable {
     let title: String
     let body: String
     let isEmpty: Bool
+
+    /// A diff from raw `git` output; blank output reads "No diff available." and is flagged empty.
+    init(title: String, output: String) {
+        let trimmed = output.trimmingCharacters(in: .whitespacesAndNewlines)
+        self.init(
+            title: title, body: trimmed.isEmpty ? "No diff available." : trimmed, isEmpty: trimmed.isEmpty)
+    }
+
+    init(title: String, body: String, isEmpty: Bool) {
+        self.title = title
+        self.body = body
+        self.isEmpty = isEmpty
+    }
 }
 
 struct GitChange: Identifiable, Equatable {
@@ -136,7 +146,6 @@ struct GitChange: Identifiable, Equatable {
     let statusCode: String
     let kind: GitChangeKind
 
-    var isStaged: Bool { isIndexStaged }
     var isUntracked: Bool { kind == .untracked }
     var isIndexStaged: Bool {
         guard !isUntracked, kind != .ignored else { return false }
@@ -172,20 +181,4 @@ enum GitChangeKind: Equatable {
     case deleted
     case conflicted
     case ignored
-
-    var label: String {
-        switch self {
-        case .staged: return "Staged"
-        case .modified: return "Modified"
-        case .untracked: return "Untracked"
-        case .renamed: return "Renamed"
-        case .deleted: return "Deleted"
-        case .conflicted: return "Conflict"
-        case .ignored: return "Ignored"
-        }
-    }
-
-    var isStaged: Bool {
-        self == .staged || self == .renamed || self == .deleted
-    }
 }

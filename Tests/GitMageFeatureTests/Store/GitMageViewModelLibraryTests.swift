@@ -88,7 +88,7 @@ struct GitMageViewModelLibraryTests {
         model.refresh()
         try await waitUntil("A to load") { model.snapshot != nil && isIdle(model) }
 
-        model.removeActiveRepository()
+        model.removeRepository(a.path)
 
         #expect(model.repos.map(\.id) == [b.path])
         #expect(model.activeRepoID == b.path)

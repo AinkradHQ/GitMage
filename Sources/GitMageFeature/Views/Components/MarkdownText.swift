@@ -8,7 +8,7 @@ import SwiftUI
 struct MarkdownText: View {
     let markdown: String
     let tokens: HostThemeTokens
-    var baseSize: CGFloat = 12
+    private let baseSize: CGFloat = 12
 
     private enum Block {
         case paragraph(String)

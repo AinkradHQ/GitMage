@@ -3,7 +3,7 @@ import SwiftUI
 
 // MARK: - Shared HUD surface finish
 
-enum HUDButtonKind { case chip, secondary, primary, destructive }
+enum HUDButtonKind { case chip }
 
 private struct HUDButtonSurface: ViewModifier {
     let tokens: HostThemeTokens
@@ -28,23 +28,7 @@ private struct HUDButtonSurface: ViewModifier {
 
     @ViewBuilder private var fill: some View {
         switch kind {
-        case .primary:
-            LinearGradient(
-                colors: [
-                    tokens.accentPrimary.opacity(hovering ? 1 : 0.92),
-                    tokens.accentPrimary.opacity(hovering ? 0.9 : 0.72),
-                ],
-                startPoint: .top, endPoint: .bottom
-            )
-        case .destructive:
-            LinearGradient(
-                colors: [
-                    tokens.accentTertiary.opacity(hovering ? 0.28 : 0.16),
-                    tokens.accentTertiary.opacity(hovering ? 0.18 : 0.10),
-                ],
-                startPoint: .top, endPoint: .bottom
-            )
-        case .secondary, .chip:
+        case .chip:
             LinearGradient(
                 colors: [
                     tokens.surfaceElevated.opacity(hovering ? 0.85 : 0.5),
@@ -57,17 +41,13 @@ private struct HUDButtonSurface: ViewModifier {
 
     private var glowColor: Color {
         switch kind {
-        case .primary: return tokens.accentPrimary.opacity(hovering ? 0.55 : 0.35)
-        case .destructive: return tokens.accentTertiary.opacity(hovering ? 0.4 : 0.1)
-        case .secondary, .chip: return tokens.accentPrimary.opacity(hovering ? 0.32 : 0.06)
+        case .chip: return tokens.accentPrimary.opacity(hovering ? 0.32 : 0.06)
         }
     }
 
     private var glowRadius: CGFloat {
         switch kind {
-        case .primary: return hovering ? 14 : 9
-        case .destructive: return hovering ? 12 : 4
-        case .secondary, .chip: return hovering ? 11 : 3
+        case .chip: return hovering ? 11 : 3
         }
     }
 }

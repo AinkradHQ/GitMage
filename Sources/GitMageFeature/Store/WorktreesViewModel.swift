@@ -170,6 +170,6 @@ final class WorktreesViewModel: ObservableObject {
     }
 
     private func report(_ error: Error) {
-        errorMessage = (error as? LocalizedError)?.errorDescription ?? error.localizedDescription
+        errorMessage = error.displayMessage
     }
 }

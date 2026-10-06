@@ -71,48 +71,29 @@ struct IssueDetailView: View {
 
     private func editors(_ detail: IssueDetail) -> some View {
         VStack(alignment: .leading, spacing: 8) {
-            LabelsEditor(model: model, detail: detail, tokens: tokens)
+            LabelsEditor(model: model, detail: detail)
             AssigneesEditor(model: model, detail: detail, tokens: tokens)
         }
     }
 
     private func composer(_ detail: IssueDetail) -> some View {
-        VStack(alignment: .leading, spacing: 10) {
-            GlowRule(tokens: tokens)
-            AinkradTextArea(
-                text: $composerText, placeholder: "Leave a comment…", minHeight: 34, maxHeight: 80,
-                onSubmit: {
-                    guard !model.isLoading,
-                        !composerText.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
-                    else { return }
-                    Task {
-                        await model.comment(composerText)
-                        composerText = ""
-                    }
-                })
-            HStack(spacing: 8) {
-                AinkradButton(title: "Comment", style: .secondary, icon: "text.bubble") {
-                    Task {
-                        await model.comment(composerText)
-                        composerText = ""
-                    }
+        GMCommentComposer(
+            text: $composerText, isLoading: model.isLoading, tokens: tokens,
+            comment: { await model.comment($0) }
+        ) {
+            Spacer()
+            if detail.state.lowercased() == "open" {
+                AinkradButton(title: "Close", style: .danger, icon: "xmark.circle") {
+                    Task { await model.toggleState() }
                 }
                 .disabled(model.isLoading)
-                Spacer()
-                if detail.state.lowercased() == "open" {
-                    AinkradButton(title: "Close", style: .danger, icon: "xmark.circle") {
-                        Task { await model.toggleState() }
-                    }
-                    .disabled(model.isLoading)
-                } else {
-                    AinkradButton(title: "Reopen", style: .primary, icon: "arrow.counterclockwise") {
-                        Task { await model.toggleState() }
-                    }
-                    .disabled(model.isLoading)
+            } else {
+                AinkradButton(title: "Reopen", style: .primary, icon: "arrow.counterclockwise") {
+                    Task { await model.toggleState() }
                 }
+                .disabled(model.isLoading)
             }
         }
-        .padding(16)
     }
 }
 
@@ -121,7 +102,6 @@ struct IssueDetailView: View {
 private struct LabelsEditor: View {
     @ObservedObject var model: IssuesViewModel
     let detail: IssueDetail
-    let tokens: HostThemeTokens
 
     var body: some View {
         HStack(spacing: 6) {

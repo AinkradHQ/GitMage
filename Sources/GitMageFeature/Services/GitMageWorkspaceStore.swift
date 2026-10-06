@@ -70,9 +70,4 @@ struct GitMageWorkspaceStore {
         guard let data = documents.data(forKey: legacyKey) else { return GitMageWorkspaceState() }
         return (try? JSONDecoder().decode(GitMageWorkspaceState.self, from: data)) ?? GitMageWorkspaceState()
     }
-
-    func save(_ state: GitMageWorkspaceState) {
-        guard let data = try? JSONEncoder().encode(state) else { return }
-        documents.setData(data, forKey: legacyKey)
-    }
 }

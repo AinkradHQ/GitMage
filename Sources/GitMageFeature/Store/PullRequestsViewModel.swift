@@ -39,26 +39,7 @@ final class PullRequestsViewModel: ObservableObject {
     }
 
     func verify() async {
-        guard let token = auth.token(), !token.isEmpty else {
-            authState = .missingToken
-            return
-        }
-        guard let provider else {
-            authState = .missingToken
-            return
-        }
-        do {
-            let user = try await provider.verify()
-            authState = .valid(user.login)
-        } catch let error as ForgeError {
-            if error == .unauthorized {
-                authState = .invalid(error.errorDescription ?? "Invalid token.")
-            } else {
-                errorMessage = error.errorDescription
-            }
-        } catch {
-            errorMessage = error.localizedDescription
-        }
+        await verifyToken(provider: provider, auth: auth)
     }
 
     /// Loads (or reloads) the first page for the current filter/search/labels.
@@ -163,11 +144,6 @@ final class PullRequestsViewModel: ObservableObject {
             errorMessage = error.localizedDescription
         }
     }
-
-    private func handleForgeError(_ error: ForgeError) {
-        errorMessage = error.errorDescription
-        if error == .unauthorized {
-            authState = .invalid(error.errorDescription ?? "Invalid token.")
-        }
-    }
 }
+
+extension PullRequestsViewModel: ForgeAuthGated {}

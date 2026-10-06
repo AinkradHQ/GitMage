@@ -128,22 +128,9 @@ struct FileDisclosureRow: View {
     let onToggle: () -> Void
     @State private var hovering = false
 
-    private var badgeLetter: String {
-        switch status.lowercased() {
-        case "added": return "A"
-        case "removed": return "D"
-        case "renamed": return "R"
-        default: return "M"
-        }
-    }
-    private var badgeColor: Color {
-        switch status.lowercased() {
-        case "added": return GMColor.diffAdd(tokens)
-        case "removed": return GMColor.diffRemove(tokens)
-        case "renamed": return tokens.accentSecondary
-        default: return tokens.accentTertiary
-        }
-    }
+    private var badgeStatus: GMFileStatus { GMFileStatus(forgeStatus: status) }
+    private var badgeLetter: String { badgeStatus.letter }
+    private var badgeColor: Color { badgeStatus.color(tokens) }
 
     var body: some View {
         VStack(spacing: 0) {

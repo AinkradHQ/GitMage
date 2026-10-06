@@ -8,16 +8,13 @@ struct RepoManagerPanel: View {
     let tokens: HostThemeTokens
     let dismiss: () -> Void
 
-    @State private var query = ""
-    @State private var selected = 0
+    @State private var picker = OverlaySelection()
     @FocusState private var focused: Bool
 
     private let columns = [GridItem(.flexible(), spacing: 12), GridItem(.flexible(), spacing: 12)]
 
     private var filtered: [GitMageRepoConfig] {
-        let q = query.trimmingCharacters(in: .whitespaces).lowercased()
-        guard !q.isEmpty else { return model.repos }
-        return model.repos.filter { $0.name.lowercased().contains(q) || $0.path.lowercased().contains(q) }
+        picker.filter(model.repos) { [$0.name, $0.path] }
     }
 
     var body: some View {
@@ -25,8 +22,8 @@ struct RepoManagerPanel: View {
         VStack(alignment: .leading, spacing: 0) {
             OverlaySearchField(
                 placeholder: "Search repositories…",
-                text: $query, tokens: tokens, focus: $focused,
-                onMove: { move($0, count: results.count) },
+                text: $picker.query, tokens: tokens, focus: $focused,
+                onMove: { picker.move($0, count: results.count) },
                 onActivate: { activate(results) },
                 onEscape: dismiss
             )
@@ -42,10 +39,10 @@ struct RepoManagerPanel: View {
                             RepoCard(
                                 repo: repo,
                                 isActive: repo.id == model.activeRepoID,
-                                isSelected: index == selected,
+                                isSelected: index == picker.selected,
                                 tokens: tokens,
                                 onSelect: {
-                                    selected = index
+                                    picker.selected = index
                                     activate(results)
                                 },
                                 onRemove: { model.removeRepository(repo.id) }
@@ -78,27 +75,22 @@ struct RepoManagerPanel: View {
         }
         .hudPanelChrome(tokens)
         .onAppear { focused = true }
-        .onChange(of: query) { _, _ in selected = 0 }
+        .onChange(of: picker.query) { _, _ in picker.selected = 0 }
     }
 
     private var emptyState: some View {
         EmptyStateView(
             icon: "square.stack.3d.up.slash",
-            title: query.isEmpty ? "No repositories yet" : "No matches",
-            message: query.isEmpty ? "Add a local folder or clone one to begin." : "Try a different search.",
+            title: picker.query.isEmpty ? "No repositories yet" : "No matches",
+            message: picker.query.isEmpty ? "Add a local folder or clone one to begin." : "Try a different search.",
             tokens: tokens
         )
         .frame(maxWidth: .infinity, minHeight: 150)
     }
 
-    private func move(_ delta: Int, count: Int) {
-        guard count > 0 else { return }
-        selected = (selected + delta + count) % count
-    }
-
     private func activate(_ results: [GitMageRepoConfig]) {
-        guard results.indices.contains(selected) else { return }
-        model.selectRepository(results[selected].id)
+        guard results.indices.contains(picker.selected) else { return }
+        model.selectRepository(results[picker.selected].id)
         dismiss()
     }
 }

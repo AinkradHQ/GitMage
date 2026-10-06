@@ -4,14 +4,10 @@ import XCTest
 @testable import GitMageFeature
 
 final class GitMageWorkspaceStoreTests: XCTestCase {
-    func testRoundTripsWorkspaceState() {
-        let documents = MemoryDocumentStore()
-        let store = GitMageWorkspaceStore(documents: documents)
-        let state = GitMageWorkspaceState(repositoryPath: "/tmp/repo", draftCommitMessage: "WIP")
-
-        store.save(state)
-
-        XCTAssertEqual(store.load(), state)
+    /// Writes a v1 single-repo document, as an install from before the library existed would have.
+    private func seedLegacy(_ documents: PluginDocumentStore) {
+        let state = GitMageWorkspaceState(repositoryPath: "/tmp/legacy-repo", draftCommitMessage: "carry over")
+        documents.setData(try! JSONEncoder().encode(state), forKey: "workspace.state.v1")
     }
 
     func testRoundTripsLibraryState() {
@@ -29,7 +25,7 @@ final class GitMageWorkspaceStoreTests: XCTestCase {
     func testMigratesLegacyWorkspaceIntoLibrary() {
         let documents = MemoryDocumentStore()
         let store = GitMageWorkspaceStore(documents: documents)
-        store.save(GitMageWorkspaceState(repositoryPath: "/tmp/legacy-repo", draftCommitMessage: "carry over"))
+        seedLegacy(documents)
 
         let library = store.loadLibrary()
 
@@ -54,7 +50,7 @@ final class GitMageWorkspaceStoreTests: XCTestCase {
         let documents = MemoryDocumentStore()
         documents.setData(seed, forKey: "library.state.v2")
         let store = GitMageWorkspaceStore(documents: documents)
-        store.save(GitMageWorkspaceState(repositoryPath: "/tmp/legacy-repo", draftCommitMessage: "carry over"))
+        seedLegacy(documents)
 
         let library = store.loadLibrary()
 
@@ -71,7 +67,7 @@ final class GitMageWorkspaceStoreTests: XCTestCase {
         let documents = RejectingCorruptDocs()
         documents.setData(seed, forKey: "library.state.v2")
         let store = GitMageWorkspaceStore(documents: documents)
-        store.save(GitMageWorkspaceState(repositoryPath: "/tmp/legacy-repo", draftCommitMessage: "carry over"))
+        seedLegacy(documents)
 
         _ = store.loadLibrary()
         store.saveLibrary(GitMageLibraryState())

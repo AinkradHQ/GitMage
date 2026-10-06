@@ -117,11 +117,6 @@ extension GitMageViewModel {
         refresh()
     }
 
-    func removeActiveRepository() {
-        guard let activeRepoID else { return }
-        removeRepository(activeRepoID)
-    }
-
     func removeRepository(_ id: String) {
         repos.removeAll { $0.id == id }
         if activeRepoID == id {
@@ -134,16 +129,6 @@ extension GitMageViewModel {
     }
 
     private func pickFolder(title: String, prompt: String, message: String) -> URL? {
-        let panel = NSOpenPanel()
-        panel.title = title
-        panel.prompt = prompt
-        panel.message = message
-        panel.canChooseFiles = false
-        panel.canChooseDirectories = true
-        panel.canCreateDirectories = true
-        panel.allowsMultipleSelection = false
-        panel.canResolveUbiquitousConflicts = false
-        guard panel.runModal() == .OK else { return nil }
-        return panel.url
+        FolderPicker.pick(title: title, prompt: prompt, message: message, resolvesUbiquitousConflicts: false)
     }
 }

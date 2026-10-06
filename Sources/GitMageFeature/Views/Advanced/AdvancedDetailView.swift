@@ -87,14 +87,9 @@ struct AdvancedDetailView: View {
                             .font(AinkradFont.display(13, weight: .medium))
                             .foregroundStyle(tokens.foreground)
                             .lineLimit(2)
-                        HStack(spacing: 8) {
-                            Text(commit.shortSHA).font(AinkradFont.mono(10, weight: .medium)).foregroundStyle(
-                                tokens.accentSecondary)
-                            Text(commit.author).font(AinkradFont.display(10)).foregroundStyle(
-                                tokens.foreground.opacity(0.5))
-                            Text(commit.relativeDate).font(AinkradFont.display(10)).foregroundStyle(
-                                tokens.foreground.opacity(0.4))
-                        }
+                        GMCommitMeta(
+                            sha: commit.shortSHA, author: commit.author, date: commit.relativeDate, tokens: tokens,
+                            size: 10, limitLines: false)
                     }
 
                     HStack(spacing: 8) {
@@ -198,9 +193,7 @@ struct AdvancedDetailView: View {
 
     @ViewBuilder private func card<Content: View>(_ title: String, @ViewBuilder content: () -> Content) -> some View {
         VStack(alignment: .leading, spacing: 10) {
-            Text(title)
-                .font(AinkradFont.display(10, weight: .semibold)).kerning(2)
-                .foregroundStyle(tokens.foreground.opacity(0.5))
+            GMHeaderLabel(text: title, tokens: tokens)
             content()
         }
         .padding(14)

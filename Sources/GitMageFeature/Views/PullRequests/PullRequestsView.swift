@@ -10,124 +10,33 @@ struct PullRequestsContextPane: View {
     /// from the shell, since the view model does not expose its `repo`.
     let hasGitHubRemote: Bool
 
+    private var gate: ForgeGate { ForgeGate(hasGitHubRemote: hasGitHubRemote, authState: model.authState) }
+
     var body: some View {
         VStack(spacing: 0) {
-            switch gate {
-            case .needsGitHubRemote:
-                gateMessage("Pull Requests need a GitHub `origin` remote.")
-            case .needsToken:
-                gateMessage("Add a GitHub token in Settings.")
-            case .invalidToken(let message):
-                gateMessage(message)
-            case .ready:
-                filterBar
-                list
-            }
-        }
-    }
-
-    private enum Gate {
-        case needsGitHubRemote
-        case needsToken
-        case invalidToken(String)
-        case ready
-    }
-
-    private var gate: Gate {
-        guard hasGitHubRemote else { return .needsGitHubRemote }
-        switch model.authState {
-        case .missingToken: return .needsToken
-        case .invalid(let message): return .invalidToken(message)
-        case .unknown, .valid: return .ready
-        }
-    }
-
-    private func gateMessage(_ text: String) -> some View {
-        EmptyStateView(icon: "arrow.triangle.pull", title: "Pull Requests", message: text, tokens: tokens)
-            .frame(maxWidth: .infinity, maxHeight: .infinity)
-    }
-
-    private var countText: String {
-        model.totalCount > 0 ? "\(model.pullRequests.count) / \(model.totalCount)" : "\(model.pullRequests.count)"
-    }
-
-    private var filterBar: some View {
-        VStack(spacing: 8) {
-            PaneHeader(title: "PULL REQUESTS", count: model.pullRequests.count, countText: countText, tokens: tokens)
-            AinkradSegmentedPicker(
-                items: [PRState.open, PRState.closed],
-                selection: Binding(
-                    get: { model.filter },
-                    set: { newValue in
-                        if model.filter != newValue {
-                            model.filter = newValue
-                            Task { await model.load() }
-                        }
-                    }
-                ),
-                label: { $0 == .open ? "Open" : "Closed" }
-            )
-            .padding(.horizontal, 12)
-            AinkradSearchField(
-                text: $model.searchText, placeholder: "Search pull requests…",
-                onSubmit: { Task { await model.load() } }
-            )
-            .padding(.horizontal, 12)
-            if !model.availableLabels.isEmpty {
-                ScrollView(.horizontal, showsIndicators: false) {
-                    HStack(spacing: 6) {
-                        ForEach(model.availableLabels) { label in
-                            AinkradSwatchChip(
-                                label: label.name,
-                                swatch: Color(hex: label.color),
-                                isOn: model.selectedLabels.contains(label.name),
-                                onTap: { model.toggleLabel(label.name) }
-                            )
-                        }
-                    }
+            if let message = gate.message(area: "Pull Requests") {
+                ForgeMessage(icon: "arrow.triangle.pull", title: "Pull Requests", message: message, tokens: tokens)
+            } else {
+                ForgeFilterToolbar(
+                    title: "PULL REQUESTS", loaded: model.pullRequests.count, total: model.totalCount,
+                    tokens: tokens, filters: [PRState.open, PRState.closed], filter: $model.filter,
+                    filterLabel: { $0 == .open ? "Open" : "Closed" }, searchText: $model.searchText,
+                    searchPlaceholder: "Search pull requests…", labels: model.availableLabels,
+                    selectedLabels: model.selectedLabels, toggleLabel: { model.toggleLabel($0) },
+                    load: { Task { await model.load() } })
+                ForgeItemList(
+                    items: model.pullRequests, isLoading: model.isLoading, isLoadingMore: model.isLoadingMore,
+                    errorMessage: model.errorMessage, icon: "arrow.triangle.pull", areaTitle: "Pull Requests",
+                    emptyTitle: "No pull requests", tokens: tokens,
+                    loadMore: { Task { await model.loadMore() } }
+                ) { pr in
+                    PullRequestRow(
+                        pr: pr,
+                        tokens: tokens,
+                        isSelected: model.selectedPRNumber == pr.number,
+                        onSelect: { Task { await model.select(pr.number) } }
+                    )
                 }
-                .padding(.horizontal, 12)
-            }
-        }
-        .padding(.bottom, 8)
-    }
-
-    @ViewBuilder private var list: some View {
-        if model.isLoading {
-            AinkradSpinner(size: 22)
-                .frame(maxWidth: .infinity, maxHeight: .infinity)
-        } else if let errorMessage = model.errorMessage {
-            gateMessage(errorMessage)
-        } else if model.pullRequests.isEmpty {
-            EmptyStateView(
-                icon: "arrow.triangle.pull", title: "No pull requests",
-                message: "Nothing matches this filter.", tokens: tokens
-            )
-            .frame(maxWidth: .infinity, maxHeight: .infinity)
-        } else {
-            ScrollView {
-                LazyVStack(alignment: .leading, spacing: 3) {
-                    ForEach(Array(model.pullRequests.enumerated()), id: \.element.id) { index, pr in
-                        PullRequestRow(
-                            pr: pr,
-                            tokens: tokens,
-                            isSelected: model.selectedPRNumber == pr.number,
-                            onSelect: { Task { await model.select(pr.number) } }
-                        )
-                        .onAppear {
-                            if index == model.pullRequests.count - 1 { Task { await model.loadMore() } }
-                        }
-                    }
-                    if model.isLoadingMore {
-                        HStack {
-                            Spacer()
-                            AinkradSpinner(size: 16)
-                            Spacer()
-                        }
-                        .padding(.vertical, 12)
-                    }
-                }
-                .padding(.horizontal, 12).padding(.bottom, 12)
             }
         }
     }
@@ -139,7 +48,6 @@ private struct PullRequestRow: View {
     let isSelected: Bool
     let onSelect: () -> Void
     @State private var hovering = false
-    @Environment(\.ainkradReduceMotion) private var reduceMotion
 
     private var isOpen: Bool { pr.state.lowercased() == "open" }
 
@@ -170,22 +78,7 @@ private struct PullRequestRow: View {
             }
         }
         .padding(.horizontal, 9).padding(.vertical, 7)
-        .background(
-            ChamferShape(cut: AinkradRadius.md)
-                .fill(
-                    isSelected
-                        ? tokens.accentPrimary.opacity(0.13)
-                        : (hovering ? tokens.surfaceElevated.opacity(0.5) : .clear))
-        )
-        .overlay(alignment: .leading) {
-            Capsule().fill(tokens.accentPrimary).frame(width: 3, height: 18)
-                .shadow(color: tokens.accentPrimary.opacity(0.8), radius: 4).padding(.leading, 1)
-                .opacity(isSelected ? 1 : 0)
-        }
-        .contentShape(Rectangle())
+        .gmListRowChrome(tokens: tokens, isSelected: isSelected, hovering: $hovering)
         .onTapGesture(perform: onSelect)
-        .onHover { hovering = $0 }
-        .animation(reduceMotion ? nil : .easeOut(duration: 0.12), value: hovering)
-        .animation(reduceMotion ? nil : .easeOut(duration: 0.14), value: isSelected)
     }
 }

@@ -33,11 +33,6 @@ extension GitRepositoryClient {
             ["stash", "show", "-p", "--no-color", "--no-ext-diff", "--unified=3", id],
             in: rootURL
         )
-        let body = output.trimmingCharacters(in: .whitespacesAndNewlines)
-        return GitDiffSnapshot(
-            title: id,
-            body: body.isEmpty ? "No diff available." : body,
-            isEmpty: body.isEmpty
-        )
+        return GitDiffSnapshot(title: id, output: output)
     }
 }

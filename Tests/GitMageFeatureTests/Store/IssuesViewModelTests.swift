@@ -110,7 +110,6 @@ private final class StubIssueForgeProvider: GitForgeProvider {
     var verifyError: ForgeError?
     var listIssuesError: ForgeError?
 
-    var listIssuesCallCount = 0
     var searchIssuesCallCount = 0
     var issueCallCount = 0
     var createIssueCalls: [(title: String, body: String, labels: [String], assignees: [String])] = []
@@ -142,12 +141,6 @@ private final class StubIssueForgeProvider: GitForgeProvider {
         async throws -> Int
     { 0 }
     func setPullRequestState(_ repo: RepoRef, number: Int, state: PRState) async throws {}
-
-    func listIssues(_ repo: RepoRef, state: IssueState) async throws -> [IssueSummary] {
-        listIssuesCallCount += 1
-        if let listIssuesError { throw listIssuesError }
-        return summaries
-    }
 
     func searchIssues(_ repo: RepoRef, state: IssueState, query: String, labels: [String], page: Int) async throws
         -> ForgePage<IssueSummary>

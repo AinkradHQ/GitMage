@@ -23,7 +23,6 @@ final class GitMageViewModel: ObservableObject {
     /// Label of the git action currently running (e.g. "fetch", "pull",
     /// "push"), so a button can show its own inline spinner. Nil when idle.
     @Published var activeOperation: String?
-    @Published var isLoadingDiff = false
     @Published var errorMessage: String?
 
     // Area / History state
@@ -124,10 +123,6 @@ final class GitMageViewModel: ObservableObject {
     func persistLibrary() {
         syncActiveRepoState()
         workspaceStore.saveLibrary(GitMageLibraryState(repos: repos, activeRepoID: activeRepoID))
-    }
-
-    func saveDraft() {
-        persistLibrary()
     }
 
     func bootstrapIfNeeded() {
@@ -241,27 +236,18 @@ final class GitMageViewModel: ObservableObject {
 
     func loadDiff(for change: GitChange) {
         let path = repositoryPath
-        isLoadingDiff = true
         Task { @MainActor in
             do {
                 let diff = try await client.loadDiff(for: change, in: path)
-                guard repositoryPath == path else {  // switched repos mid-load
-                    isLoadingDiff = false
-                    return
-                }
+                guard repositoryPath == path else { return }  // switched repos mid-load
                 diffSnapshot = diff
-                isLoadingDiff = false
             } catch {
-                guard repositoryPath == path else {
-                    isLoadingDiff = false
-                    return
-                }
+                guard repositoryPath == path else { return }
                 diffSnapshot = GitDiffSnapshot(
                     title: change.path,
-                    body: (error as? LocalizedError)?.errorDescription ?? error.localizedDescription,
+                    body: error.displayMessage,
                     isEmpty: true
                 )
-                isLoadingDiff = false
                 log.error("Failed to load diff for \(change.filePath): \(error.localizedDescription)")
             }
         }
@@ -271,7 +257,7 @@ final class GitMageViewModel: ObservableObject {
     func dismissError() { errorMessage = nil }
 
     func report(_ error: Error, context: String) {
-        errorMessage = (error as? LocalizedError)?.errorDescription ?? error.localizedDescription
+        errorMessage = error.displayMessage
         log.error("Failed to \(context): \(error.localizedDescription)")
     }
 }

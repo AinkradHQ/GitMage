@@ -26,9 +26,7 @@ final class GitWorktreeParserTests: XCTestCase {
         let wts = GitWorktreeParser.parse(porcelain: out)
         XCTAssertEqual(wts.count, 4)
         XCTAssertEqual(wts[0].branch, "main")
-        XCTAssertFalse(wts[0].isDetached)
         XCTAssertEqual(wts[2].branch, nil)
-        XCTAssertTrue(wts[2].isDetached)
         XCTAssertTrue(wts[3].isLocked)
     }
 
@@ -45,7 +43,6 @@ final class GitWorktreeParserTests: XCTestCase {
             """
         let wts = GitWorktreeParser.parse(porcelain: out)
         XCTAssertEqual(wts.count, 2)
-        XCTAssertTrue(wts[0].isBare)
         XCTAssertTrue(wts[1].isPrunable)
     }
 }

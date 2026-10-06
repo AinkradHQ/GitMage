@@ -5,6 +5,6 @@ import Foundation
 enum ForgeAuthState: Equatable {
     case unknown
     case missingToken
-    case valid(String)
+    case valid
     case invalid(String)
 }

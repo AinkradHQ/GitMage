@@ -57,7 +57,7 @@ struct GitMageSafetyTests {
         try a.run("git", "stash", "push")
         let model = makeModel(a, b)
 
-        model.selectStash(GitStashEntry(id: "stash@{0}", index: 0, message: "wip"))
+        model.selectStash(GitStashEntry(id: "stash@{0}", message: "wip"))
         model.activeRepoID = b.path
         try await Task.sleep(nanoseconds: 1_500_000_000)
 
@@ -82,7 +82,6 @@ struct GitMageSafetyTests {
         try await Task.sleep(nanoseconds: 1_500_000_000)
 
         #expect(model.diffSnapshot == nil, "repo A's diff must not show under repo B")
-        #expect(!model.isLoadingDiff, "a dropped load must not leave the spinner on")
     }
 
     @Test("Conflicts are reported from the refreshed state, not the stale snapshot")

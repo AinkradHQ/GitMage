@@ -46,7 +46,6 @@ struct AdvancedCommitRow: View {
     let tokens: HostThemeTokens
     let onSelect: () -> Void
     @State private var hovering = false
-    @Environment(\.ainkradReduceMotion) private var reduceMotion
 
     var body: some View {
         HStack(spacing: 10) {
@@ -59,33 +58,13 @@ struct AdvancedCommitRow: View {
                     .font(AinkradFont.display(12))
                     .foregroundStyle(tokens.foreground.opacity(isSelected ? 1 : 0.9))
                     .lineLimit(1)
-                HStack(spacing: 8) {
-                    Text(commit.shortSHA).font(AinkradFont.mono(9, weight: .medium)).foregroundStyle(
-                        tokens.accentSecondary)
-                    Text(commit.author).font(AinkradFont.display(9)).foregroundStyle(tokens.foreground.opacity(0.5))
-                        .lineLimit(1)
-                    Text(commit.relativeDate).font(AinkradFont.display(9)).foregroundStyle(
-                        tokens.foreground.opacity(0.4))
-                }
+                GMCommitMeta(
+                    sha: commit.shortSHA, author: commit.author, date: commit.relativeDate, tokens: tokens)
             }
             Spacer(minLength: 4)
         }
         .padding(.horizontal, 9).padding(.vertical, 7)
-        .background(
-            ChamferShape(cut: AinkradRadius.md)
-                .fill(
-                    isSelected
-                        ? tokens.accentPrimary.opacity(0.13)
-                        : (hovering ? tokens.surfaceElevated.opacity(0.5) : .clear))
-        )
-        .overlay(alignment: .leading) {
-            Capsule().fill(tokens.accentPrimary).frame(width: 3, height: 16)
-                .shadow(color: tokens.accentPrimary.opacity(0.8), radius: 4)
-                .opacity(isSelected ? 1 : 0)
-        }
-        .contentShape(Rectangle())
+        .gmListRowChrome(tokens: tokens, isSelected: isSelected, hovering: $hovering, spine: (16, 0), animatesSelection: false)
         .onTapGesture(perform: onSelect)
-        .onHover { hovering = $0 }
-        .animation(reduceMotion ? nil : .easeOut(duration: 0.12), value: hovering)
     }
 }

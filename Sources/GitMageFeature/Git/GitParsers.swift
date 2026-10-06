@@ -297,12 +297,11 @@ enum GitStashParser {
         output
             .split(separator: "\n", omittingEmptySubsequences: true)
             .map(String.init)
-            .enumerated()
-            .compactMap { index, line in
+            .compactMap { line in
                 let parts = line.split(separator: "\t", maxSplits: 1, omittingEmptySubsequences: false).map(String.init)
                 guard let ref = parts.first, !ref.isEmpty else { return nil }
                 let message = parts.count > 1 ? parts[1] : ref
-                return GitStashEntry(id: ref, index: index, message: message)
+                return GitStashEntry(id: ref, message: message)
             }
     }
 }
@@ -315,22 +314,13 @@ enum GitWorktreeParser {
             let lines = block.split(separator: "\n", omittingEmptySubsequences: true).map(String.init)
             guard let wtLine = lines.first(where: { $0.hasPrefix("worktree ") }) else { continue }
             let path = String(wtLine.dropFirst("worktree ".count))
-            var head = ""
             var branch: String?
-            var isBare = false
-            var isDetached = false
             var isLocked = false
             var isPrunable = false
             for line in lines {
-                if line.hasPrefix("HEAD ") {
-                    head = String(line.dropFirst(5))
-                } else if line.hasPrefix("branch ") {
+                if line.hasPrefix("branch ") {
                     let ref = String(line.dropFirst("branch ".count))
                     branch = ref.hasPrefix("refs/heads/") ? String(ref.dropFirst("refs/heads/".count)) : ref
-                } else if line == "bare" {
-                    isBare = true
-                } else if line == "detached" {
-                    isDetached = true
                 } else if line == "locked" || line.hasPrefix("locked ") {
                     isLocked = true
                 } else if line == "prunable" || line.hasPrefix("prunable ") {
@@ -339,8 +329,7 @@ enum GitWorktreeParser {
             }
             result.append(
                 GitWorktree(
-                    path: path, head: head, branch: branch, isBare: isBare, isDetached: isDetached, isLocked: isLocked,
-                    isPrunable: isPrunable))
+                    path: path, branch: branch, isLocked: isLocked, isPrunable: isPrunable))
         }
         return result
     }

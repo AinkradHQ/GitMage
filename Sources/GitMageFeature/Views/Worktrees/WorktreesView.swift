@@ -77,7 +77,6 @@ private struct WorktreeRow: View {
     let onToggleLock: () -> Void
     let onRemove: () -> Void
     @State private var hovering = false
-    @Environment(\.ainkradReduceMotion) private var reduceMotion
 
     private var lastPathComponent: String {
         (worktree.path as NSString).lastPathComponent
@@ -97,25 +96,9 @@ private struct WorktreeRow: View {
                 .frame(height: 22)
         }
         .padding(.horizontal, 9).padding(.vertical, 8)
-        .background(
-            ChamferShape(cut: AinkradRadius.md)
-                .fill(
-                    isSelected
-                        ? tokens.accentPrimary.opacity(0.13)
-                        : (hovering ? tokens.surfaceElevated.opacity(0.5) : .clear))
-        )
-        .overlay(alignment: .leading) {
-            if isSelected {
-                Capsule().fill(tokens.accentPrimary).frame(width: 3, height: 20)
-                    .shadow(color: tokens.accentPrimary.opacity(0.8), radius: 4).padding(.leading, 1)
-            }
-        }
-        .contentShape(Rectangle())
+        .gmListRowChrome(tokens: tokens, isSelected: isSelected, hovering: $hovering, spine: (20, 1))
         .onTapGesture(count: 2, perform: onOpen)
         .onTapGesture(perform: onSelect)
-        .onHover { hovering = $0 }
-        .animation(reduceMotion ? nil : .easeOut(duration: 0.12), value: hovering)
-        .animation(reduceMotion ? nil : .easeOut(duration: 0.14), value: isSelected)
     }
 
     private var topLine: some View {

@@ -14,20 +14,6 @@ final class GitHubIssuesTests: XCTestCase {
     }
     private let repo = RepoRef(host: "github.com", owner: "o", name: "r")
 
-    func testListIssuesFiltersOutPullRequests() async throws {
-        let p = provider(
-            status: 200,
-            body: """
-                [{"number":1,"title":"Bug","state":"open","user":{"login":"a"},"labels":[{"name":"bug","color":"f00"}],"assignees":[],"comments":2},
-                 {"number":2,"title":"A PR","state":"open","user":{"login":"b"},"labels":[],"assignees":[],"comments":0,"pull_request":{"url":"x"}}]
-                """)
-        let issues = try await p.listIssues(repo, state: .open)
-        XCTAssertEqual(issues.count, 1)
-        XCTAssertEqual(issues.first?.number, 1)
-        XCTAssertEqual(issues.first?.labelNames, ["bug"])
-        XCTAssertEqual(issues.first?.commentCount, 2)
-    }
-
     func testCreateIssueSendsFieldsAndReturnsNumber() async throws {
         let p = provider(
             status: 201,

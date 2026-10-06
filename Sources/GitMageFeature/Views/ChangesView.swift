@@ -46,9 +46,7 @@ struct ChangesContextPane: View {
         if !changes.isEmpty {
             LazyVStack(alignment: .leading, spacing: 5) {
                 HStack(spacing: 8) {
-                    Text(title)
-                        .font(AinkradFont.display(10, weight: .semibold)).kerning(2)
-                        .foregroundStyle(tokens.foreground.opacity(0.5))
+                    GMHeaderLabel(text: title, tokens: tokens)
                     Text("\(changes.count)")
                         .font(AinkradFont.mono(9, weight: .medium))
                         .foregroundStyle(tokens.foreground.opacity(0.5))
@@ -108,7 +106,6 @@ struct ChangeRow: View {
     let onUnstage: () -> Void
     let onDiscard: () -> Void
     @State private var hovering = false
-    @Environment(\.ainkradReduceMotion) private var reduceMotion
 
     private var fileName: String { (change.path as NSString).lastPathComponent }
     private var directory: String {
@@ -116,27 +113,9 @@ struct ChangeRow: View {
         return dir.isEmpty ? "" : dir
     }
 
-    /// Single-letter status glyph + its semantic color.
-    private var badgeLetter: String {
-        switch change.kind {
-        case .untracked: return "A"
-        case .modified, .staged: return "M"
-        case .deleted: return "D"
-        case .renamed: return "R"
-        case .conflicted: return "C"
-        case .ignored: return "I"
-        }
-    }
-    private var badgeColor: Color {
-        switch change.kind {
-        case .untracked: return GMColor.diffAdd(tokens)
-        case .deleted: return GMColor.diffRemove(tokens)
-        case .conflicted: return tokens.accentTertiary
-        case .renamed: return tokens.accentSecondary
-        case .modified, .staged: return tokens.accentTertiary
-        case .ignored: return tokens.foreground.opacity(0.4)
-        }
-    }
+    private var status: GMFileStatus { GMFileStatus(change.kind) }
+    private var badgeLetter: String { status.letter }
+    private var badgeColor: Color { status.color(tokens) }
 
     var body: some View {
         HStack(spacing: 10) {
@@ -182,27 +161,8 @@ struct ChangeRow: View {
             .allowsHitTesting(hovering)
         }
         .padding(.horizontal, 9).padding(.vertical, 7)
-        .background(
-            ChamferShape(cut: AinkradRadius.md)
-                .fill(
-                    isSelected
-                        ? accent.opacity(0.13)
-                        : (hovering ? tokens.surfaceElevated.opacity(0.5) : .clear))
-        )
-        .overlay(alignment: .leading) {
-            // Glowing selection spine, matching the nav rail language.
-            Capsule()
-                .fill(accent)
-                .frame(width: 3, height: 18)
-                .shadow(color: accent.opacity(0.8), radius: 4)
-                .padding(.leading, 1)
-                .opacity(isSelected ? 1 : 0)
-        }
-        .contentShape(Rectangle())
+        .gmListRowChrome(tokens: tokens, isSelected: isSelected, hovering: $hovering, accent: accent)
         .onTapGesture(perform: onSelect)
-        .onHover { hovering = $0 }
-        .animation(reduceMotion ? nil : .easeOut(duration: 0.12), value: hovering)
-        .animation(reduceMotion ? nil : .easeOut(duration: 0.14), value: isSelected)
     }
 }
 
@@ -228,9 +188,7 @@ struct CommitBox: View {
             .frame(height: 1)
 
             HStack {
-                Text("COMMIT")
-                    .font(AinkradFont.display(10, weight: .semibold)).kerning(2)
-                    .foregroundStyle(tokens.foreground.opacity(0.5))
+                GMHeaderLabel(text: "COMMIT", tokens: tokens)
                 Spacer()
                 Text("\(stagedCount) staged")
                     .font(AinkradFont.mono(9, weight: .medium))

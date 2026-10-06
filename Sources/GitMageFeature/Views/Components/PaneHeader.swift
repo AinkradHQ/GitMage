@@ -24,9 +24,7 @@ struct PaneHeader<Trailing: View>: View {
 
     var body: some View {
         HStack(spacing: 8) {
-            Text(title)
-                .font(AinkradFont.display(10, weight: .semibold)).kerning(2)
-                .foregroundStyle(tokens.foreground.opacity(0.5))
+            GMHeaderLabel(text: title, tokens: tokens)
             Text(countText ?? "\(count)")
                 .font(AinkradFont.mono(9, weight: .medium))
                 .foregroundStyle(tokens.foreground.opacity(0.5))
@@ -50,5 +48,17 @@ struct GlowRule: View {
             startPoint: .leading, endPoint: .trailing
         )
         .frame(height: 1)
+    }
+}
+
+/// The small kerned caption above a group: "COMMIT", "STAGED", a pane title.
+struct GMHeaderLabel: View {
+    let text: String
+    let tokens: HostThemeTokens
+
+    var body: some View {
+        Text(text)
+            .font(AinkradFont.display(10, weight: .semibold)).kerning(2)
+            .foregroundStyle(tokens.foreground.opacity(0.5))
     }
 }

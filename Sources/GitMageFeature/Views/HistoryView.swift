@@ -68,7 +68,6 @@ private struct CommitRow: View {
     let tokens: HostThemeTokens
     let onSelect: () -> Void
     @State private var hovering = false
-    @Environment(\.ainkradReduceMotion) private var reduceMotion
 
     var body: some View {
         HStack(spacing: 10) {
@@ -96,35 +95,14 @@ private struct CommitRow: View {
                     .font(AinkradFont.display(12))
                     .foregroundStyle(tokens.foreground.opacity(isSelected ? 1 : 0.9))
                     .lineLimit(1)
-                HStack(spacing: 8) {
-                    Text(commit.shortSHA)
-                        .font(AinkradFont.mono(9, weight: .medium))
-                        .foregroundStyle(tokens.accentSecondary)
-                    Text(commit.author)
-                        .font(AinkradFont.display(9))
-                        .foregroundStyle(tokens.foreground.opacity(0.5)).lineLimit(1)
-                    Text(commit.relativeDate)
-                        .font(AinkradFont.display(9))
-                        .foregroundStyle(tokens.foreground.opacity(0.4)).lineLimit(1)
-                }
+                GMCommitMeta(
+                    sha: commit.shortSHA, author: commit.author, date: commit.relativeDate, tokens: tokens)
             }
             .padding(.vertical, 7)
             Spacer(minLength: 4)
         }
         .padding(.horizontal, 9)
-        .background(
-            ChamferShape(cut: AinkradRadius.md)
-                .fill(
-                    isSelected
-                        ? tokens.accentPrimary.opacity(0.13)
-                        : (hovering ? tokens.surfaceElevated.opacity(0.5) : .clear)
-                )
-                .padding(.vertical, 2)
-        )
-        .contentShape(Rectangle())
+        .gmListRowChrome(tokens: tokens, isSelected: isSelected, hovering: $hovering, spine: nil, fillInset: 2)
         .onTapGesture(perform: onSelect)
-        .onHover { hovering = $0 }
-        .animation(reduceMotion ? nil : .easeOut(duration: 0.12), value: hovering)
-        .animation(reduceMotion ? nil : .easeOut(duration: 0.14), value: isSelected)
     }
 }

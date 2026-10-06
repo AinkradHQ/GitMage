@@ -166,7 +166,7 @@ extension GitMageViewModel {
                 report(error, context: context)
                 reporter.operationFailed(
                     operation: context, repository: repository,
-                    reason: Self.describe(error))
+                    reason: error.displayMessage)
             }
         }
     }
@@ -185,11 +185,5 @@ extension GitMageViewModel {
         reporter.conflictsDetected(
             operation: operation, repository: repository,
             files: conflicted)
-    }
-
-    /// The same text `report(_:context:)` shows in the UI, so the feed row and
-    /// the banner cannot disagree about what went wrong.
-    private static func describe(_ error: Error) -> String {
-        (error as? LocalizedError)?.errorDescription ?? error.localizedDescription
     }
 }

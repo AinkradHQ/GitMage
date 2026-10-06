@@ -87,7 +87,6 @@ private final class StubForgeProvider: GitForgeProvider {
         try failIfNeeded()
     }
 
-    func listIssues(_ repo: RepoRef, state: IssueState) async throws -> [IssueSummary] { [] }
     func searchIssues(_ repo: RepoRef, state: IssueState, query: String, labels: [String], page: Int) async throws
         -> ForgePage<IssueSummary>
     {
