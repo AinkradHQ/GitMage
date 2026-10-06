@@ -4,6 +4,7 @@ import SwiftUI
 
 /// Detail pane for the selected worktree, plus the Add-worktree sheet.
 struct WorktreeDetailView: View {
+    @Environment(\.ainkradSkin) private var skin
     @ObservedObject var model: WorktreesViewModel
     let tokens: HostThemeTokens
     var fontSize: Double = 12
@@ -58,17 +59,17 @@ struct WorktreeDetailView: View {
             VStack(alignment: .leading, spacing: 2) {
                 HStack(spacing: 8) {
                     Text((wt.path as NSString).lastPathComponent)
-                        .font(AinkradFont.display(15, weight: .semibold))
+                        .font(AinkradFont.display(skin.type.sizes.t15, weight: .semibold))
                         .foregroundStyle(tokens.foreground)
                     if model.isCurrent(wt) {
                         AinkradBadge(text: "CURRENT", tint: tokens.accentPrimary)
                     }
                 }
                 HStack(spacing: 6) {
-                    Image(systemName: "arrow.triangle.branch").font(.system(size: 9)).foregroundStyle(
+                    Image(systemName: "arrow.triangle.branch").font(skin.font(AinkradFontToken(sizeKey: "t9"))).foregroundStyle(
                         tokens.foreground.opacity(0.5))
                     Text(wt.branch ?? "detached")
-                        .font(AinkradFont.mono(11))
+                        .font(AinkradFont.mono(skin.type.sizes.t11))
                         .foregroundStyle(
                             wt.branch != nil ? tokens.accentPrimary.opacity(0.85) : tokens.foreground.opacity(0.55))
                 }
@@ -113,6 +114,7 @@ struct WorktreeDetailView: View {
 }
 
 private struct AddWorktreeSheet: View {
+    @Environment(\.ainkradSkin) private var skin
     @ObservedObject var model: WorktreesViewModel
     let tokens: HostThemeTokens
     @State private var destination: String = ""
@@ -120,7 +122,7 @@ private struct AddWorktreeSheet: View {
     var body: some View {
         VStack(alignment: .leading, spacing: 16) {
             Text("Add Worktree")
-                .font(AinkradFont.display(18, weight: .semibold))
+                .font(AinkradFont.display(skin.type.sizes.t18, weight: .semibold))
 
             destinationPicker
             modePicker
@@ -128,7 +130,7 @@ private struct AddWorktreeSheet: View {
 
             if let errorMessage = model.errorMessage {
                 Text(errorMessage)
-                    .font(AinkradFont.display(11))
+                    .font(AinkradFont.display(skin.type.sizes.t11))
                     .foregroundStyle(tokens.accentTertiary.opacity(0.9))
             }
 
@@ -157,11 +159,11 @@ private struct AddWorktreeSheet: View {
     private var destinationPicker: some View {
         VStack(alignment: .leading, spacing: 4) {
             Text("DESTINATION")
-                .font(AinkradFont.display(9, weight: .semibold))
+                .font(AinkradFont.display(skin.type.sizes.t9, weight: .semibold))
                 .foregroundStyle(tokens.foreground.opacity(0.45))
             HStack(spacing: 8) {
                 Text(destination.isEmpty ? "No folder chosen" : destination)
-                    .font(AinkradFont.mono(11))
+                    .font(AinkradFont.mono(skin.type.sizes.t11))
                     .foregroundStyle(tokens.foreground.opacity(destination.isEmpty ? 0.4 : 0.85))
                     .lineLimit(1)
                     .truncationMode(.middle)

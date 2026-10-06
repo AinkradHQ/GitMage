@@ -3,6 +3,7 @@ import SwiftUI
 
 /// Sheet for composing a new issue: title, body, and optional labels/assignees.
 struct NewIssueSheet: View {
+    @Environment(\.ainkradSkin) private var skin
     @ObservedObject var model: IssuesViewModel
     let tokens: HostThemeTokens
 
@@ -12,7 +13,7 @@ struct NewIssueSheet: View {
 
     var body: some View {
         VStack(alignment: .leading, spacing: 14) {
-            Text("New Issue").font(AinkradFont.display(18, weight: .semibold))
+            Text("New Issue").font(AinkradFont.display(skin.type.sizes.t18, weight: .semibold))
 
             AinkradTextField(text: $model.newTitle, placeholder: "Title")
 

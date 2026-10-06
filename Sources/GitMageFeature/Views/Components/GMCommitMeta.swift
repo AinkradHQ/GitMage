@@ -7,21 +7,24 @@ struct GMCommitMeta: View {
     let author: String
     let date: String
     let tokens: HostThemeTokens
-    var size: CGFloat = 9
+    /// The type size; the skin's 9 pt when nil.
+    var size: CGFloat? = nil
     /// Truncate the author and date to one line (rows); the detail card lets them wrap.
     var limitLines = true
+
+    @Environment(\.ainkradSkin) private var skin
 
     var body: some View {
         HStack(spacing: 8) {
             Text(sha)
-                .font(AinkradFont.mono(size, weight: .medium))
+                .font(AinkradFont.mono(size ?? skin.type.sizes.t9, weight: .medium))
                 .foregroundStyle(tokens.accentSecondary)
             Text(author)
-                .font(AinkradFont.display(size))
+                .font(AinkradFont.display(size ?? skin.type.sizes.t9))
                 .foregroundStyle(tokens.foreground.opacity(0.5))
                 .lineLimit(limitLines ? 1 : nil)
             Text(date)
-                .font(AinkradFont.display(size))
+                .font(AinkradFont.display(size ?? skin.type.sizes.t9))
                 .foregroundStyle(tokens.foreground.opacity(0.4))
                 .lineLimit(limitLines ? 1 : nil)
         }

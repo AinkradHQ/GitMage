@@ -5,6 +5,7 @@ import SwiftUI
 /// selected commit's ops (cherry-pick / revert / reset / tag-target), a rebase
 /// card, and a tags card. No per-action page.
 struct AdvancedDetailView: View {
+    @Environment(\.ainkradSkin) private var skin
     @ObservedObject var model: AdvancedViewModel
     let tokens: HostThemeTokens
 
@@ -58,10 +59,10 @@ struct AdvancedDetailView: View {
                 Image(systemName: "exclamationmark.arrow.triangle.2.circlepath")
                     .foregroundStyle(tokens.accentTertiary)
                 Text(model.operationState.label)
-                    .font(AinkradFont.display(12, weight: .semibold))
+                    .font(AinkradFont.display(skin.type.sizes.t12, weight: .semibold))
             }
             Text("Resolve conflicts in Changes, then Continue.")
-                .font(AinkradFont.display(11))
+                .font(AinkradFont.display(skin.type.sizes.t11))
                 .foregroundStyle(tokens.foreground.opacity(0.6))
             HStack(spacing: 8) {
                 AinkradButton(title: "Continue", style: .primary) { Task { await model.continueOperation() } }
@@ -84,12 +85,12 @@ struct AdvancedDetailView: View {
                 VStack(alignment: .leading, spacing: 12) {
                     VStack(alignment: .leading, spacing: 3) {
                         Text(commit.summary)
-                            .font(AinkradFont.display(13, weight: .medium))
+                            .font(AinkradFont.display(skin.type.sizes.t13, weight: .medium))
                             .foregroundStyle(tokens.foreground)
                             .lineLimit(2)
                         GMCommitMeta(
                             sha: commit.shortSHA, author: commit.author, date: commit.relativeDate, tokens: tokens,
-                            size: 10, limitLines: false)
+                            size: skin.type.sizes.t10, limitLines: false)
                     }
 
                     HStack(spacing: 8) {
@@ -118,7 +119,7 @@ struct AdvancedDetailView: View {
                 }
             } else {
                 Text("Select a commit from the list to cherry-pick, revert, reset, or tag it.")
-                    .font(AinkradFont.display(12))
+                    .font(AinkradFont.display(skin.type.sizes.t12))
                     .foregroundStyle(tokens.foreground.opacity(0.5))
             }
         }
@@ -131,7 +132,7 @@ struct AdvancedDetailView: View {
             VStack(alignment: .leading, spacing: 10) {
                 HStack(spacing: 8) {
                     Text("Rebase \(model.currentBranchName) onto")
-                        .font(AinkradFont.display(12))
+                        .font(AinkradFont.display(skin.type.sizes.t12))
                         .foregroundStyle(tokens.foreground.opacity(0.85))
                     AinkradSelect(
                         items: model.branchNames,
@@ -163,7 +164,7 @@ struct AdvancedDetailView: View {
             VStack(alignment: .leading, spacing: 10) {
                 if model.tags.isEmpty {
                     Text("No tags yet.")
-                        .font(AinkradFont.display(11))
+                        .font(AinkradFont.display(skin.type.sizes.t11))
                         .foregroundStyle(tokens.foreground.opacity(0.45))
                 } else {
                     ScrollView {
@@ -177,7 +178,7 @@ struct AdvancedDetailView: View {
                 }
 
                 Text("NEW TAG AT \(tagTarget)")
-                    .font(AinkradFont.display(9, weight: .semibold)).kerning(1)
+                    .font(AinkradFont.display(skin.type.sizes.t9, weight: .semibold)).kerning(1)
                     .foregroundStyle(tokens.foreground.opacity(0.45))
                 AinkradTextField(text: $model.newTagName, placeholder: "Tag name")
                 AinkradTextField(text: $model.newTagMessage, placeholder: "Message (optional)")
@@ -205,13 +206,14 @@ struct AdvancedDetailView: View {
 
 /// Labeled HUD toggle row for the auto-stash option.
 private struct AutostashToggle: View {
+    @Environment(\.ainkradSkin) private var skin
     @Binding var isOn: Bool
     let tokens: HostThemeTokens
 
     var body: some View {
         HStack {
             Text("Auto-stash uncommitted changes before rebase/reset")
-                .font(AinkradFont.display(12))
+                .font(AinkradFont.display(skin.type.sizes.t12))
                 .foregroundStyle(tokens.foreground.opacity(0.85))
             Spacer()
             AinkradToggle(isOn: $isOn)
@@ -220,6 +222,7 @@ private struct AutostashToggle: View {
 }
 
 private struct TagRow: View {
+    @Environment(\.ainkradSkin) private var skin
     let tag: GitTag
     let tokens: HostThemeTokens
     let onDelete: () -> Void
@@ -229,7 +232,7 @@ private struct TagRow: View {
         // The kit row owns the hover wash; this one only reveals the trash.
         AinkradListRow(
             leading: {
-                Image(systemName: "tag").font(.system(size: 10)).foregroundStyle(tokens.accentSecondary.opacity(0.8))
+                Image(systemName: "tag").font(skin.font(AinkradFontToken(sizeKey: "t10"))).foregroundStyle(tokens.accentSecondary.opacity(0.8))
                     .frame(width: 14)
             },
             title: tag.name,

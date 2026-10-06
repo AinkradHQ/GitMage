@@ -8,7 +8,8 @@ import SwiftUI
 struct MarkdownText: View {
     let markdown: String
     let tokens: HostThemeTokens
-    private let baseSize: CGFloat = 12
+    @Environment(\.ainkradSkin) private var skin
+    private var baseSize: CGFloat { skin.type.sizes.t12 }
 
     private enum Block {
         case paragraph(String)
@@ -98,10 +99,10 @@ struct MarkdownText: View {
 
     private func headingSize(_ level: Int) -> CGFloat {
         switch level {
-        case 1: return baseSize + 6
-        case 2: return baseSize + 4
-        case 3: return baseSize + 2
-        default: return baseSize + 1
+        case 1: return skin.type.sizes.t18
+        case 2: return skin.type.sizes.t16
+        case 3: return skin.type.sizes.t14
+        default: return skin.type.sizes.t13
         }
     }
 

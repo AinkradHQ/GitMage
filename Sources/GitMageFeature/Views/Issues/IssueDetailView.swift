@@ -4,6 +4,7 @@ import SwiftUI
 /// Detail pane for the Issues area: header, editable labels/assignees, body,
 /// comments, and a composer with close/reopen.
 struct IssueDetailView: View {
+    @Environment(\.ainkradSkin) private var skin
     @ObservedObject var model: IssuesViewModel
     let tokens: HostThemeTokens
 
@@ -21,7 +22,7 @@ struct IssueDetailView: View {
                             text: detail.body, isPrimary: true, tokens: tokens)
                         if !model.comments.isEmpty {
                             Text("\(model.comments.count) comment\(model.comments.count == 1 ? "" : "s")")
-                                .font(AinkradFont.display(10, weight: .semibold)).kerning(1.5)
+                                .font(AinkradFont.display(skin.type.sizes.t10, weight: .semibold)).kerning(1.5)
                                 .foregroundStyle(tokens.foreground.opacity(0.45))
                                 .padding(.top, 2)
                         }
@@ -53,10 +54,10 @@ struct IssueDetailView: View {
         VStack(alignment: .leading, spacing: 5) {
             HStack(spacing: 8) {
                 Text(detail.title)
-                    .font(AinkradFont.display(16, weight: .semibold))
+                    .font(AinkradFont.display(skin.type.sizes.t16, weight: .semibold))
                     .foregroundStyle(tokens.foreground)
                 Text("#\(detail.number)")
-                    .font(AinkradFont.mono(12))
+                    .font(AinkradFont.mono(skin.type.sizes.t12))
                     .foregroundStyle(tokens.accentSecondary)
                 Spacer()
                 AinkradBadge(
@@ -64,7 +65,7 @@ struct IssueDetailView: View {
                     tint: GMColor.status(detail.state.lowercased() == "open" ? .open : .closedMerged, tokens))
             }
             Text("opened by \(detail.author) · \(ForgeDate.short(detail.createdAt))")
-                .font(AinkradFont.mono(10))
+                .font(AinkradFont.mono(skin.type.sizes.t10))
                 .foregroundStyle(tokens.foreground.opacity(0.5))
         }
     }
@@ -129,6 +130,7 @@ private struct LabelsEditor: View {
 /// Editable assignees control: a menu of assignable users with checkmarks on
 /// those currently assigned.
 private struct AssigneesEditor: View {
+    @Environment(\.ainkradSkin) private var skin
     @ObservedObject var model: IssuesViewModel
     let detail: IssueDetail
     let tokens: HostThemeTokens
@@ -151,12 +153,12 @@ private struct AssigneesEditor: View {
                     ZStack {
                         Circle().fill(tokens.accentSecondary.opacity(0.2))
                         Text(String(login.prefix(1)).uppercased())
-                            .font(AinkradFont.display(8, weight: .bold))
+                            .font(AinkradFont.display(skin.type.sizes.t8, weight: .bold))
                             .foregroundStyle(tokens.accentSecondary)
                     }
                     .frame(width: 15, height: 15)
                     Text(login)
-                        .font(AinkradFont.mono(10))
+                        .font(AinkradFont.mono(skin.type.sizes.t10))
                         .foregroundStyle(tokens.foreground.opacity(0.75))
                 }
                 .padding(.horizontal, 6).padding(.vertical, 2)

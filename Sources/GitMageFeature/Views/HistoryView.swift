@@ -53,6 +53,7 @@ struct HistoryContextPane: View {
 }
 
 private struct CommitRow: View {
+    @Environment(\.ainkradSkin) private var skin
     let commit: GitCommitSummary
     let isSelected: Bool
     let isFirst: Bool
@@ -84,7 +85,7 @@ private struct CommitRow: View {
 
             VStack(alignment: .leading, spacing: 3) {
                 Text(commit.summary)
-                    .font(AinkradFont.display(12))
+                    .font(AinkradFont.display(skin.type.sizes.t12))
                     .foregroundStyle(tokens.foreground.opacity(isSelected ? 1 : 0.9))
                     .lineLimit(1)
                 GMCommitMeta(

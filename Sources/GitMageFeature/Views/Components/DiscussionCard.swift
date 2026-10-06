@@ -5,6 +5,7 @@ import SwiftUI
 /// GitHub web timeline: an author avatar-initial + name + date header strip
 /// over the markdown body. Shared by the PR and Issue detail panes.
 struct DiscussionCard: View {
+    @Environment(\.ainkradSkin) private var skin
     let author: String
     let timestamp: String
     let text: String
@@ -18,15 +19,15 @@ struct DiscussionCard: View {
                 ZStack {
                     Circle().fill(tokens.accentPrimary.opacity(0.18))
                     Text(String(author.prefix(1)).uppercased())
-                        .font(AinkradFont.display(10, weight: .bold))
+                        .font(AinkradFont.display(skin.type.sizes.t10, weight: .bold))
                         .foregroundStyle(tokens.accentPrimary)
                 }
                 .frame(width: 22, height: 22)
                 Text(author)
-                    .font(AinkradFont.display(12, weight: .semibold))
+                    .font(AinkradFont.display(skin.type.sizes.t12, weight: .semibold))
                     .foregroundStyle(tokens.foreground.opacity(0.9))
                 Text(ForgeDate.short(timestamp))
-                    .font(AinkradFont.mono(9))
+                    .font(AinkradFont.mono(skin.type.sizes.t9))
                     .foregroundStyle(tokens.foreground.opacity(0.45))
                 Spacer()
                 if isPrimary {
@@ -39,7 +40,7 @@ struct DiscussionCard: View {
             Group {
                 if text.isEmpty {
                     Text("No description provided.")
-                        .font(AinkradFont.display(12))
+                        .font(AinkradFont.display(skin.type.sizes.t12))
                         .foregroundStyle(tokens.foreground.opacity(0.4))
                         .frame(maxWidth: .infinity, alignment: .leading)
                 } else {

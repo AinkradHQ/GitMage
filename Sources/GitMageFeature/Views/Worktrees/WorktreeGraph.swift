@@ -101,6 +101,7 @@ struct GraphGutter: View {
 
 /// An interactive graph row: gutter + commit info; tap to select (loads its diff).
 struct GraphCommitRow: View {
+    @Environment(\.ainkradSkin) private var skin
     let row: GraphRow
     let laneCount: Int
     let isSelected: Bool
@@ -117,7 +118,7 @@ struct GraphCommitRow: View {
                 .frame(width: gutterWidth, height: rowHeight)
             VStack(alignment: .leading, spacing: 1) {
                 Text(row.commit.summary)
-                    .font(AinkradFont.display(12))
+                    .font(AinkradFont.display(skin.type.sizes.t12))
                     .foregroundStyle(tokens.foreground.opacity(isSelected ? 1 : 0.9))
                     .lineLimit(1)
                 GMCommitMeta(

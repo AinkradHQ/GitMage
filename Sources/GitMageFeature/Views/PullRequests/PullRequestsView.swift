@@ -43,6 +43,7 @@ struct PullRequestsContextPane: View {
 }
 
 private struct PullRequestRow: View {
+    @Environment(\.ainkradSkin) private var skin
     let pr: PullRequestSummary
     let tokens: HostThemeTokens
     let isSelected: Bool
@@ -55,7 +56,7 @@ private struct PullRequestRow: View {
             isSelected: isSelected, onTap: onSelect,
             leading: {
                 Image(systemName: "arrow.triangle.pull")
-                    .font(.system(size: 12))
+                    .font(skin.font(AinkradFontToken(sizeKey: "t12")))
                     .foregroundStyle(isOpen ? GMColor.status(.open, tokens) : GMColor.status(.closedMerged, tokens))
                     .frame(width: 16)
             },

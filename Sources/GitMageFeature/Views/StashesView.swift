@@ -53,6 +53,7 @@ struct StashesContextPane: View {
 }
 
 private struct StashRow: View {
+    @Environment(\.ainkradSkin) private var skin
     let stash: GitStashEntry
     let isSelected: Bool
     let tokens: HostThemeTokens
@@ -68,7 +69,7 @@ private struct StashRow: View {
             isSelected: isSelected, onTap: onSelect,
             leading: {
                 Image(systemName: "tray.full")
-                    .font(.system(size: 12))
+                    .font(skin.font(AinkradFontToken(sizeKey: "t12")))
                     .foregroundStyle(isSelected ? tokens.accentPrimary : tokens.accentSecondary.opacity(0.7))
                     .frame(width: 16)
             },

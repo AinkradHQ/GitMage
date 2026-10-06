@@ -3,6 +3,7 @@ import SwiftUI
 
 /// Detail pane for the Pull Requests area: header + Conversation/Files switch.
 struct PullRequestDetailView: View {
+    @Environment(\.ainkradSkin) private var skin
     @ObservedObject var model: PullRequestsViewModel
     let tokens: HostThemeTokens
     let fontSize: Double
@@ -54,10 +55,10 @@ struct PullRequestDetailView: View {
         VStack(alignment: .leading, spacing: 6) {
             HStack(spacing: 8) {
                 Text(detail.title)
-                    .font(AinkradFont.display(16, weight: .semibold))
+                    .font(AinkradFont.display(skin.type.sizes.t16, weight: .semibold))
                     .foregroundStyle(tokens.foreground)
                 Text("#\(detail.number)")
-                    .font(AinkradFont.mono(12))
+                    .font(AinkradFont.mono(skin.type.sizes.t12))
                     .foregroundStyle(tokens.accentSecondary)
                 Spacer()
                 if detail.isDraft {
@@ -69,13 +70,13 @@ struct PullRequestDetailView: View {
             }
             HStack(spacing: 6) {
                 Image(systemName: "arrow.triangle.branch")
-                    .font(.system(size: 10)).foregroundStyle(tokens.foreground.opacity(0.5))
+                    .font(skin.font(AinkradFontToken(sizeKey: "t10"))).foregroundStyle(tokens.foreground.opacity(0.5))
                 Text("\(detail.baseBranch) ← \(detail.headBranch)")
-                    .font(AinkradFont.mono(11))
+                    .font(AinkradFont.mono(skin.type.sizes.t11))
                     .foregroundStyle(tokens.foreground.opacity(0.6))
             }
             Text(statusSummary(detail))
-                .font(AinkradFont.display(11))
+                .font(AinkradFont.display(skin.type.sizes.t11))
                 .foregroundStyle(tokens.foreground.opacity(0.5))
         }
         .padding(.horizontal, 16).padding(.top, 14).padding(.bottom, 2)
@@ -201,6 +202,7 @@ struct PullRequestDetailView: View {
 }
 
 private struct PRCommitRow: View {
+    @Environment(\.ainkradSkin) private var skin
     let commit: PRCommit
     let tokens: HostThemeTokens
 
@@ -208,7 +210,7 @@ private struct PRCommitRow: View {
         AinkradListRow(
             leading: {
                 Image(systemName: "circle.fill")
-                    .font(.system(size: 6))
+                    .font(skin.font(AinkradFontToken(sizeKey: "t6")))
                     .foregroundStyle(tokens.accentSecondary.opacity(0.7))
                     .frame(width: 14)
             },

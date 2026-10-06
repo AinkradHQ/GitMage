@@ -124,7 +124,7 @@ struct ChangeRow: View {
 
     private var badge: some View {
         Text(badgeLetter)
-            .font(AinkradFont.mono(10, weight: .bold))
+            .font(AinkradFont.mono(skin.type.sizes.t10, weight: .bold))
             .foregroundStyle(badgeColor)
             .frame(width: 20, height: 20)
             .background(
@@ -155,6 +155,7 @@ struct ChangeRow: View {
 }
 
 struct CommitBox: View {
+    @Environment(\.ainkradSkin) private var skin
     @ObservedObject var model: GitMageViewModel
     let tokens: HostThemeTokens
     let accent: Color
@@ -180,14 +181,14 @@ struct CommitBox: View {
 
             ZStack(alignment: .topLeading) {
                 TextEditor(text: $model.draftCommitMessage)
-                    .font(AinkradFont.display(12))
+                    .font(AinkradFont.display(skin.type.sizes.t12))
                     .scrollContentBackground(.hidden)
                     .focused($editorFocused)
                     .frame(height: 70)
                     .padding(7)
                 if model.draftCommitMessage.isEmpty {
                     Text("Summary of your changes…")
-                        .font(AinkradFont.display(12))
+                        .font(AinkradFont.display(skin.type.sizes.t12))
                         .foregroundStyle(tokens.foreground.opacity(0.35))
                         .padding(.horizontal, 12).padding(.vertical, 15)
                         .allowsHitTesting(false)

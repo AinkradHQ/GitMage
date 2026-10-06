@@ -67,6 +67,7 @@ struct WorktreesContextPane: View {
 }
 
 private struct WorktreeRow: View {
+    @Environment(\.ainkradSkin) private var skin
     let worktree: GitWorktree
     let tokens: HostThemeTokens
     let isSelected: Bool
@@ -86,7 +87,7 @@ private struct WorktreeRow: View {
         VStack(alignment: .leading, spacing: 4) {
             topLine
             Text(worktree.path)
-                .font(AinkradFont.mono(9))
+                .font(AinkradFont.mono(skin.type.sizes.t9))
                 .foregroundStyle(tokens.foreground.opacity(0.45))
                 .lineLimit(1).truncationMode(.middle)
             bottomLine
@@ -108,7 +109,7 @@ private struct WorktreeRow: View {
     private var topLine: some View {
         HStack(spacing: 6) {
             Text(lastPathComponent)
-                .font(AinkradFont.display(12, weight: .bold))
+                .font(AinkradFont.display(skin.type.sizes.t12, weight: .bold))
                 .lineLimit(1)
             if isCurrent {
                 AinkradBadge(text: "current", tint: tokens.accentPrimary)
@@ -116,12 +117,12 @@ private struct WorktreeRow: View {
             Spacer()
             if worktree.isLocked {
                 Image(systemName: "lock.fill")
-                    .font(.system(size: 10))
+                    .font(skin.font(AinkradFontToken(sizeKey: "t10")))
                     .foregroundStyle(tokens.foreground.opacity(0.5))
             }
             if worktree.isPrunable {
                 Image(systemName: "exclamationmark.triangle")
-                    .font(.system(size: 10))
+                    .font(skin.font(AinkradFontToken(sizeKey: "t10")))
                     .foregroundStyle(tokens.accentTertiary.opacity(0.9))
             }
         }
@@ -129,7 +130,7 @@ private struct WorktreeRow: View {
 
     private var bottomLine: some View {
         Text(worktree.branch ?? "detached")
-            .font(AinkradFont.display(10, weight: .medium))
+            .font(AinkradFont.display(skin.type.sizes.t10, weight: .medium))
             .foregroundStyle(
                 worktree.branch != nil ? tokens.accentPrimary.opacity(0.85) : tokens.foreground.opacity(0.5))
     }

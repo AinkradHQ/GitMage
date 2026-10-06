@@ -88,18 +88,18 @@ struct DiffView: View {
 
     private func header(title: String, parsed: DiffRows) -> some View {
         HStack(spacing: 8) {
-            Image(systemName: "doc.text").font(.system(size: 11)).foregroundStyle(tokens.accentSecondary)
+            Image(systemName: "doc.text").font(skin.font(AinkradFontToken(sizeKey: "t11"))).foregroundStyle(tokens.accentSecondary)
             Text(title)
-                .font(AinkradFont.mono(11, weight: .medium))
+                .font(AinkradFont.mono(skin.type.sizes.t11, weight: .medium))
                 .foregroundStyle(tokens.foreground.opacity(0.75))
                 .lineLimit(1).truncationMode(.middle)
             Spacer(minLength: 8)
             if parsed.additions > 0 {
-                Text("+\(parsed.additions)").font(AinkradFont.mono(10, weight: .semibold)).foregroundStyle(
+                Text("+\(parsed.additions)").font(AinkradFont.mono(skin.type.sizes.t10, weight: .semibold)).foregroundStyle(
                     GMColor.diffAdd(skin))
             }
             if parsed.deletions > 0 {
-                Text("−\(parsed.deletions)").font(AinkradFont.mono(10, weight: .semibold)).foregroundStyle(
+                Text("−\(parsed.deletions)").font(AinkradFont.mono(skin.type.sizes.t10, weight: .semibold)).foregroundStyle(
                     GMColor.diffRemove(skin))
             }
         }
@@ -134,7 +134,7 @@ struct DiffView: View {
             .frame(maxWidth: .infinity, maxHeight: .infinity)
         } else {
             Text("No textual changes.")
-                .font(AinkradFont.mono(10)).foregroundStyle(tokens.foreground.opacity(0.4)).padding(8)
+                .font(AinkradFont.mono(skin.type.sizes.t10)).foregroundStyle(tokens.foreground.opacity(0.4)).padding(8)
         }
     }
 
@@ -177,7 +177,7 @@ struct DiffView: View {
             Text(new.map(String.init) ?? "")
                 .frame(width: numberWidth, alignment: .trailing)
         }
-        .font(AinkradFont.mono(max(9, fontSize - 2)))
+        .font(AinkradFont.mono(max(skin.type.sizes.t9, fontSize - 2)))
         .foregroundStyle(tokens.foreground.opacity(0.3))
         .padding(.trailing, 8)
         .background(tokens.foreground.opacity(0.03))

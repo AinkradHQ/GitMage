@@ -41,6 +41,7 @@ struct AdvancedContextPane: View {
 
 /// A selectable commit row (git node dot + summary + sha·author·date).
 struct AdvancedCommitRow: View {
+    @Environment(\.ainkradSkin) private var skin
     let commit: GitCommitSummary
     let isSelected: Bool
     let tokens: HostThemeTokens
@@ -51,7 +52,7 @@ struct AdvancedCommitRow: View {
             isSelected: isSelected, onTap: onSelect,
             leading: {
                 Image(systemName: "circle.fill")
-                    .font(.system(size: 6))
+                    .font(skin.font(AinkradFontToken(sizeKey: "t6")))
                     .foregroundStyle(isSelected ? tokens.accentPrimary : tokens.accentSecondary.opacity(0.6))
                     .frame(width: 12)
             },

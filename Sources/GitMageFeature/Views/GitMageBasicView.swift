@@ -13,6 +13,7 @@ import SwiftUI
 /// changed file, none of which this screen shows. Trimming the view alone would
 /// have saved nothing.
 struct GitMageBasicView: View {
+    @Environment(\.ainkradSkin) private var skin
     let host: HostServices
     @ObservedObject var model: GitMageViewModel
 
@@ -108,7 +109,7 @@ struct GitMageBasicView: View {
                                 systemName: branch.isCurrent
                                     ? "arrow.triangle.branch" : "circle"
                             )
-                            .font(.system(size: 10, weight: .semibold))
+                            .font(skin.font(AinkradFontToken(sizeKey: "t10", weight: "semibold")))
                             .foregroundStyle(
                                 branch.isCurrent
                                     ? tokens.accentPrimary

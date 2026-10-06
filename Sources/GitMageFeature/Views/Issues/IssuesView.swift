@@ -49,6 +49,7 @@ struct IssuesContextPane: View {
 }
 
 private struct IssueRow: View {
+    @Environment(\.ainkradSkin) private var skin
     let issue: IssueSummary
     let tokens: HostThemeTokens
     let isSelected: Bool
@@ -60,24 +61,24 @@ private struct IssueRow: View {
     var body: some View {
         HStack(alignment: .top, spacing: 10) {
             Image(systemName: isOpen ? "smallcircle.filled.circle" : "checkmark.circle")
-                .font(.system(size: 12))
+                .font(skin.font(AinkradFontToken(sizeKey: "t12")))
                 .foregroundStyle(isOpen ? GMColor.status(.open, tokens) : GMColor.status(.closedMerged, tokens))
                 .frame(width: 16)
             VStack(alignment: .leading, spacing: 3) {
                 Text(issue.title)
-                    .font(AinkradFont.display(12))
+                    .font(AinkradFont.display(skin.type.sizes.t12))
                     .foregroundStyle(tokens.foreground.opacity(isSelected ? 1 : 0.9))
                     .lineLimit(1)
                 HStack(spacing: 6) {
                     Text("#\(issue.number)")
-                        .font(AinkradFont.mono(9, weight: .medium))
+                        .font(AinkradFont.mono(skin.type.sizes.t9, weight: .medium))
                         .foregroundStyle(tokens.accentSecondary)
                     Text(issue.author)
-                        .font(AinkradFont.mono(9))
+                        .font(AinkradFont.mono(skin.type.sizes.t9))
                         .foregroundStyle(tokens.foreground.opacity(0.5)).lineLimit(1)
                     if issue.commentCount > 0 {
                         Label("\(issue.commentCount)", systemImage: "bubble.left")
-                            .font(AinkradFont.mono(9))
+                            .font(AinkradFont.mono(skin.type.sizes.t9))
                             .foregroundStyle(tokens.foreground.opacity(0.45))
                     }
                 }
