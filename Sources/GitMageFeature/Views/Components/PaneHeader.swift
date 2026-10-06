@@ -10,6 +10,7 @@ struct PaneHeader<Trailing: View>: View {
     let countText: String?
     let tokens: HostThemeTokens
     @ViewBuilder var trailing: () -> Trailing
+    @Environment(\.ainkradSkin) private var skin
 
     init(
         title: String, count: Int, countText: String? = nil, tokens: HostThemeTokens,
@@ -26,7 +27,7 @@ struct PaneHeader<Trailing: View>: View {
         HStack(spacing: 8) {
             GMHeaderLabel(text: title, tokens: tokens)
             Text(countText ?? "\(count)")
-                .font(AinkradFont.mono(9, weight: .medium))
+                .font(AinkradFont.mono(skin.type.sizes.t9, weight: .medium))
                 .foregroundStyle(tokens.foreground.opacity(0.5))
                 .padding(.horizontal, 5).padding(.vertical, 1)
                 .background(Capsule().fill(tokens.surfaceElevated.opacity(0.6)))
@@ -55,10 +56,11 @@ struct GlowRule: View {
 struct GMHeaderLabel: View {
     let text: String
     let tokens: HostThemeTokens
+    @Environment(\.ainkradSkin) private var skin
 
     var body: some View {
         Text(text)
-            .font(AinkradFont.display(10, weight: .semibold)).kerning(2)
+            .font(AinkradFont.display(skin.type.sizes.t10, weight: .semibold)).kerning(2)
             .foregroundStyle(tokens.foreground.opacity(0.5))
     }
 }

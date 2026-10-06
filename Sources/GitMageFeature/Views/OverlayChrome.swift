@@ -7,9 +7,10 @@ import SwiftUI
 struct SectionLabel: View {
     let text: String
     let tokens: HostThemeTokens
+    @Environment(\.ainkradSkin) private var skin
     var body: some View {
         Text(text)
-            .font(AinkradFont.mono(9, weight: .medium))
+            .font(AinkradFont.mono(skin.type.sizes.t9, weight: .medium))
             .kerning(2.5)
             .foregroundStyle(tokens.foreground.opacity(0.4))
             .padding(.horizontal, 18)

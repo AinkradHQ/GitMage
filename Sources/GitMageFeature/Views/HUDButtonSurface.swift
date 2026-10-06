@@ -9,6 +9,7 @@ private struct HUDButtonSurface: ViewModifier {
     let tokens: HostThemeTokens
     let kind: HUDButtonKind
     let hovering: Bool
+    @Environment(\.ainkradSkin) private var skin
 
     // Single choke point: chamfering here cascades to every top-bar chip /
     // repo/branch switcher that finishes with `.hudButtonSurface`.

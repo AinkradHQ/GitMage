@@ -13,6 +13,7 @@ struct GitMageShell: View {
     @State var advancedModel: AdvancedViewModel?
     @State private var management: GitMageManagementKind?
     @Namespace private var navNamespace
+    @Environment(\.ainkradSkin) var skin
     @Environment(\.ainkradReduceMotion) private var reduceMotion
 
     init(host: HostServices, settingsStore: GitMageSettingsStore) {
@@ -213,10 +214,10 @@ struct GitMageShell: View {
 
     private var emptyLibraryState: some View {
         VStack(spacing: 12) {
-            Image(systemName: "wand.and.stars").font(.system(size: 34, weight: .light)).foregroundStyle(
+            Image(systemName: "wand.and.stars").font(skin.font(AinkradFontToken(sizeKey: "t34", weight: "light"))).foregroundStyle(
                 tokens.accentPrimary.opacity(0.6))
-            Text("No repository").font(AinkradFont.display(18, weight: .semibold))
-            Text("Add a local folder or clone one to begin.").font(AinkradFont.display(12)).foregroundStyle(
+            Text("No repository").font(AinkradFont.display(skin.type.sizes.t18, weight: .semibold))
+            Text("Add a local folder or clone one to begin.").font(AinkradFont.display(skin.type.sizes.t12)).foregroundStyle(
                 tokens.foreground.opacity(0.5))
             HStack {
                 AinkradButton(title: "Add…", style: .primary, icon: "plus") { model.addRepositoryFolder() }

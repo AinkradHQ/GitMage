@@ -10,6 +10,7 @@ struct BranchManagerPanel: View {
 
     @State private var picker = OverlaySelection()
     @FocusState private var focused: Bool
+    @Environment(\.ainkradSkin) private var skin
 
     private var filtered: [GitBranchSummary] {
         picker.filter(model.branches) { [$0.name] }
@@ -68,7 +69,7 @@ struct BranchManagerPanel: View {
                 .disabled(!canCreate)
                 Spacer()
                 Text("↑↓ navigate   ↩ checkout   esc close")
-                    .font(AinkradFont.mono(9))
+                    .font(AinkradFont.mono(skin.type.sizes.t9))
                     .foregroundStyle(tokens.foreground.opacity(0.35))
             }
             .padding(.horizontal, 18)

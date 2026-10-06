@@ -17,6 +17,7 @@ struct GitMageManagementOverlay: View {
     let tokens: HostThemeTokens
     let kind: GitMageManagementKind
     let dismiss: () -> Void
+    @Environment(\.ainkradSkin) private var skin
 
     var body: some View {
         GeometryReader { geo in

@@ -10,6 +10,7 @@ struct RepoManagerPanel: View {
 
     @State private var picker = OverlaySelection()
     @FocusState private var focused: Bool
+    @Environment(\.ainkradSkin) private var skin
 
     private let columns = [GridItem(.flexible(), spacing: 12), GridItem(.flexible(), spacing: 12)]
 
@@ -64,7 +65,7 @@ struct RepoManagerPanel: View {
                 }
                 Spacer()
                 Text("↑↓ navigate   ↩ open   esc close")
-                    .font(AinkradFont.mono(9))
+                    .font(AinkradFont.mono(skin.type.sizes.t9))
                     .foregroundStyle(tokens.foreground.opacity(0.35))
             }
             .padding(.horizontal, 18)
@@ -106,7 +107,7 @@ private struct RepoCard: View {
         VStack(alignment: .leading, spacing: 10) {
             HStack {
                 Image(systemName: "folder.fill")
-                    .font(.system(size: 15))
+                    .font(skin.font(AinkradFontToken(sizeKey: "t15")))
                     .foregroundStyle(isActive ? tokens.accentPrimary : tokens.foreground.opacity(0.6))
                 Spacer()
                 if isActive {
@@ -119,10 +120,10 @@ private struct RepoCard: View {
             Spacer(minLength: 0)
             VStack(alignment: .leading, spacing: 3) {
                 Text(repo.name)
-                    .font(AinkradFont.display(14, weight: .semibold))
+                    .font(AinkradFont.display(skin.type.sizes.t14, weight: .semibold))
                     .foregroundStyle(tokens.foreground).lineLimit(1)
                 Text(repo.path)
-                    .font(AinkradFont.mono(9))
+                    .font(AinkradFont.mono(skin.type.sizes.t9))
                     .foregroundStyle(tokens.foreground.opacity(0.45))
                     .lineLimit(1).truncationMode(.middle)
             }
