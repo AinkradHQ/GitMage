@@ -115,27 +115,9 @@ struct ChangeRow: View {
         return dir.isEmpty ? "" : dir
     }
 
-    /// Single-letter status glyph + its semantic color.
-    private var badgeLetter: String {
-        switch change.kind {
-        case .untracked: return "A"
-        case .modified, .staged: return "M"
-        case .deleted: return "D"
-        case .renamed: return "R"
-        case .conflicted: return "C"
-        case .ignored: return "I"
-        }
-    }
-    private var badgeColor: Color {
-        switch change.kind {
-        case .untracked: return GMColor.diffAdd(tokens)
-        case .deleted: return GMColor.diffRemove(tokens)
-        case .conflicted: return tokens.accentTertiary
-        case .renamed: return tokens.accentSecondary
-        case .modified, .staged: return tokens.accentTertiary
-        case .ignored: return tokens.foreground.opacity(0.4)
-        }
-    }
+    private var status: GMFileStatus { GMFileStatus(change.kind) }
+    private var badgeLetter: String { status.letter }
+    private var badgeColor: Color { status.color(tokens) }
 
     var body: some View {
         HStack(spacing: 10) {
