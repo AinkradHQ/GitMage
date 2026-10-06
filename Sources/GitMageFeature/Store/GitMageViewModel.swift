@@ -89,9 +89,9 @@ final class GitMageViewModel: ObservableObject {
     /// can load this bundle supplies one.
     let reporter: GitMageSignalReporter
 
-    init(host: HostServices) {
-        self.workspaceStore = GitMageWorkspaceStore(documents: host.documents)
-        self.reporter = GitMageSignalReporter(signals: host.signals)
+    init(documents: PluginDocumentStore, signals: PluginSignalEmitter) {
+        self.workspaceStore = GitMageWorkspaceStore(documents: documents)
+        self.reporter = GitMageSignalReporter(signals: signals)
         let library = workspaceStore.loadLibrary()
         self.repos = library.repos
         self.activeRepoID = library.activeRepoID ?? library.repos.first?.id

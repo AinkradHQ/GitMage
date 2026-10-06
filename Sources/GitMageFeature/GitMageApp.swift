@@ -78,7 +78,7 @@ private struct GitMageBasicRoot: View {
 
     init(host: HostServices) {
         self.host = host
-        _model = StateObject(wrappedValue: GitMageViewModel(host: host))
+        _model = StateObject(wrappedValue: GitMageViewModel(documents: host.documents, signals: host.signals))
     }
 
     var body: some View {

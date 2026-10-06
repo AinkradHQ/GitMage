@@ -18,7 +18,7 @@ struct GitMageShell: View {
     init(host: HostServices, settingsStore: GitMageSettingsStore) {
         self.host = host
         self.settingsStore = settingsStore
-        _model = StateObject(wrappedValue: GitMageViewModel(host: host))
+        _model = StateObject(wrappedValue: GitMageViewModel(documents: host.documents, signals: host.signals))
     }
 
     var tokens: HostThemeTokens { host.theme.tokens }
