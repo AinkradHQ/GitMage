@@ -3,8 +3,8 @@
 version 1
 format off
 font-size 27
-padding-literal 88
-spacing-literal 107
+padding-literal 87
+spacing-literal 105
 radius-literal 10
 hex-color 7
 raw-color 11

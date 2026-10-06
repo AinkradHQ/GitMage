@@ -148,46 +148,27 @@ struct PullRequestDetailView: View {
     }
 
     private var composer: some View {
-        VStack(alignment: .leading, spacing: 10) {
-            GlowRule(tokens: tokens)
-            AinkradTextArea(
-                text: $composerText, placeholder: "Leave a comment…", minHeight: 34, maxHeight: 80,
-                onSubmit: {
-                    guard !model.isLoading,
-                        !composerText.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
-                    else { return }
-                    Task {
-                        await model.comment(composerText)
-                        composerText = ""
-                    }
-                })
-            HStack(spacing: 8) {
-                AinkradButton(title: "Comment", style: .secondary, icon: "text.bubble") {
-                    Task {
-                        await model.comment(composerText)
-                        composerText = ""
-                    }
+        GMCommentComposer(
+            text: $composerText, isLoading: model.isLoading, tokens: tokens,
+            comment: { await model.comment($0) }
+        ) {
+            AinkradButton(title: "Approve", style: .secondary, icon: "checkmark.seal") {
+                Task {
+                    await model.review(.approve, body: composerText)
+                    composerText = ""
                 }
-                .disabled(model.isLoading)
-                AinkradButton(title: "Approve", style: .secondary, icon: "checkmark.seal") {
-                    Task {
-                        await model.review(.approve, body: composerText)
-                        composerText = ""
-                    }
-                }
-                .disabled(model.isLoading)
-                AinkradButton(title: "Request changes", style: .danger, icon: "exclamationmark.bubble") {
-                    Task {
-                        await model.review(.requestChanges, body: composerText)
-                        composerText = ""
-                    }
-                }
-                .disabled(model.isLoading)
-                Spacer()
-                mergeMenu
             }
+            .disabled(model.isLoading)
+            AinkradButton(title: "Request changes", style: .danger, icon: "exclamationmark.bubble") {
+                Task {
+                    await model.review(.requestChanges, body: composerText)
+                    composerText = ""
+                }
+            }
+            .disabled(model.isLoading)
+            Spacer()
+            mergeMenu
         }
-        .padding(16)
     }
 
     private var mergeMenu: some View {
