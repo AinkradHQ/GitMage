@@ -123,6 +123,19 @@ struct GitDiffSnapshot: Equatable {
     let title: String
     let body: String
     let isEmpty: Bool
+
+    /// A diff from raw `git` output; blank output reads "No diff available." and is flagged empty.
+    init(title: String, output: String) {
+        let trimmed = output.trimmingCharacters(in: .whitespacesAndNewlines)
+        self.init(
+            title: title, body: trimmed.isEmpty ? "No diff available." : trimmed, isEmpty: trimmed.isEmpty)
+    }
+
+    init(title: String, body: String, isEmpty: Bool) {
+        self.title = title
+        self.body = body
+        self.isEmpty = isEmpty
+    }
 }
 
 struct GitChange: Identifiable, Equatable {

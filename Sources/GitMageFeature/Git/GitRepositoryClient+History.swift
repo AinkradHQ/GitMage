@@ -44,11 +44,6 @@ extension GitRepositoryClient {
             ["show", "--no-color", "--no-ext-diff", "--unified=3", "--format=medium", sha],
             in: rootURL
         )
-        let body = output.trimmingCharacters(in: .whitespacesAndNewlines)
-        return GitDiffSnapshot(
-            title: sha,
-            body: body.isEmpty ? "No diff available." : body,
-            isEmpty: body.isEmpty
-        )
+        return GitDiffSnapshot(title: sha, output: output)
     }
 }

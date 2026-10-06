@@ -128,11 +128,6 @@ extension GitRepositoryClient {
             acceptedExitCodes: change.kind == .untracked ? [0, 1] : [0]
         )
 
-        let body = output.trimmingCharacters(in: .whitespacesAndNewlines)
-        return GitDiffSnapshot(
-            title: title,
-            body: body.isEmpty ? "No diff available." : body,
-            isEmpty: body.isEmpty
-        )
+        return GitDiffSnapshot(title: title, output: output)
     }
 }
