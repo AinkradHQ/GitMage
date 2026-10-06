@@ -80,14 +80,11 @@ struct BranchManagerPanel: View {
     }
 
     private var emptyState: some View {
-        VStack(spacing: 8) {
-            EmptyStateView(
-                icon: "arrow.triangle.branch",
-                title: canCreate ? "No matching branch" : "No branches",
-                message: canCreate ? "Press ↩ or Create to make \"\(createName)\"." : "Create your first branch below.",
-                tokens: tokens
-            )
-        }
+        AinkradEmptyState(
+            icon: "arrow.triangle.branch",
+            title: canCreate ? "No matching branch" : "No branches",
+            message: canCreate ? "Press ↩ or Create to make \"\(createName)\"." : "Create your first branch below."
+        )
         .frame(maxWidth: .infinity, minHeight: 150)
     }
 

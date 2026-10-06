@@ -76,11 +76,10 @@ struct RepoManagerPanel: View {
     }
 
     private var emptyState: some View {
-        EmptyStateView(
+        AinkradEmptyState(
             icon: "square.stack.3d.up.slash",
             title: picker.query.isEmpty ? "No repositories yet" : "No matches",
-            message: picker.query.isEmpty ? "Add a local folder or clone one to begin." : "Try a different search.",
-            tokens: tokens
+            message: picker.query.isEmpty ? "Add a local folder or clone one to begin." : "Try a different search."
         )
         .frame(maxWidth: .infinity, minHeight: 150)
     }

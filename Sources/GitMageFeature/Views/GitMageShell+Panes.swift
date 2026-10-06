@@ -44,9 +44,9 @@ extension GitMageShell {
                     files: DiffFileSplitter.split(commitDiff.body), tokens: tokens,
                     fontSize: appearance.diffFontSize, fallbackTitle: commitDiff.title)
             } else {
-                EmptyStateView(
+                AinkradEmptyState(
                     icon: "clock.arrow.circlepath", title: "History",
-                    message: "Select a commit to inspect its changed files.", tokens: tokens)
+                    message: "Select a commit to inspect its changed files.")
             }
         case .stashes:
             if let selectedStashDiff = model.selectedStashDiff {
@@ -54,11 +54,10 @@ extension GitMageShell {
                     files: DiffFileSplitter.split(selectedStashDiff.body), tokens: tokens,
                     fontSize: appearance.diffFontSize, fallbackTitle: selectedStashDiff.title)
             } else {
-                EmptyStateView(
+                AinkradEmptyState(
                     icon: "tray.2",
                     title: "Stashes",
-                    message: "Select a stash to preview its changed files.",
-                    tokens: tokens
+                    message: "Select a stash to preview its changed files."
                 )
             }
         case .pullRequests:
@@ -89,15 +88,9 @@ extension GitMageShell {
         }
     }
 
+    /// Shown while an area's model is still being built for the active repository.
     private var selectRepoPlaceholder: some View {
-        VStack(spacing: 10) {
-            Image(systemName: "rectangle.split.3x1")
-                .font(.system(size: 28, weight: .light))
-                .foregroundStyle(tokens.accentPrimary.opacity(0.5))
-            Text("Select a repository.")
-                .font(AinkradFont.display(12))
-                .foregroundStyle(tokens.foreground.opacity(0.6))
-        }
-        .frame(maxWidth: .infinity, maxHeight: .infinity)
+        AinkradEmptyState(
+            icon: "rectangle.split.3x1", title: model.selectedArea.title, message: "Select a repository.")
     }
 }
