@@ -13,31 +13,35 @@ struct TopBarChip: View {
     let tokens: HostThemeTokens
     let action: () -> Void
     @State private var hovering = false
+    @Environment(\.ainkradSkin) private var skin
     @Environment(\.ainkradReduceMotion) private var reduceMotion
 
     var body: some View {
-        Button(action: action) {
-            HStack(spacing: 7) {
+        // No kit trigger chip yet (AinkradSelect keeps its trigger private), so the chip is local.
+        Button(action: action) {  // design-lint: allow raw-control kit gap: trigger chip
+            HStack(spacing: skin.size.s7) {
                 Image(systemName: icon)
-                    .font(.system(size: 12, weight: .semibold))
+                    .font(skin.font(AinkradFontToken(sizeKey: "t12", weight: "semibold")))
                     .foregroundStyle(tokens.accentSecondary)
-                    .shadow(color: tokens.accentSecondary.opacity(hovering ? 0.8 : 0.4), radius: hovering ? 5 : 2)
+                    .shadow(
+                        color: tokens.accentSecondary.opacity(hovering ? skin.opacity.o80 : skin.opacity.o40),
+                        radius: hovering ? skin.size.s5 : skin.size.s2)
                 Text(label)
-                    .font(AinkradFont.display(13, weight: .medium))
-                    .foregroundStyle(tokens.foreground.opacity(0.92))
+                    .font(AinkradFont.display(skin.type.sizes.t13, weight: .medium))
+                    .foregroundStyle(tokens.foreground.opacity(skin.opacity.o92))
                     .lineLimit(1)
                 Image(systemName: "chevron.down")
-                    .font(.system(size: 8, weight: .bold))
-                    .foregroundStyle(tokens.foreground.opacity(hovering ? 0.7 : 0.4))
+                    .font(skin.font(AinkradFontToken(sizeKey: "t8", weight: "bold")))
+                    .foregroundStyle(tokens.foreground.opacity(hovering ? skin.opacity.o70 : skin.opacity.o40))
             }
-            .padding(.horizontal, 12)
-            .padding(.vertical, 7)
+            .padding(.horizontal, skin.spacing.md)
+            .padding(.vertical, skin.size.s7)
             .hudButtonSurface(tokens: tokens, kind: .chip, hovering: hovering)
             .contentShape(Rectangle())
         }
         .buttonStyle(.plain)
         .ainkradTooltip(shortcutTooltip(tooltip ?? label, shortcut))
-        .onHover { h in withAnimation(reduceMotion ? nil : .easeOut(duration: 0.14)) { hovering = h } }
+        .onHover { h in withAnimation(reduceMotion ? nil : .easeOut(duration: skin.motion.durations.d0_14)) { hovering = h } }
     }
 }
 

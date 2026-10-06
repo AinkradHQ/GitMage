@@ -13,6 +13,7 @@ struct GitMageShell: View {
     @State var advancedModel: AdvancedViewModel?
     @State private var management: GitMageManagementKind?
     @Namespace private var navNamespace
+    @Environment(\.ainkradSkin) var skin
     @Environment(\.ainkradReduceMotion) private var reduceMotion
 
     init(host: HostServices, settingsStore: GitMageSettingsStore) {
@@ -50,8 +51,8 @@ struct GitMageShell: View {
                     navRail
                     if model.hasActiveRepo {
                         contextPane
-                            .frame(width: 300)
-                            .background(tokens.surface.opacity(0.35))
+                            .frame(width: skin.size.s300)
+                            .background(tokens.surface.opacity(skin.opacity.o35))
                         detailPane
                             .frame(maxWidth: .infinity, maxHeight: .infinity)
                     } else {
@@ -66,7 +67,11 @@ struct GitMageShell: View {
                     model: model,
                     tokens: tokens,
                     kind: management,
-                    dismiss: { withAnimation(reduceMotion ? nil : .easeOut(duration: 0.16)) { self.management = nil } }
+                    dismiss: {
+                        withAnimation(reduceMotion ? nil : .easeOut(duration: skin.motion.durations.d0_16)) {
+                            self.management = nil
+                        }
+                    }
                 )
             }
 
@@ -92,7 +97,7 @@ struct GitMageShell: View {
             confirmTitle: "Initialize",
             onConfirm: { model.confirmInitPendingRepository() }
         )
-        .animation(reduceMotion ? nil : .spring(response: 0.32, dampingFraction: 0.85), value: management)
+        .animation(managementSpring, value: management)
         .background(
             ShortcutLayer(
                 shortcuts: settingsStore.settings.shortcuts,
@@ -127,7 +132,7 @@ struct GitMageShell: View {
     }
 
     private var topBar: some View {
-        HStack(spacing: 14) {
+        HStack(spacing: skin.size.s14) {
             RepoSwitcher(model: model, tokens: tokens, shortcut: hint(.openRepos)) {
                 openManagement(.repos)
             }
@@ -155,8 +160,8 @@ struct GitMageShell: View {
                 .ainkradTooltip(shortcutTooltip("Push", hint(.push)))
             }
         }
-        .padding(.horizontal, 16)
-        .frame(height: 44)
+        .padding(.horizontal, skin.spacing.lg)
+        .frame(height: skin.size.s44)
     }
 
     /// Display string for a command's bound chord, or nil when unbound.
@@ -170,8 +175,18 @@ struct GitMageShell: View {
         return hint(command)
     }
 
+    /// The management overlay's present spring; nil under Reduce Motion.
+    private var managementSpring: Animation? {
+        reduceMotion ? nil : skin.motion.springs["sp32_85"].map { skin.animation($0) }
+    }
+
+    /// The nav rail's area-switch spring; nil under Reduce Motion.
+    private var areaSpring: Animation? {
+        reduceMotion ? nil : skin.motion.springs["sp32_74"].map { skin.animation($0) }
+    }
+
     private func openManagement(_ kind: GitMageManagementKind) {
-        withAnimation(reduceMotion ? nil : .spring(response: 0.32, dampingFraction: 0.85)) { management = kind }
+        withAnimation(managementSpring) { management = kind }
     }
 
     /// Central handler for every keyboard-dispatched command.
@@ -184,7 +199,7 @@ struct GitMageShell: View {
         case .push: model.push()
         default:
             if let area = command.area {
-                withAnimation(reduceMotion ? nil : .spring(response: 0.32, dampingFraction: 0.74)) {
+                withAnimation(areaSpring) {
                     model.selectArea(area)
                 }
             }
@@ -192,36 +207,35 @@ struct GitMageShell: View {
     }
 
     private var navRail: some View {
-        VStack(spacing: 6) {
+        VStack(spacing: skin.size.s6) {
             ForEach(NavArea.built) { area in
-                NavRailItem(
-                    area: area,
-                    isActive: model.selectedArea == area,
-                    tokens: tokens,
-                    namespace: navNamespace,
-                    shortcut: areaHint(area),
+                AinkradRailItem(
+                    systemName: area.icon,
+                    help: shortcutTooltip(area.title, areaHint(area)),
+                    isSelected: model.selectedArea == area,
+                    selectionNamespace: navNamespace,
                     action: { model.selectArea(area) }
                 )
             }
             Spacer()
         }
-        .padding(.vertical, 14)
-        .frame(width: 56)
+        .padding(.vertical, skin.size.s14)
+        .frame(width: skin.size.s56)
         .frame(maxHeight: .infinity)
-        .animation(reduceMotion ? nil : .spring(response: 0.32, dampingFraction: 0.74), value: model.selectedArea)
+        .animation(areaSpring, value: model.selectedArea)
     }
 
 
     private var emptyLibraryState: some View {
-        VStack(spacing: 12) {
-            Image(systemName: "wand.and.stars").font(.system(size: 34, weight: .light)).foregroundStyle(
-                tokens.accentPrimary.opacity(0.6))
-            Text("No repository").font(AinkradFont.display(18, weight: .semibold))
-            Text("Add a local folder or clone one to begin.").font(AinkradFont.display(12)).foregroundStyle(
-                tokens.foreground.opacity(0.5))
+        VStack(spacing: skin.spacing.md) {
+            Image(systemName: "wand.and.stars").font(skin.font(AinkradFontToken(sizeKey: "t34", weight: "light"))).foregroundStyle(
+                tokens.accentPrimary.opacity(skin.opacity.o60))
+            Text("No repository").font(AinkradFont.display(skin.type.sizes.t18, weight: .semibold))
+            Text("Add a local folder or clone one to begin.").font(AinkradFont.display(skin.type.sizes.t12)).foregroundStyle(
+                tokens.foreground.opacity(skin.opacity.o50))
             HStack {
-                Button("Add…") { model.addRepositoryFolder() }.font(AinkradFont.display(12))
-                Button("Clone…") { model.startClone() }.font(AinkradFont.display(12))
+                AinkradButton(title: "Add…", style: .primary, icon: "plus") { model.addRepositoryFolder() }
+                AinkradButton(title: "Clone…", style: .secondary, icon: "arrow.down.doc") { model.startClone() }
             }
         }
     }
