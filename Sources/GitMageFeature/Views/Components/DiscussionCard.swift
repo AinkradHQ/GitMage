@@ -5,6 +5,7 @@ import SwiftUI
 /// GitHub web timeline: an author avatar-initial + name + date header strip
 /// over the markdown body. Shared by the PR and Issue detail panes.
 struct DiscussionCard: View {
+    @Environment(\.ainkradSkin) private var skin
     let author: String
     let timestamp: String
     let text: String
@@ -14,45 +15,45 @@ struct DiscussionCard: View {
 
     var body: some View {
         VStack(alignment: .leading, spacing: 0) {
-            HStack(spacing: 8) {
+            HStack(spacing: skin.spacing.sm) {
                 ZStack {
-                    Circle().fill(tokens.accentPrimary.opacity(0.18))
+                    Circle().fill(tokens.accentPrimary.opacity(skin.opacity.o18))
                     Text(String(author.prefix(1)).uppercased())
-                        .font(AinkradFont.display(10, weight: .bold))
+                        .font(AinkradFont.display(skin.type.sizes.t10, weight: .bold))
                         .foregroundStyle(tokens.accentPrimary)
                 }
-                .frame(width: 22, height: 22)
+                .frame(width: skin.size.s22, height: skin.size.s22)
                 Text(author)
-                    .font(AinkradFont.display(12, weight: .semibold))
-                    .foregroundStyle(tokens.foreground.opacity(0.9))
+                    .font(AinkradFont.display(skin.type.sizes.t12, weight: .semibold))
+                    .foregroundStyle(tokens.foreground.opacity(skin.opacity.o90))
                 Text(ForgeDate.short(timestamp))
-                    .font(AinkradFont.mono(9))
-                    .foregroundStyle(tokens.foreground.opacity(0.45))
+                    .font(AinkradFont.mono(skin.type.sizes.t9))
+                    .foregroundStyle(tokens.foreground.opacity(skin.opacity.o45))
                 Spacer()
                 if isPrimary {
                     AinkradBadge(text: "AUTHOR", tint: tokens.accentSecondary)
                 }
             }
-            .padding(.horizontal, 12).padding(.vertical, 8)
-            .background(tokens.surfaceElevated.opacity(0.5))
+            .padding(.horizontal, skin.spacing.md).padding(.vertical, skin.spacing.sm)
+            .background(tokens.surfaceElevated.opacity(skin.opacity.o50))
 
             Group {
                 if text.isEmpty {
                     Text("No description provided.")
-                        .font(AinkradFont.display(12))
-                        .foregroundStyle(tokens.foreground.opacity(0.4))
+                        .font(AinkradFont.display(skin.type.sizes.t12))
+                        .foregroundStyle(tokens.foreground.opacity(skin.opacity.o40))
                         .frame(maxWidth: .infinity, alignment: .leading)
                 } else {
                     MarkdownText(markdown: text, tokens: tokens)
                 }
             }
-            .padding(12)
+            .padding(skin.spacing.md)
         }
-        .background(tokens.surface.opacity(0.4))
+        .background(tokens.surface.opacity(skin.opacity.o40))
         .clipShape(ChamferShape(cut: AinkradRadius.md))
         .overlay(
             ChamferShape(cut: AinkradRadius.md)
-                .strokeBorder(isPrimary ? tokens.accentPrimary.opacity(0.3) : tokens.foreground.opacity(0.08))
+                .strokeBorder(isPrimary ? tokens.accentPrimary.opacity(skin.opacity.o30) : tokens.foreground.opacity(skin.opacity.o08))
         )
     }
 }

@@ -26,29 +26,13 @@ struct PaneHeader<Trailing: View>: View {
     var body: some View {
         HStack(spacing: skin.spacing.sm) {
             GMHeaderLabel(text: title, tokens: tokens)
-            Text(countText ?? "\(count)")
-                .font(AinkradFont.mono(skin.type.sizes.t9, weight: .medium))
-                .foregroundStyle(tokens.foreground.opacity(skin.opacity.o50))
-                .padding(.horizontal, skin.size.s5).padding(.vertical, skin.size.s1)
-                .background(Capsule().fill(tokens.surfaceElevated.opacity(skin.opacity.o60)))
+            AinkradBadge(text: countText ?? "\(count)")
             Spacer()
             trailing()
         }
         .padding(.horizontal, skin.size.s14)
         .padding(.top, skin.size.s14)
         .padding(.bottom, skin.spacing.sm)
-    }
-}
-
-/// Horizontal accent glow rule — the soft separator used across surfaces.
-struct GlowRule: View {
-    let tokens: HostThemeTokens
-    var body: some View {
-        LinearGradient(
-            colors: [.clear, tokens.accentPrimary.opacity(0.4), .clear],
-            startPoint: .leading, endPoint: .trailing
-        )
-        .frame(height: 1)
     }
 }
 

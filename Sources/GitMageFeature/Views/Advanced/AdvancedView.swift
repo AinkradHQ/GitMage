@@ -5,24 +5,25 @@ import SwiftUI
 /// drives the contextual actions (cherry-pick / revert / reset / tag) in the
 /// detail pane — there is no per-action page.
 struct AdvancedContextPane: View {
+    @Environment(\.ainkradSkin) private var skin
     @ObservedObject var model: AdvancedViewModel
     let tokens: HostThemeTokens
 
     var body: some View {
         VStack(spacing: 0) {
             PaneHeader(title: "COMMITS", count: model.commits.count, tokens: tokens) {
-                if model.isLoading { AinkradSpinner(size: 16) }
+                if model.isLoading { AinkradSpinner(size: skin.size.s16) }
             }
 
             if model.commits.isEmpty {
-                EmptyStateView(
+                AinkradEmptyState(
                     icon: "clock.arrow.circlepath", title: "No commits",
-                    message: "This repository has no history yet.", tokens: tokens
+                    message: "This repository has no history yet."
                 )
                 .frame(maxWidth: .infinity, maxHeight: .infinity)
             } else {
                 ScrollView {
-                    LazyVStack(alignment: .leading, spacing: 2) {
+                    LazyVStack(alignment: .leading, spacing: skin.size.s2) {
                         ForEach(model.commits) { commit in
                             AdvancedCommitRow(
                                 commit: commit,
@@ -32,7 +33,7 @@ struct AdvancedContextPane: View {
                             )
                         }
                     }
-                    .padding(.horizontal, 12).padding(.bottom, 12)
+                    .padding(.horizontal, skin.spacing.md).padding(.bottom, skin.spacing.md)
                 }
             }
         }
@@ -41,30 +42,24 @@ struct AdvancedContextPane: View {
 
 /// A selectable commit row (git node dot + summary + sha·author·date).
 struct AdvancedCommitRow: View {
+    @Environment(\.ainkradSkin) private var skin
     let commit: GitCommitSummary
     let isSelected: Bool
     let tokens: HostThemeTokens
     let onSelect: () -> Void
-    @State private var hovering = false
 
     var body: some View {
-        HStack(spacing: 10) {
-            Image(systemName: "circle.fill")
-                .font(.system(size: 6))
-                .foregroundStyle(isSelected ? tokens.accentPrimary : tokens.accentSecondary.opacity(0.6))
-                .frame(width: 12)
-            VStack(alignment: .leading, spacing: 2) {
-                Text(commit.summary)
-                    .font(AinkradFont.display(12))
-                    .foregroundStyle(tokens.foreground.opacity(isSelected ? 1 : 0.9))
-                    .lineLimit(1)
-                GMCommitMeta(
-                    sha: commit.shortSHA, author: commit.author, date: commit.relativeDate, tokens: tokens)
-            }
-            Spacer(minLength: 4)
-        }
-        .padding(.horizontal, 9).padding(.vertical, 7)
-        .gmListRowChrome(tokens: tokens, isSelected: isSelected, hovering: $hovering, spine: (16, 0), animatesSelection: false)
-        .onTapGesture(perform: onSelect)
+        AinkradListRow(
+            isSelected: isSelected, onTap: onSelect,
+            leading: {
+                Image(systemName: "circle.fill")
+                    .font(skin.font(AinkradFontToken(sizeKey: "t6")))
+                    .foregroundStyle(isSelected ? tokens.accentPrimary : tokens.accentSecondary.opacity(skin.opacity.o60))
+                    .frame(width: skin.size.s12)
+            },
+            title: commit.summary,
+            subtitle: GMCommitMeta.text(sha: commit.shortSHA, author: commit.author, date: commit.relativeDate),
+            trailing: { EmptyView() }
+        )
     }
 }

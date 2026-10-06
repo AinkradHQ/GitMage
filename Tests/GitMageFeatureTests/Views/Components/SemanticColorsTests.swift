@@ -16,11 +16,12 @@ final class SemanticColorsTests: XCTestCase {
         let tokens = makeTokens()
         XCTAssertEqual(GMColor.status(.open, tokens), tokens.accentPrimary)
         XCTAssertEqual(GMColor.status(.closedMerged, tokens), tokens.accentSecondary)
-        XCTAssertEqual(GMColor.status(.warning, tokens), tokens.accentTertiary)
     }
 
-    func testDiffColorsAreDistinctFromEachOther() {
-        let tokens = makeTokens()
-        XCTAssertNotEqual(GMColor.diffAdd(tokens), GMColor.diffRemove(tokens))
+    func testDiffColorsComeFromTheSkinsSuccessAndDanger() {
+        let skin = AinkradSkin.standard
+        XCTAssertEqual(GMColor.diffAdd(skin), skin.color(.palette("success", 1)))
+        XCTAssertEqual(GMColor.diffRemove(skin), skin.color(.palette("danger", 1)))
+        XCTAssertNotEqual(GMColor.diffAdd(skin), GMColor.diffRemove(skin))
     }
 }

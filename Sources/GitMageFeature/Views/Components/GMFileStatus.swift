@@ -17,13 +17,13 @@ enum GMFileStatus {
         }
     }
 
-    func color(_ tokens: HostThemeTokens) -> Color {
+    func color(_ tokens: HostThemeTokens, _ skin: AinkradSkin) -> Color {
         switch self {
-        case .added: return GMColor.diffAdd(tokens)
-        case .deleted: return GMColor.diffRemove(tokens)
+        case .added: return GMColor.diffAdd(skin)
+        case .deleted: return GMColor.diffRemove(skin)
         case .conflicted, .modified: return tokens.accentTertiary
         case .renamed: return tokens.accentSecondary
-        case .ignored: return tokens.foreground.opacity(0.4)
+        case .ignored: return tokens.foreground.opacity(skin.opacity.o40)
         }
     }
 

@@ -2,6 +2,7 @@ import AinkradAppKit
 import SwiftUI
 
 struct HistoryContextPane: View {
+    @Environment(\.ainkradSkin) private var skin
     @ObservedObject var model: GitMageViewModel
     let tokens: HostThemeTokens
 
@@ -18,11 +19,10 @@ struct HistoryContextPane: View {
                 countText: historyCountText, tokens: tokens)
 
             if model.commits.isEmpty {
-                EmptyStateView(
+                AinkradEmptyState(
                     icon: "clock.arrow.circlepath",
                     title: "No commits",
-                    message: "This repository has no history yet.",
-                    tokens: tokens
+                    message: "This repository has no history yet."
                 )
                 .frame(maxWidth: .infinity, maxHeight: .infinity)
             } else {
@@ -43,17 +43,10 @@ struct HistoryContextPane: View {
                             }
                         }
 
-                        if model.isLoadingCommits {
-                            HStack {
-                                Spacer()
-                                AinkradSpinner(size: 16)
-                                Spacer()
-                            }
-                            .padding(.vertical, 12)
-                        }
+                        if model.isLoadingCommits { AinkradLoadingState() }
                     }
-                    .padding(.horizontal, 12)
-                    .padding(.bottom, 12)
+                    .padding(.horizontal, skin.spacing.md)
+                    .padding(.bottom, skin.spacing.md)
                 }
             }
         }
@@ -61,6 +54,7 @@ struct HistoryContextPane: View {
 }
 
 private struct CommitRow: View {
+    @Environment(\.ainkradSkin) private var skin
     let commit: GitCommitSummary
     let isSelected: Bool
     let isFirst: Bool
@@ -70,39 +64,42 @@ private struct CommitRow: View {
     @State private var hovering = false
 
     var body: some View {
-        HStack(spacing: 10) {
+        HStack(spacing: skin.size.s10) {
             // Git-graph rail: a continuous line with a node per commit.
             ZStack {
                 Rectangle()
-                    .fill(tokens.foreground.opacity(0.14))
-                    .frame(width: 1)
+                    .fill(tokens.foreground.opacity(skin.opacity.o14))
+                    .frame(width: skin.size.s1)
                     .padding(.top, isFirst ? 14 : 0)
                     .padding(.bottom, isLast ? 14 : 0)
                 Circle()
-                    .fill(isSelected ? tokens.accentPrimary : tokens.accentSecondary.opacity(0.8))
-                    .frame(width: 8, height: 8)
-                    .shadow(color: isSelected ? tokens.accentPrimary.opacity(0.8) : .clear, radius: 4)
+                    .fill(isSelected ? tokens.accentPrimary : tokens.accentSecondary.opacity(skin.opacity.o80))
+                    .frame(width: skin.size.s8, height: skin.size.s8)
+                    .shadow(color: isSelected ? tokens.accentPrimary.opacity(skin.opacity.o80) : .clear, radius: skin.size.s4)
                     .overlay(
                         Circle().stroke(tokens.background, lineWidth: 2)
-                            .frame(width: 8, height: 8)
+                            .frame(width: skin.size.s8, height: skin.size.s8)
                             .opacity(isSelected ? 0 : 1)
                     )
             }
-            .frame(width: 14)
+            .frame(width: skin.size.s14)
 
-            VStack(alignment: .leading, spacing: 3) {
+            VStack(alignment: .leading, spacing: skin.size.s3) {
                 Text(commit.summary)
-                    .font(AinkradFont.display(12))
-                    .foregroundStyle(tokens.foreground.opacity(isSelected ? 1 : 0.9))
+                    .font(AinkradFont.display(skin.type.sizes.t12))
+                    .foregroundStyle(tokens.foreground.opacity(isSelected ? 1 : skin.opacity.o90))
                     .lineLimit(1)
                 GMCommitMeta(
                     sha: commit.shortSHA, author: commit.author, date: commit.relativeDate, tokens: tokens)
             }
-            .padding(.vertical, 7)
+            .padding(.vertical, skin.size.s7)
             Spacer(minLength: 4)
         }
-        .padding(.horizontal, 9)
-        .gmListRowChrome(tokens: tokens, isSelected: isSelected, hovering: $hovering, spine: nil, fillInset: 2)
+        .padding(.horizontal, skin.size.s9)
+        // The kit's row wash; the layout stays local (AinkradListRow is title + subtitle only).
+        .ainkradRowBackground(isSelected: isSelected, isHovered: hovering)
+        .contentShape(Rectangle())
+        .onHover { hovering = $0 }
         .onTapGesture(perform: onSelect)
     }
 }

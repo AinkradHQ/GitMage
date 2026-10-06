@@ -11,13 +11,13 @@ extension GitMageShell {
             if let prModel {
                 PullRequestsContextPane(model: prModel, tokens: tokens, hasGitHubRemote: prHasGitHubRemote)
             } else {
-                ComingSoonView(area: model.selectedArea, tokens: tokens)
+                comingSoon
             }
         case .issues:
             if let issuesModel {
                 IssuesContextPane(model: issuesModel, tokens: tokens, hasGitHubRemote: issuesHasGitHubRemote)
             } else {
-                ComingSoonView(area: model.selectedArea, tokens: tokens)
+                comingSoon
             }
         case .worktrees:
             if let worktreesModel {
@@ -64,13 +64,13 @@ extension GitMageShell {
             if let prModel {
                 PullRequestDetailView(model: prModel, tokens: tokens, fontSize: appearance.diffFontSize)
             } else {
-                ComingSoonView(area: model.selectedArea, tokens: tokens)
+                comingSoon
             }
         case .issues:
             if let issuesModel {
                 IssueDetailView(model: issuesModel, tokens: tokens)
             } else {
-                ComingSoonView(area: model.selectedArea, tokens: tokens)
+                comingSoon
             }
         case .worktrees:
             if let worktreesModel {
@@ -84,8 +84,14 @@ extension GitMageShell {
             } else {
                 selectRepoPlaceholder
             }
-        default: ComingSoonView(area: model.selectedArea, tokens: tokens)
+        default: comingSoon
         }
+    }
+
+    /// An area that is not built yet.
+    private var comingSoon: some View {
+        AinkradEmptyState(
+            icon: model.selectedArea.icon, title: model.selectedArea.title, message: "Coming in a later milestone.")
     }
 
     /// Shown while an area's model is still being built for the active repository.

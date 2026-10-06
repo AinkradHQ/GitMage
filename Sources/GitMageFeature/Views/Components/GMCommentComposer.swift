@@ -4,6 +4,7 @@ import SwiftUI
 /// The comment box under a pull request or issue: a text area that submits on
 /// return, a Comment button, and whatever else the screen puts beside it.
 struct GMCommentComposer<Actions: View>: View {
+    @Environment(\.ainkradSkin) private var skin
     @Binding var text: String
     let isLoading: Bool
     let tokens: HostThemeTokens
@@ -13,8 +14,7 @@ struct GMCommentComposer<Actions: View>: View {
     @ViewBuilder let actions: () -> Actions
 
     var body: some View {
-        VStack(alignment: .leading, spacing: 10) {
-            GlowRule(tokens: tokens)
+        VStack(alignment: .leading, spacing: skin.size.s10) {
             AinkradTextArea(
                 text: $text, placeholder: "Leave a comment…", minHeight: 34, maxHeight: 80,
                 onSubmit: {
@@ -22,13 +22,13 @@ struct GMCommentComposer<Actions: View>: View {
                     else { return }
                     post()
                 })
-            HStack(spacing: 8) {
+            HStack(spacing: skin.spacing.sm) {
                 AinkradButton(title: "Comment", style: .secondary, icon: "text.bubble") { post() }
                     .disabled(isLoading)
                 actions()
             }
         }
-        .padding(16)
+        .padding(skin.spacing.lg)
     }
 
     private func post() {

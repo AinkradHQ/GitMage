@@ -3,6 +3,7 @@ import SwiftUI
 
 /// Sheet for composing a new issue: title, body, and optional labels/assignees.
 struct NewIssueSheet: View {
+    @Environment(\.ainkradSkin) private var skin
     @ObservedObject var model: IssuesViewModel
     let tokens: HostThemeTokens
 
@@ -11,14 +12,14 @@ struct NewIssueSheet: View {
     }
 
     var body: some View {
-        VStack(alignment: .leading, spacing: 14) {
-            Text("New Issue").font(AinkradFont.display(18, weight: .semibold))
+        VStack(alignment: .leading, spacing: skin.size.s14) {
+            Text("New Issue").font(AinkradFont.display(skin.type.sizes.t18, weight: .semibold))
 
             AinkradTextField(text: $model.newTitle, placeholder: "Title")
 
             AinkradTextArea(text: $model.newBody, placeholder: "Description…")
 
-            HStack(spacing: 10) {
+            HStack(spacing: skin.size.s10) {
                 labelsMenu
                 assigneesMenu
             }
@@ -40,7 +41,7 @@ struct NewIssueSheet: View {
             selection: $model.newLabels,
             label: { $0 },
             swatch: { name in
-                model.repoLabels.first { $0.name == name }.map { Color(hex: $0.color) }
+                model.repoLabels.first { $0.name == name }.flatMap { Color(hex: $0.color) }  // design-lint: allow hex-color GitHub label data
             }
         )
     }

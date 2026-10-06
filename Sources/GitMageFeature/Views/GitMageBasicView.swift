@@ -13,6 +13,7 @@ import SwiftUI
 /// changed file, none of which this screen shows. Trimming the view alone would
 /// have saved nothing.
 struct GitMageBasicView: View {
+    @Environment(\.ainkradSkin) private var skin
     let host: HostServices
     @ObservedObject var model: GitMageViewModel
 
@@ -52,7 +53,7 @@ struct GitMageBasicView: View {
                     triggerLabel: model.activeRepo?.name ?? "Repository",
                     searchPlaceholder: "Search repositories"
                 )
-                .frame(maxWidth: 220)
+                .frame(maxWidth: skin.size.s220)
             }
             AinkradButton(title: "Fetch", style: .secondary, icon: "arrow.down") {
                 model.fetch()
@@ -99,7 +100,7 @@ struct GitMageBasicView: View {
 
     private var branchList: some View {
         ScrollView {
-            VStack(spacing: 1) {
+            VStack(spacing: skin.size.s1) {
                 ForEach(model.branches) { branch in
                     AinkradListRow(
                         isSelected: branch.isCurrent,
@@ -108,13 +109,13 @@ struct GitMageBasicView: View {
                                 systemName: branch.isCurrent
                                     ? "arrow.triangle.branch" : "circle"
                             )
-                            .font(.system(size: 10, weight: .semibold))
+                            .font(skin.font(AinkradFontToken(sizeKey: "t10", weight: "semibold")))
                             .foregroundStyle(
                                 branch.isCurrent
                                     ? tokens.accentPrimary
-                                    : tokens.foreground.opacity(0.35)
+                                    : tokens.foreground.opacity(skin.opacity.o35)
                             )
-                            .frame(width: 20)
+                            .frame(width: skin.size.s20)
                         },
                         title: branch.name,
                         subtitle: branch.subtitle,

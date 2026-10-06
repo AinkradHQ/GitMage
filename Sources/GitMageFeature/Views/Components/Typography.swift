@@ -34,7 +34,7 @@ enum AinkradFont {
     @MainActor static func display(_ size: CGFloat, weight: Font.Weight = .regular) -> Font {
         let scaled = size * config.scale
         if config.displayFamily == systemFamily {
-            return .system(size: scaled).weight(weight)
+            return .system(size: scaled).weight(weight)  // design-lint: allow font-size kit gap: per-app display and mono families
         }
         return .custom(config.displayFamily, size: scaled).weight(weight)
     }
@@ -42,7 +42,7 @@ enum AinkradFont {
     @MainActor static func mono(_ size: CGFloat, weight: Font.Weight = .regular) -> Font {
         let scaled = size * config.scale
         if config.monoFamily == systemFamily {
-            return .system(size: scaled, design: .monospaced).weight(weight)
+            return .system(size: scaled, design: .monospaced).weight(weight)  // design-lint: allow font-size kit gap: per-app display and mono families
         }
         return .custom(config.monoFamily, size: scaled).weight(weight)
     }
@@ -51,9 +51,9 @@ enum AinkradFont {
     // Git Mage's own Settings chrome, so configuring the font never restyles
     // the panel you're configuring it from.
     static func fixedDisplay(_ size: CGFloat, weight: Font.Weight = .regular) -> Font {
-        .custom("Exo 2", size: size).weight(weight)
+        .custom("Exo 2", size: size).weight(weight)  // design-lint: allow font-size kit gap: per-app display and mono families
     }
     static func fixedMono(_ size: CGFloat, weight: Font.Weight = .regular) -> Font {
-        .custom("JetBrains Mono", size: size).weight(weight)
+        .custom("JetBrains Mono", size: size).weight(weight)  // design-lint: allow font-size kit gap: per-app display and mono families
     }
 }

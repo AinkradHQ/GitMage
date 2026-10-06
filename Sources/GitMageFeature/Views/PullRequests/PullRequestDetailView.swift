@@ -3,6 +3,7 @@ import SwiftUI
 
 /// Detail pane for the Pull Requests area: header + Conversation/Files switch.
 struct PullRequestDetailView: View {
+    @Environment(\.ainkradSkin) private var skin
     @ObservedObject var model: PullRequestsViewModel
     let tokens: HostThemeTokens
     let fontSize: Double
@@ -29,7 +30,7 @@ struct PullRequestDetailView: View {
                     selection: $tab,
                     label: { "\($0.rawValue) \(tabCount($0))" }
                 )
-                .padding(.horizontal, 16).padding(.vertical, 10)
+                .padding(.horizontal, skin.spacing.lg).padding(.vertical, skin.size.s10)
 
                 switch tab {
                 case .conversation:
@@ -40,9 +41,9 @@ struct PullRequestDetailView: View {
                     filesTab
                 }
             } else {
-                EmptyStateView(
+                AinkradEmptyState(
                     icon: "arrow.triangle.pull", title: "No pull request",
-                    message: "Select a pull request to see its conversation and files.", tokens: tokens
+                    message: "Select a pull request to see its conversation and files."
                 )
                 .frame(maxWidth: .infinity, maxHeight: .infinity)
             }
@@ -51,34 +52,34 @@ struct PullRequestDetailView: View {
     }
 
     private func header(_ detail: PullRequestDetail) -> some View {
-        VStack(alignment: .leading, spacing: 6) {
-            HStack(spacing: 8) {
+        VStack(alignment: .leading, spacing: skin.size.s6) {
+            HStack(spacing: skin.spacing.sm) {
                 Text(detail.title)
-                    .font(AinkradFont.display(16, weight: .semibold))
+                    .font(AinkradFont.display(skin.type.sizes.t16, weight: .semibold))
                     .foregroundStyle(tokens.foreground)
                 Text("#\(detail.number)")
-                    .font(AinkradFont.mono(12))
+                    .font(AinkradFont.mono(skin.type.sizes.t12))
                     .foregroundStyle(tokens.accentSecondary)
                 Spacer()
                 if detail.isDraft {
-                    StatusPill(text: "Draft", kind: .neutral, tokens: tokens)
+                    AinkradBadge(text: "Draft")
                 }
-                StatusPill(
+                AinkradBadge(
                     text: detail.state.capitalized,
-                    kind: detail.state.lowercased() == "open" ? .open : .closedMerged, tokens: tokens)
+                    tint: GMColor.status(detail.state.lowercased() == "open" ? .open : .closedMerged, tokens))
             }
-            HStack(spacing: 6) {
+            HStack(spacing: skin.size.s6) {
                 Image(systemName: "arrow.triangle.branch")
-                    .font(.system(size: 10)).foregroundStyle(tokens.foreground.opacity(0.5))
+                    .font(skin.font(AinkradFontToken(sizeKey: "t10"))).foregroundStyle(tokens.foreground.opacity(skin.opacity.o50))
                 Text("\(detail.baseBranch) ← \(detail.headBranch)")
-                    .font(AinkradFont.mono(11))
-                    .foregroundStyle(tokens.foreground.opacity(0.6))
+                    .font(AinkradFont.mono(skin.type.sizes.t11))
+                    .foregroundStyle(tokens.foreground.opacity(skin.opacity.o60))
             }
             Text(statusSummary(detail))
-                .font(AinkradFont.display(11))
-                .foregroundStyle(tokens.foreground.opacity(0.5))
+                .font(AinkradFont.display(skin.type.sizes.t11))
+                .foregroundStyle(tokens.foreground.opacity(skin.opacity.o50))
         }
-        .padding(.horizontal, 16).padding(.top, 14).padding(.bottom, 2)
+        .padding(.horizontal, skin.spacing.lg).padding(.top, skin.size.s14).padding(.bottom, skin.size.s2)
     }
 
     private func statusSummary(_ detail: PullRequestDetail) -> String {
@@ -110,7 +111,7 @@ struct PullRequestDetailView: View {
     private func conversation(_ detail: PullRequestDetail) -> some View {
         VStack(spacing: 0) {
             ScrollView {
-                VStack(alignment: .leading, spacing: 12) {
+                VStack(alignment: .leading, spacing: skin.spacing.md) {
                     DiscussionCard(
                         author: detail.author, timestamp: detail.createdAt,
                         text: detail.body, isPrimary: true, tokens: tokens)
@@ -120,7 +121,7 @@ struct PullRequestDetailView: View {
                             text: comment.body, isPrimary: false, tokens: tokens)
                     }
                 }
-                .padding(16)
+                .padding(skin.spacing.lg)
             }
             composer
         }
@@ -130,20 +131,20 @@ struct PullRequestDetailView: View {
 
     private var commitsTab: some View {
         ScrollView {
-            VStack(alignment: .leading, spacing: 3) {
+            VStack(alignment: .leading, spacing: skin.size.s3) {
                 if model.commits.isEmpty {
-                    EmptyStateView(
+                    AinkradEmptyState(
                         icon: "clock.arrow.circlepath", title: "No commits",
-                        message: "This pull request has no commits.", tokens: tokens
+                        message: "This pull request has no commits."
                     )
-                    .frame(maxWidth: .infinity, minHeight: 160)
+                    .frame(maxWidth: .infinity, minHeight: skin.size.s160)
                 } else {
                     ForEach(model.commits) { commit in
                         PRCommitRow(commit: commit, tokens: tokens)
                     }
                 }
             }
-            .padding(12)
+            .padding(skin.spacing.md)
         }
     }
 
@@ -201,34 +202,21 @@ struct PullRequestDetailView: View {
 }
 
 private struct PRCommitRow: View {
+    @Environment(\.ainkradSkin) private var skin
     let commit: PRCommit
     let tokens: HostThemeTokens
-    @State private var hovering = false
-    @Environment(\.ainkradReduceMotion) private var reduceMotion
 
     var body: some View {
-        HStack(spacing: 10) {
-            Image(systemName: "circle.fill")
-                .font(.system(size: 6))
-                .foregroundStyle(tokens.accentSecondary.opacity(0.7))
-                .frame(width: 14)
-            VStack(alignment: .leading, spacing: 2) {
-                Text(commit.message)
-                    .font(AinkradFont.display(12))
-                    .foregroundStyle(tokens.foreground.opacity(0.9))
-                    .lineLimit(1)
-                GMCommitMeta(
-                    sha: commit.shortSHA, author: commit.author, date: ForgeDate.short(commit.date), tokens: tokens)
-            }
-            Spacer()
-        }
-        .padding(.horizontal, 9).padding(.vertical, 7)
-        .background(
-            ChamferShape(cut: AinkradRadius.md)
-                .fill(hovering ? tokens.surfaceElevated.opacity(0.5) : .clear)
+        AinkradListRow(
+            leading: {
+                Image(systemName: "circle.fill")
+                    .font(skin.font(AinkradFontToken(sizeKey: "t6")))
+                    .foregroundStyle(tokens.accentSecondary.opacity(skin.opacity.o70))
+                    .frame(width: skin.size.s14)
+            },
+            title: commit.message,
+            subtitle: GMCommitMeta.text(sha: commit.shortSHA, author: commit.author, date: ForgeDate.short(commit.date)),
+            trailing: { EmptyView() }
         )
-        .contentShape(Rectangle())
-        .onHover { hovering = $0 }
-        .animation(reduceMotion ? nil : .easeOut(duration: 0.12), value: hovering)
     }
 }

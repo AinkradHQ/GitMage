@@ -51,10 +51,11 @@ struct DiffView: View {
     /// and no header — the diff flows in the parent's scroll.
     var embedded: Bool = false
     var showHeader: Bool = true
+    @Environment(\.ainkradSkin) private var skin
 
-    private let numberWidth: CGFloat = 34
-    private let signWidth: CGFloat = 16
-    private var gutterWidth: CGFloat { numberWidth * 2 + 8 }
+    private var numberWidth: CGFloat { skin.size.s34 }
+    private var signWidth: CGFloat { skin.size.s16 }
+    private var gutterWidth: CGFloat { numberWidth * 2 + skin.spacing.sm }
 
     enum LineKind { case hunk, add, remove, context, meta }
     struct Row: Identifiable, Equatable {
@@ -72,38 +73,37 @@ struct DiffView: View {
             VStack(alignment: .leading, spacing: 0) {
                 if showHeader {
                     header(title: diff.title, parsed: parsed)
-                    GlowRule(tokens: tokens)
                 }
                 content(parsed)
             }
             .frame(maxWidth: .infinity, maxHeight: embedded ? nil : .infinity, alignment: .topLeading)
         } else if !embedded {
-            EmptyStateView(
+            AinkradEmptyState(
                 icon: "doc.text.magnifyingglass", title: "No file selected",
-                message: "Select a file, commit, or stash to inspect its diff.", tokens: tokens
+                message: "Select a file, commit, or stash to inspect its diff."
             )
             .frame(maxWidth: .infinity, maxHeight: .infinity)
         }
     }
 
     private func header(title: String, parsed: DiffRows) -> some View {
-        HStack(spacing: 8) {
-            Image(systemName: "doc.text").font(.system(size: 11)).foregroundStyle(tokens.accentSecondary)
+        HStack(spacing: skin.spacing.sm) {
+            Image(systemName: "doc.text").font(skin.font(AinkradFontToken(sizeKey: "t11"))).foregroundStyle(tokens.accentSecondary)
             Text(title)
-                .font(AinkradFont.mono(11, weight: .medium))
-                .foregroundStyle(tokens.foreground.opacity(0.75))
+                .font(AinkradFont.mono(skin.type.sizes.t11, weight: .medium))
+                .foregroundStyle(tokens.foreground.opacity(skin.opacity.o75))
                 .lineLimit(1).truncationMode(.middle)
             Spacer(minLength: 8)
             if parsed.additions > 0 {
-                Text("+\(parsed.additions)").font(AinkradFont.mono(10, weight: .semibold)).foregroundStyle(
-                    GMColor.diffAdd(tokens))
+                Text("+\(parsed.additions)").font(AinkradFont.mono(skin.type.sizes.t10, weight: .semibold)).foregroundStyle(
+                    GMColor.diffAdd(skin))
             }
             if parsed.deletions > 0 {
-                Text("−\(parsed.deletions)").font(AinkradFont.mono(10, weight: .semibold)).foregroundStyle(
-                    GMColor.diffRemove(tokens))
+                Text("−\(parsed.deletions)").font(AinkradFont.mono(skin.type.sizes.t10, weight: .semibold)).foregroundStyle(
+                    GMColor.diffRemove(skin))
             }
         }
-        .padding(.horizontal, 14).padding(.vertical, 9)
+        .padding(.horizontal, skin.size.s14).padding(.vertical, skin.size.s9)
     }
 
     @ViewBuilder private func content(_ parsed: DiffRows) -> some View {
@@ -118,7 +118,7 @@ struct DiffView: View {
                 ForEach(parsed.rows) { row($0, codeWidth: parsed.codeWidth) }
             }
             .frame(width: parsed.codeWidth + gutterWidth + signWidth, alignment: .leading)
-            .padding(.vertical, 4)
+            .padding(.vertical, skin.spacing.xs)
             .textSelection(.enabled)
 
             if embedded {
@@ -127,14 +127,14 @@ struct DiffView: View {
                 ScrollView([.vertical, .horizontal]) { stack }
             }
         } else if !embedded {
-            EmptyStateView(
+            AinkradEmptyState(
                 icon: "doc.text", title: "No textual changes",
-                message: "This change has no line-level diff to show.", tokens: tokens
+                message: "This change has no line-level diff to show."
             )
             .frame(maxWidth: .infinity, maxHeight: .infinity)
         } else {
             Text("No textual changes.")
-                .font(AinkradFont.mono(10)).foregroundStyle(tokens.foreground.opacity(0.4)).padding(8)
+                .font(AinkradFont.mono(skin.type.sizes.t10)).foregroundStyle(tokens.foreground.opacity(skin.opacity.o40)).padding(skin.spacing.sm)
         }
     }
 
@@ -147,12 +147,12 @@ struct DiffView: View {
                 Color.clear.frame(width: gutterWidth + signWidth)
                 Text(r.text)
                     .font(AinkradFont.mono(fontSize - 1, weight: .medium))
-                    .foregroundStyle(tokens.accentSecondary.opacity(0.9))
+                    .foregroundStyle(tokens.accentSecondary.opacity(skin.opacity.o90))
                     .lineLimit(1)
                     .frame(width: codeWidth, alignment: .leading)
-                    .padding(.leading, 4)
+                    .padding(.leading, skin.spacing.xs)
             }
-            .background(tokens.accentSecondary.opacity(0.08))
+            .background(tokens.accentSecondary.opacity(skin.opacity.o08))
         default:
             HStack(spacing: 0) {
                 gutterCell(r.oldNo, r.newNo)
@@ -160,11 +160,11 @@ struct DiffView: View {
                     .font(AinkradFont.mono(fontSize))
                     .foregroundStyle(signColor(r.kind))
                     .frame(width: signWidth, alignment: .center)
-                Text(SyntaxHighlighter.highlight(Self.displayText(r), tokens: tokens))
+                Text(SyntaxHighlighter.highlight(Self.displayText(r), tokens: tokens, skin: skin))
                     .font(AinkradFont.mono(fontSize))
                     .lineLimit(1)
                     .frame(width: codeWidth, alignment: .leading)
-                    .padding(.trailing, 8)
+                    .padding(.trailing, skin.spacing.sm)
             }
             .background(lineBackground(r.kind))
         }
@@ -177,10 +177,10 @@ struct DiffView: View {
             Text(new.map(String.init) ?? "")
                 .frame(width: numberWidth, alignment: .trailing)
         }
-        .font(AinkradFont.mono(max(9, fontSize - 2)))
-        .foregroundStyle(tokens.foreground.opacity(0.3))
-        .padding(.trailing, 8)
-        .background(tokens.foreground.opacity(0.03))
+        .font(AinkradFont.mono(max(skin.type.sizes.t9, fontSize - 2)))
+        .foregroundStyle(tokens.foreground.opacity(skin.opacity.o30))
+        .padding(.trailing, skin.spacing.sm)
+        .background(tokens.foreground.opacity(skin.opacity.o03))
     }
 
     /// Tab-expanded text for a row (tabs → 4 spaces) so columns align.
@@ -190,16 +190,16 @@ struct DiffView: View {
 
     private func signColor(_ kind: LineKind) -> Color {
         switch kind {
-        case .add: return GMColor.diffAdd(tokens)
-        case .remove: return GMColor.diffRemove(tokens)
-        default: return tokens.foreground.opacity(0.3)
+        case .add: return GMColor.diffAdd(skin)
+        case .remove: return GMColor.diffRemove(skin)
+        default: return tokens.foreground.opacity(skin.opacity.o30)
         }
     }
 
     private func lineBackground(_ kind: LineKind) -> Color {
         switch kind {
-        case .add: return GMColor.diffAdd(tokens).opacity(0.12)
-        case .remove: return GMColor.diffRemove(tokens).opacity(0.12)
+        case .add: return GMColor.diffAdd(skin).opacity(skin.opacity.o12)
+        case .remove: return GMColor.diffRemove(skin).opacity(skin.opacity.o12)
         default: return .clear
         }
     }

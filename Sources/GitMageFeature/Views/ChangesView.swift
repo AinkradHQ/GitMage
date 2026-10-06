@@ -2,6 +2,7 @@ import AinkradAppKit
 import SwiftUI
 
 struct ChangesContextPane: View {
+    @Environment(\.ainkradSkin) private var skin
     @ObservedObject var model: GitMageViewModel
     let tokens: HostThemeTokens
     let accent: Color
@@ -22,20 +23,19 @@ struct ChangesContextPane: View {
         let unstaged = allChanges.filter { $0.hasUnstagedComponent }
         VStack(spacing: 0) {
             if staged.isEmpty && unstaged.isEmpty {
-                EmptyStateView(
+                AinkradEmptyState(
                     icon: "checkmark.seal",
                     title: "Working tree clean",
-                    message: "No changes to stage or commit.",
-                    tokens: tokens
+                    message: "No changes to stage or commit."
                 )
                 .frame(maxWidth: .infinity, maxHeight: .infinity)
             } else {
                 ScrollView {
-                    LazyVStack(alignment: .leading, spacing: 16) {
+                    LazyVStack(alignment: .leading, spacing: skin.spacing.lg) {
                         group(title: "STAGED", changes: staged, staged: true)
                         group(title: "UNSTAGED", changes: unstaged, staged: false)
                     }
-                    .padding(12)
+                    .padding(skin.spacing.md)
                 }
             }
             CommitBox(model: model, tokens: tokens, accent: accent, stagedCount: staged.count)
@@ -44,32 +44,27 @@ struct ChangesContextPane: View {
 
     @ViewBuilder private func group(title: String, changes: [GitChange], staged: Bool) -> some View {
         if !changes.isEmpty {
-            LazyVStack(alignment: .leading, spacing: 5) {
-                HStack(spacing: 8) {
+            LazyVStack(alignment: .leading, spacing: skin.size.s5) {
+                HStack(spacing: skin.spacing.sm) {
                     GMHeaderLabel(text: title, tokens: tokens)
-                    Text("\(changes.count)")
-                        .font(AinkradFont.mono(9, weight: .medium))
-                        .foregroundStyle(tokens.foreground.opacity(0.5))
-                        .padding(.horizontal, 5).padding(.vertical, 1)
-                        .background(Capsule().fill(tokens.surfaceElevated.opacity(0.6)))
+                    AinkradBadge(text: "\(changes.count)")
                     Spacer()
                     if staged {
-                        AinkradIconButton(systemName: "minus", size: 20, tooltip: "Unstage all") {
+                        AinkradIconButton(systemName: "minus", size: skin.size.s20, tooltip: "Unstage all") {
                             model.unstageAllChanges()
                         }
                     } else {
-                        AinkradIconButton(systemName: "plus", size: 20, tooltip: "Stage all") {
+                        AinkradIconButton(systemName: "plus", size: skin.size.s20, tooltip: "Stage all") {
                             model.stageAllChanges()
                         }
                     }
                 }
-                .padding(.horizontal, 4)
+                .padding(.horizontal, skin.spacing.xs)
 
                 ForEach(changes, id: \.id) { change in
                     let rowID = "\(staged ? "staged" : "unstaged"):\(change.id)"
                     ChangeRow(
                         change: change, isSelected: selectedRowID == rowID, staged: staged, tokens: tokens,
-                        accent: accent,
                         onSelect: {
                             selectedRowID = rowID
                             model.selectChange(change)
@@ -100,12 +95,13 @@ struct ChangeRow: View {
     let isSelected: Bool
     let staged: Bool
     let tokens: HostThemeTokens
-    let accent: Color
     let onSelect: () -> Void
     let onStage: () -> Void
     let onUnstage: () -> Void
     let onDiscard: () -> Void
     @State private var hovering = false
+    @Environment(\.ainkradSkin) private var skin
+    @Environment(\.ainkradReduceMotion) private var reduceMotion
 
     private var fileName: String { (change.path as NSString).lastPathComponent }
     private var directory: String {
@@ -115,58 +111,52 @@ struct ChangeRow: View {
 
     private var status: GMFileStatus { GMFileStatus(change.kind) }
     private var badgeLetter: String { status.letter }
-    private var badgeColor: Color { status.color(tokens) }
+    private var badgeColor: Color { status.color(tokens, skin) }
 
     var body: some View {
-        HStack(spacing: 10) {
-            Text(badgeLetter)
-                .font(AinkradFont.mono(10, weight: .bold))
-                .foregroundStyle(badgeColor)
-                .frame(width: 20, height: 20)
-                .background(
-                    ChamferShape(cut: AinkradRadius.sm)
-                        .fill(badgeColor.opacity(0.16))
-                )
-                .overlay(
-                    ChamferShape(cut: AinkradRadius.sm)
-                        .strokeBorder(badgeColor.opacity(0.35), lineWidth: 0.5)
-                )
+        // The kit row owns the hover wash and selection; this one only reveals the actions.
+        AinkradListRow(
+            isSelected: isSelected, onTap: onSelect, leading: { badge }, title: fileName,
+            subtitle: directory.isEmpty ? nil : directory, trailing: { actions }
+        )
+        .onHover { hovering = $0 }
+        .animation(reduceMotion ? nil : .easeOut(duration: skin.motion.durations.d0_12), value: hovering)
+    }
 
-            VStack(alignment: .leading, spacing: 1) {
-                Text(fileName)
-                    .font(AinkradFont.display(12))
-                    .foregroundStyle(tokens.foreground.opacity(isSelected ? 1 : 0.9))
-                    .lineLimit(1)
-                if !directory.isEmpty {
-                    Text(directory)
-                        .font(AinkradFont.mono(9))
-                        .foregroundStyle(tokens.foreground.opacity(0.4))
-                        .lineLimit(1).truncationMode(.middle)
-                }
-            }
-            Spacer(minLength: 4)
+    private var badge: some View {
+        Text(badgeLetter)
+            .font(AinkradFont.mono(skin.type.sizes.t10, weight: .bold))
+            .foregroundStyle(badgeColor)
+            .frame(width: skin.size.s20, height: skin.size.s20)
+            .background(
+                ChamferShape(cut: AinkradRadius.sm)
+                    .fill(badgeColor.opacity(skin.opacity.o16))
+            )
+            .overlay(
+                ChamferShape(cut: AinkradRadius.sm)
+                    .strokeBorder(badgeColor.opacity(skin.opacity.o35), lineWidth: 0.5)
+            )
+    }
 
-            // Always laid out (reserves width so nothing shifts); revealed on
-            // hover. Not hit-testable while hidden so it never steals a click.
-            HStack(spacing: 4) {
-                if staged {
-                    AinkradIconButton(systemName: "minus", size: 22, tooltip: "Unstage", action: onUnstage)
-                } else {
-                    AinkradIconButton(systemName: "plus", size: 22, tooltip: "Stage", action: onStage)
-                    AinkradIconButton(
-                        systemName: "arrow.uturn.backward", size: 22, tooltip: "Discard", action: onDiscard)
-                }
+    /// Always laid out (reserves width so nothing shifts); revealed on hover.
+    /// Not hit-testable while hidden so it never steals a click.
+    private var actions: some View {
+        HStack(spacing: skin.spacing.xs) {
+            if staged {
+                AinkradIconButton(systemName: "minus", size: skin.size.s22, tooltip: "Unstage", action: onUnstage)
+            } else {
+                AinkradIconButton(systemName: "plus", size: skin.size.s22, tooltip: "Stage", action: onStage)
+                AinkradIconButton(
+                    systemName: "arrow.uturn.backward", size: 22, tooltip: "Discard", action: onDiscard)
             }
-            .opacity(hovering ? 1 : 0)
-            .allowsHitTesting(hovering)
         }
-        .padding(.horizontal, 9).padding(.vertical, 7)
-        .gmListRowChrome(tokens: tokens, isSelected: isSelected, hovering: $hovering, accent: accent)
-        .onTapGesture(perform: onSelect)
+        .opacity(hovering ? 1 : 0)
+        .allowsHitTesting(hovering)
     }
 }
 
 struct CommitBox: View {
+    @Environment(\.ainkradSkin) private var skin
     @ObservedObject var model: GitMageViewModel
     let tokens: HostThemeTokens
     let accent: Color
@@ -179,50 +169,43 @@ struct CommitBox: View {
     }
 
     var body: some View {
-        VStack(alignment: .leading, spacing: 10) {
-            // Glow rule instead of a hard separator.
-            LinearGradient(
-                colors: [.clear, accent.opacity(0.4), .clear],
-                startPoint: .leading, endPoint: .trailing
-            )
-            .frame(height: 1)
-
+        VStack(alignment: .leading, spacing: skin.size.s10) {
             HStack {
                 GMHeaderLabel(text: "COMMIT", tokens: tokens)
                 Spacer()
-                Text("\(stagedCount) staged")
-                    .font(AinkradFont.mono(9, weight: .medium))
-                    .foregroundStyle(stagedCount > 0 ? accent.opacity(0.9) : tokens.foreground.opacity(0.4))
-                    .padding(.horizontal, 6).padding(.vertical, 2)
-                    .background(Capsule().fill((stagedCount > 0 ? accent : tokens.foreground).opacity(0.12)))
+                if stagedCount > 0 {
+                    AinkradBadge(text: "\(stagedCount) staged", tint: accent)
+                } else {
+                    AinkradBadge(text: "\(stagedCount) staged")
+                }
             }
 
             ZStack(alignment: .topLeading) {
                 TextEditor(text: $model.draftCommitMessage)
-                    .font(AinkradFont.display(12))
+                    .font(AinkradFont.display(skin.type.sizes.t12))
                     .scrollContentBackground(.hidden)
                     .focused($editorFocused)
-                    .frame(height: 70)
-                    .padding(7)
+                    .frame(height: skin.size.s70)
+                    .padding(skin.size.s7)
                 if model.draftCommitMessage.isEmpty {
                     Text("Summary of your changes…")
-                        .font(AinkradFont.display(12))
-                        .foregroundStyle(tokens.foreground.opacity(0.35))
-                        .padding(.horizontal, 12).padding(.vertical, 15)
+                        .font(AinkradFont.display(skin.type.sizes.t12))
+                        .foregroundStyle(tokens.foreground.opacity(skin.opacity.o35))
+                        .padding(.horizontal, skin.spacing.md).padding(.vertical, skin.size.s15)
                         .allowsHitTesting(false)
                 }
             }
             .background(
                 ChamferShape(cut: AinkradRadius.sm)
-                    .fill(tokens.surfaceElevated.opacity(0.5))
+                    .fill(tokens.surfaceElevated.opacity(skin.opacity.o50))
             )
             .overlay(
                 ChamferShape(cut: AinkradRadius.sm)
                     .strokeBorder(
-                        accent.opacity(editorFocused ? 0.6 : 0.2),
+                        accent.opacity(editorFocused ? skin.opacity.o60 : skin.opacity.o20),
                         lineWidth: editorFocused ? 1.2 : 1)
             )
-            .shadow(color: editorFocused ? accent.opacity(0.25) : .clear, radius: 8)
+            .shadow(color: editorFocused ? accent.opacity(skin.opacity.o25) : .clear, radius: skin.size.s8)
 
             HStack {
                 Spacer()
@@ -230,10 +213,10 @@ struct CommitBox: View {
                     model.commitChanges()
                 }
                 .disabled(!canCommit)
-                .opacity(canCommit ? 1 : 0.5)
+                .opacity(canCommit ? 1 : skin.opacity.o50)
             }
         }
-        .padding(12)
-        .background(tokens.surface.opacity(0.4))
+        .padding(skin.spacing.md)
+        .background(tokens.surface.opacity(skin.opacity.o40))
     }
 }

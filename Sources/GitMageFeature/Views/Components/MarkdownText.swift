@@ -8,7 +8,8 @@ import SwiftUI
 struct MarkdownText: View {
     let markdown: String
     let tokens: HostThemeTokens
-    private let baseSize: CGFloat = 12
+    @Environment(\.ainkradSkin) private var skin
+    private var baseSize: CGFloat { skin.type.sizes.t12 }
 
     private enum Block {
         case paragraph(String)
@@ -24,13 +25,13 @@ struct MarkdownText: View {
         // wrapped in LazyVStack so a long issue/PR body doesn't build one
         // live view per block up front.
         let blocks = Self.parse(markdown)
-        LazyVStack(alignment: .leading, spacing: 6) {
+        LazyVStack(alignment: .leading, spacing: skin.size.s6) {
             ForEach(Array(blocks.enumerated()), id: \.offset) { _, block in
                 blockView(block)
             }
         }
         .frame(maxWidth: .infinity, alignment: .leading)
-        .foregroundStyle(tokens.foreground.opacity(0.85))
+        .foregroundStyle(tokens.foreground.opacity(skin.opacity.o85))
         .tint(tokens.accentPrimary)
     }
 
@@ -46,36 +47,28 @@ struct MarkdownText: View {
             inline(text, size: headingSize(level), weight: .semibold)
                 .foregroundStyle(tokens.foreground)
                 .frame(maxWidth: .infinity, alignment: .leading)
-                .padding(.top, 2)
+                .padding(.top, skin.size.s2)
 
         case .code(let code):
-            ScrollView(.horizontal, showsIndicators: false) {
-                Text(code)
-                    .font(AinkradFont.mono(baseSize - 0.5))
-                    .foregroundStyle(tokens.foreground.opacity(0.85))
-                    .textSelection(.enabled)
-                    .padding(8)
-            }
-            .background(ChamferShape(cut: AinkradRadius.sm).fill(tokens.surfaceElevated.opacity(0.55)))
-            .overlay(ChamferShape(cut: AinkradRadius.sm).strokeBorder(tokens.foreground.opacity(0.07)))
+            AinkradCodeBlock(code)
 
         case .quote(let lines):
-            HStack(spacing: 8) {
-                ChamferShape(cut: AinkradRadius.sm).fill(tokens.accentPrimary.opacity(0.5)).frame(width: 3)
-                VStack(alignment: .leading, spacing: 2) {
+            HStack(spacing: skin.spacing.sm) {
+                ChamferShape(cut: AinkradRadius.sm).fill(tokens.accentPrimary.opacity(skin.opacity.o50)).frame(width: skin.size.s3)
+                VStack(alignment: .leading, spacing: skin.size.s2) {
                     ForEach(Array(lines.enumerated()), id: \.offset) { _, line in
                         inline(line, size: baseSize)
                             .frame(maxWidth: .infinity, alignment: .leading)
                     }
                 }
-                .foregroundStyle(tokens.foreground.opacity(0.6))
+                .foregroundStyle(tokens.foreground.opacity(skin.opacity.o60))
             }
             .fixedSize(horizontal: false, vertical: true)
 
         case .list(let ordered, let items):
-            VStack(alignment: .leading, spacing: 3) {
+            VStack(alignment: .leading, spacing: skin.size.s3) {
                 ForEach(Array(items.enumerated()), id: \.offset) { idx, item in
-                    HStack(alignment: .firstTextBaseline, spacing: 7) {
+                    HStack(alignment: .firstTextBaseline, spacing: skin.size.s7) {
                         Text(ordered ? "\(idx + 1)." : "•")
                             .font(AinkradFont.mono(baseSize))
                             .foregroundStyle(tokens.accentSecondary)
@@ -89,10 +82,10 @@ struct MarkdownText: View {
 
         case .rule:
             LinearGradient(
-                colors: [.clear, tokens.accentPrimary.opacity(0.3), .clear],
+                colors: [.clear, tokens.accentPrimary.opacity(skin.opacity.o30), .clear],
                 startPoint: .leading, endPoint: .trailing
             )
-            .frame(height: 1).padding(.vertical, 3)
+            .frame(height: skin.size.s1).padding(.vertical, skin.size.s3)
         }
     }
 
@@ -106,10 +99,10 @@ struct MarkdownText: View {
 
     private func headingSize(_ level: Int) -> CGFloat {
         switch level {
-        case 1: return baseSize + 6
-        case 2: return baseSize + 4
-        case 3: return baseSize + 2
-        default: return baseSize + 1
+        case 1: return skin.type.sizes.t18
+        case 2: return skin.type.sizes.t16
+        case 3: return skin.type.sizes.t14
+        default: return skin.type.sizes.t13
         }
     }
 

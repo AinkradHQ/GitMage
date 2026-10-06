@@ -4,6 +4,7 @@ import SwiftUI
 /// Context pane (left rail) for the Issues area: filter + issue list + New
 /// Issue entry point, gated on having a GitHub remote and a valid token.
 struct IssuesContextPane: View {
+    @Environment(\.ainkradSkin) private var skin
     @ObservedObject var model: IssuesViewModel
     let tokens: HostThemeTokens
     /// Whether the active repo resolved a GitHub `origin` remote. Passed in
@@ -25,7 +26,7 @@ struct IssuesContextPane: View {
                     selectedLabels: model.selectedLabels, toggleLabel: { model.toggleLabel($0) },
                     load: { Task { await model.load() } }
                 ) {
-                    AinkradIconButton(systemName: "plus", size: 22, tooltip: "New issue") { model.showNew = true }
+                    AinkradIconButton(systemName: "plus", size: skin.size.s22, tooltip: "New issue") { model.showNew = true }
                 }
                 ForgeItemList(
                     items: model.issues, isLoading: model.isLoading, isLoadingMore: model.isLoadingMore,
@@ -49,6 +50,7 @@ struct IssuesContextPane: View {
 }
 
 private struct IssueRow: View {
+    @Environment(\.ainkradSkin) private var skin
     let issue: IssueSummary
     let tokens: HostThemeTokens
     let isSelected: Bool
@@ -58,27 +60,27 @@ private struct IssueRow: View {
     private var isOpen: Bool { issue.state.lowercased() == "open" }
 
     var body: some View {
-        HStack(alignment: .top, spacing: 10) {
+        HStack(alignment: .top, spacing: skin.size.s10) {
             Image(systemName: isOpen ? "smallcircle.filled.circle" : "checkmark.circle")
-                .font(.system(size: 12))
+                .font(skin.font(AinkradFontToken(sizeKey: "t12")))
                 .foregroundStyle(isOpen ? GMColor.status(.open, tokens) : GMColor.status(.closedMerged, tokens))
-                .frame(width: 16)
-            VStack(alignment: .leading, spacing: 3) {
+                .frame(width: skin.size.s16)
+            VStack(alignment: .leading, spacing: skin.size.s3) {
                 Text(issue.title)
-                    .font(AinkradFont.display(12))
-                    .foregroundStyle(tokens.foreground.opacity(isSelected ? 1 : 0.9))
+                    .font(AinkradFont.display(skin.type.sizes.t12))
+                    .foregroundStyle(tokens.foreground.opacity(isSelected ? 1 : skin.opacity.o90))
                     .lineLimit(1)
-                HStack(spacing: 6) {
+                HStack(spacing: skin.size.s6) {
                     Text("#\(issue.number)")
-                        .font(AinkradFont.mono(9, weight: .medium))
+                        .font(AinkradFont.mono(skin.type.sizes.t9, weight: .medium))
                         .foregroundStyle(tokens.accentSecondary)
                     Text(issue.author)
-                        .font(AinkradFont.mono(9))
-                        .foregroundStyle(tokens.foreground.opacity(0.5)).lineLimit(1)
+                        .font(AinkradFont.mono(skin.type.sizes.t9))
+                        .foregroundStyle(tokens.foreground.opacity(skin.opacity.o50)).lineLimit(1)
                     if issue.commentCount > 0 {
                         Label("\(issue.commentCount)", systemImage: "bubble.left")
-                            .font(AinkradFont.mono(9))
-                            .foregroundStyle(tokens.foreground.opacity(0.45))
+                            .font(AinkradFont.mono(skin.type.sizes.t9))
+                            .foregroundStyle(tokens.foreground.opacity(skin.opacity.o45))
                     }
                 }
                 if !issue.labelNames.isEmpty {
@@ -87,8 +89,11 @@ private struct IssueRow: View {
             }
             Spacer(minLength: 4)
         }
-        .padding(.horizontal, 9).padding(.vertical, 7)
-        .gmListRowChrome(tokens: tokens, isSelected: isSelected, hovering: $hovering)
+        .padding(.horizontal, skin.size.s9).padding(.vertical, skin.size.s7)
+        // The kit's row wash; the layout stays local (AinkradListRow is title + subtitle only).
+        .ainkradRowBackground(isSelected: isSelected, isHovered: hovering)
+        .contentShape(Rectangle())
+        .onHover { hovering = $0 }
         .onTapGesture(perform: onSelect)
     }
 }
@@ -96,17 +101,14 @@ private struct IssueRow: View {
 /// Small row of neutral label chips, used where only label names (not colors)
 /// are available (e.g. issue list rows).
 struct LabelChipsRow: View {
+    @Environment(\.ainkradSkin) private var skin
     let names: [String]
     let tokens: HostThemeTokens
 
     var body: some View {
-        HStack(spacing: 4) {
+        HStack(spacing: skin.spacing.xs) {
             ForEach(names, id: \.self) { name in
-                Text(name)
-                    .font(AinkradFont.display(9, weight: .semibold))
-                    .foregroundStyle(tokens.foreground.opacity(0.7))
-                    .padding(.horizontal, 5).padding(.vertical, 1)
-                    .background(tokens.surfaceElevated.opacity(0.7), in: ChamferShape(cut: AinkradRadius.sm))
+                AinkradChip(label: name)
             }
         }
     }
@@ -116,12 +118,10 @@ struct LabelChipsRow: View {
 /// detail's editable labels control).
 struct ColoredLabelChip: View {
     let label: IssueLabel
+    @Environment(\.ainkradSkin) private var skin
 
     var body: some View {
-        Text(label.name)
-            .font(AinkradFont.display(9, weight: .semibold))
-            .foregroundStyle(Color.white.opacity(0.9))
-            .padding(.horizontal, 6).padding(.vertical, 2)
-            .background(Color(hex: label.color).opacity(0.85), in: ChamferShape(cut: AinkradRadius.sm))
+        AinkradSwatchChip(
+            label: label.name, swatch: Color(hex: label.color) ?? skin.color(skin.text.muted))  // design-lint: allow hex-color GitHub label data
     }
 }

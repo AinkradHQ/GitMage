@@ -7,9 +7,9 @@ enum GraphPalette {
     static func color(_ index: Int, _ tokens: HostThemeTokens) -> Color {
         let base: [Color] = [
             tokens.accentPrimary, tokens.accentSecondary, tokens.accentTertiary,
-            Color(red: 0.38, green: 0.80, blue: 0.52),
-            Color(red: 0.92, green: 0.62, blue: 0.32),
-            Color(red: 0.60, green: 0.52, blue: 0.92),
+            Color(red: 0.38, green: 0.80, blue: 0.52),  // design-lint: allow raw-color token-gap graphLane
+            Color(red: 0.92, green: 0.62, blue: 0.32),  // design-lint: allow raw-color token-gap graphLane
+            Color(red: 0.60, green: 0.52, blue: 0.92),  // design-lint: allow raw-color token-gap graphLane
         ]
         return base[((index % base.count) + base.count) % base.count]
     }
@@ -33,6 +33,7 @@ enum GraphLayout {
 /// Draws one row's slice of the commit graph: pass-through/merge lanes and the
 /// node, using the row's `before`/`after` lane occupancy.
 struct GraphGutter: View {
+    @Environment(\.ainkradSkin) private var skin
     let row: GraphRow
     let isSelected: Bool
     let tokens: HostThemeTokens
@@ -87,13 +88,13 @@ struct GraphGutter: View {
 
             // The commit node.
             let nodeColor = isSelected ? tokens.accentPrimary : GraphPalette.color(row.col, tokens)
-            let r: CGFloat = isSelected ? 5 : 4
+            let r: CGFloat = isSelected ? skin.size.s5 : skin.size.s4
             let dot = CGRect(x: x(row.col) - r, y: center - r, width: 2 * r, height: 2 * r)
             ctx.fill(Path(ellipseIn: dot), with: .color(nodeColor))
             if isSelected {
                 ctx.stroke(
-                    Path(ellipseIn: dot.insetBy(dx: -2.5, dy: -2.5)),
-                    with: .color(tokens.accentPrimary.opacity(0.5)), lineWidth: 1.5)
+                    Path(ellipseIn: dot.insetBy(dx: -skin.size.s2_5, dy: -skin.size.s2_5)),
+                    with: .color(tokens.accentPrimary.opacity(skin.opacity.o50)), lineWidth: 1.5)
             }
         }
     }
@@ -101,6 +102,7 @@ struct GraphGutter: View {
 
 /// An interactive graph row: gutter + commit info; tap to select (loads its diff).
 struct GraphCommitRow: View {
+    @Environment(\.ainkradSkin) private var skin
     let row: GraphRow
     let laneCount: Int
     let isSelected: Bool
@@ -108,17 +110,17 @@ struct GraphCommitRow: View {
     let onSelect: () -> Void
     @State private var hovering = false
 
-    private let rowHeight: CGFloat = 34
+    private var rowHeight: CGFloat { skin.size.s34 }
     private var gutterWidth: CGFloat { GraphLayout.gutterWidth(laneCount: laneCount) }
 
     var body: some View {
-        HStack(spacing: 8) {
+        HStack(spacing: skin.spacing.sm) {
             GraphGutter(row: row, isSelected: isSelected, tokens: tokens)
                 .frame(width: gutterWidth, height: rowHeight)
-            VStack(alignment: .leading, spacing: 1) {
+            VStack(alignment: .leading, spacing: skin.size.s1) {
                 Text(row.commit.summary)
-                    .font(AinkradFont.display(12))
-                    .foregroundStyle(tokens.foreground.opacity(isSelected ? 1 : 0.9))
+                    .font(AinkradFont.display(skin.type.sizes.t12))
+                    .foregroundStyle(tokens.foreground.opacity(isSelected ? 1 : skin.opacity.o90))
                     .lineLimit(1)
                 GMCommitMeta(
                     sha: row.commit.shortSHA, author: row.commit.author, date: row.commit.relativeDate,
@@ -126,13 +128,9 @@ struct GraphCommitRow: View {
             }
             Spacer(minLength: 4)
         }
-        .padding(.trailing, 10)
+        .padding(.trailing, skin.size.s10)
         .frame(height: rowHeight)
-        .background(
-            isSelected
-                ? tokens.accentPrimary.opacity(0.13)
-                : (hovering ? tokens.surfaceElevated.opacity(0.45) : .clear)
-        )
+        .ainkradRowBackground(isSelected: isSelected, isHovered: hovering)
         .contentShape(Rectangle())
         .onTapGesture(perform: onSelect)
         .onHover { hovering = $0 }

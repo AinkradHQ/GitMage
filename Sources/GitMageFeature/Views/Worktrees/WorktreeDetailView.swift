@@ -4,6 +4,7 @@ import SwiftUI
 
 /// Detail pane for the selected worktree, plus the Add-worktree sheet.
 struct WorktreeDetailView: View {
+    @Environment(\.ainkradSkin) private var skin
     @ObservedObject var model: WorktreesViewModel
     let tokens: HostThemeTokens
     var fontSize: Double = 12
@@ -27,9 +28,9 @@ struct WorktreeDetailView: View {
     }
 
     private var emptyState: some View {
-        EmptyStateView(
+        AinkradEmptyState(
             icon: "rectangle.split.3x1", title: "Worktrees",
-            message: "Select a worktree to browse its commit graph.", tokens: tokens)
+            message: "Select a worktree to browse its commit graph.")
     }
 
     // MARK: - Graph view
@@ -37,15 +38,13 @@ struct WorktreeDetailView: View {
     private func graphView(for wt: GitWorktree) -> some View {
         VStack(spacing: 0) {
             header(for: wt)
-            GlowRule(tokens: tokens)
 
             if model.isLoadingGraph {
-                AinkradSpinner(size: 22)
-                    .frame(maxWidth: .infinity, maxHeight: .infinity)
+                AinkradLoadingState()
             } else if model.graphRows.isEmpty {
-                EmptyStateView(
+                AinkradEmptyState(
                     icon: "point.3.connected.trianglepath.dotted", title: "No history",
-                    message: "This worktree has no commits yet.", tokens: tokens
+                    message: "This worktree has no commits yet."
                 )
                 .frame(maxWidth: .infinity, maxHeight: .infinity)
             } else {
@@ -56,27 +55,23 @@ struct WorktreeDetailView: View {
     }
 
     private func header(for wt: GitWorktree) -> some View {
-        HStack(spacing: 10) {
-            VStack(alignment: .leading, spacing: 2) {
-                HStack(spacing: 8) {
+        HStack(spacing: skin.size.s10) {
+            VStack(alignment: .leading, spacing: skin.size.s2) {
+                HStack(spacing: skin.spacing.sm) {
                     Text((wt.path as NSString).lastPathComponent)
-                        .font(AinkradFont.display(15, weight: .semibold))
+                        .font(AinkradFont.display(skin.type.sizes.t15, weight: .semibold))
                         .foregroundStyle(tokens.foreground)
                     if model.isCurrent(wt) {
-                        Text("CURRENT")
-                            .font(AinkradFont.mono(8, weight: .bold)).tracking(1)
-                            .foregroundStyle(tokens.accentPrimary)
-                            .padding(.horizontal, 5).padding(.vertical, 1)
-                            .background(Capsule().fill(tokens.accentPrimary.opacity(0.16)))
+                        AinkradBadge(text: "CURRENT", tint: tokens.accentPrimary)
                     }
                 }
-                HStack(spacing: 6) {
-                    Image(systemName: "arrow.triangle.branch").font(.system(size: 9)).foregroundStyle(
-                        tokens.foreground.opacity(0.5))
+                HStack(spacing: skin.size.s6) {
+                    Image(systemName: "arrow.triangle.branch").font(skin.font(AinkradFontToken(sizeKey: "t9"))).foregroundStyle(
+                        tokens.foreground.opacity(skin.opacity.o50))
                     Text(wt.branch ?? "detached")
-                        .font(AinkradFont.mono(11))
+                        .font(AinkradFont.mono(skin.type.sizes.t11))
                         .foregroundStyle(
-                            wt.branch != nil ? tokens.accentPrimary.opacity(0.85) : tokens.foreground.opacity(0.55))
+                            wt.branch != nil ? tokens.accentPrimary.opacity(skin.opacity.o85) : tokens.foreground.opacity(skin.opacity.o55))
                 }
             }
             Spacer()
@@ -84,7 +79,7 @@ struct WorktreeDetailView: View {
                 model.open(wt)
             }
         }
-        .padding(.horizontal, 16).padding(.vertical, 12)
+        .padding(.horizontal, skin.spacing.lg).padding(.vertical, skin.spacing.md)
     }
 
     private var graphAndDiff: some View {
@@ -102,17 +97,16 @@ struct WorktreeDetailView: View {
                         )
                     }
                 }
-                .padding(.vertical, 6)
+                .padding(.vertical, skin.size.s6)
             }
             .frame(maxWidth: .infinity, maxHeight: .infinity)
 
             if let diff = model.selectedCommitDiff {
-                GlowRule(tokens: tokens)
                 FileDiffList(
                     files: DiffFileSplitter.split(diff.body), tokens: tokens,
                     fontSize: fontSize, fallbackTitle: diff.title
                 )
-                .frame(height: 300)
+                .frame(height: skin.size.s300)
             }
         }
     }
@@ -120,14 +114,15 @@ struct WorktreeDetailView: View {
 }
 
 private struct AddWorktreeSheet: View {
+    @Environment(\.ainkradSkin) private var skin
     @ObservedObject var model: WorktreesViewModel
     let tokens: HostThemeTokens
     @State private var destination: String = ""
 
     var body: some View {
-        VStack(alignment: .leading, spacing: 16) {
+        VStack(alignment: .leading, spacing: skin.spacing.lg) {
             Text("Add Worktree")
-                .font(AinkradFont.display(18, weight: .semibold))
+                .font(AinkradFont.display(skin.type.sizes.t18, weight: .semibold))
 
             destinationPicker
             modePicker
@@ -135,8 +130,8 @@ private struct AddWorktreeSheet: View {
 
             if let errorMessage = model.errorMessage {
                 Text(errorMessage)
-                    .font(AinkradFont.display(11))
-                    .foregroundStyle(tokens.accentTertiary.opacity(0.9))
+                    .font(AinkradFont.display(skin.type.sizes.t11))
+                    .foregroundStyle(tokens.accentTertiary.opacity(skin.opacity.o90))
             }
 
             HStack {
@@ -162,14 +157,14 @@ private struct AddWorktreeSheet: View {
     }
 
     private var destinationPicker: some View {
-        VStack(alignment: .leading, spacing: 4) {
+        VStack(alignment: .leading, spacing: skin.spacing.xs) {
             Text("DESTINATION")
-                .font(AinkradFont.display(9, weight: .semibold))
-                .foregroundStyle(tokens.foreground.opacity(0.45))
-            HStack(spacing: 8) {
+                .font(AinkradFont.display(skin.type.sizes.t9, weight: .semibold))
+                .foregroundStyle(tokens.foreground.opacity(skin.opacity.o45))
+            HStack(spacing: skin.spacing.sm) {
                 Text(destination.isEmpty ? "No folder chosen" : destination)
-                    .font(AinkradFont.mono(11))
-                    .foregroundStyle(tokens.foreground.opacity(destination.isEmpty ? 0.4 : 0.85))
+                    .font(AinkradFont.mono(skin.type.sizes.t11))
+                    .foregroundStyle(tokens.foreground.opacity(destination.isEmpty ? skin.opacity.o40 : skin.opacity.o85))
                     .lineLimit(1)
                     .truncationMode(.middle)
                 Spacer()

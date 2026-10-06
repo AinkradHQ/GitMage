@@ -4,6 +4,7 @@ import SwiftUI
 /// Detail pane for the Issues area: header, editable labels/assignees, body,
 /// comments, and a composer with close/reopen.
 struct IssueDetailView: View {
+    @Environment(\.ainkradSkin) private var skin
     @ObservedObject var model: IssuesViewModel
     let tokens: HostThemeTokens
 
@@ -13,7 +14,7 @@ struct IssueDetailView: View {
         VStack(spacing: 0) {
             if let detail = model.detail {
                 ScrollView {
-                    LazyVStack(alignment: .leading, spacing: 12) {
+                    LazyVStack(alignment: .leading, spacing: skin.spacing.md) {
                         header(detail)
                         editors(detail)
                         DiscussionCard(
@@ -21,9 +22,9 @@ struct IssueDetailView: View {
                             text: detail.body, isPrimary: true, tokens: tokens)
                         if !model.comments.isEmpty {
                             Text("\(model.comments.count) comment\(model.comments.count == 1 ? "" : "s")")
-                                .font(AinkradFont.display(10, weight: .semibold)).kerning(1.5)
-                                .foregroundStyle(tokens.foreground.opacity(0.45))
-                                .padding(.top, 2)
+                                .font(AinkradFont.display(skin.type.sizes.t10, weight: .semibold)).kerning(1.5)
+                                .foregroundStyle(tokens.foreground.opacity(skin.opacity.o45))
+                                .padding(.top, skin.size.s2)
                         }
                         ForEach(model.comments) { comment in
                             DiscussionCard(
@@ -31,13 +32,13 @@ struct IssueDetailView: View {
                                 text: comment.body, isPrimary: false, tokens: tokens)
                         }
                     }
-                    .padding(16)
+                    .padding(skin.spacing.lg)
                 }
                 composer(detail)
             } else {
-                EmptyStateView(
+                AinkradEmptyState(
                     icon: "smallcircle.filled.circle", title: "No issue",
-                    message: "Select an issue to read and respond to it.", tokens: tokens
+                    message: "Select an issue to read and respond to it."
                 )
                 .frame(maxWidth: .infinity, maxHeight: .infinity)
             }
@@ -50,27 +51,27 @@ struct IssueDetailView: View {
     }
 
     private func header(_ detail: IssueDetail) -> some View {
-        VStack(alignment: .leading, spacing: 5) {
-            HStack(spacing: 8) {
+        VStack(alignment: .leading, spacing: skin.size.s5) {
+            HStack(spacing: skin.spacing.sm) {
                 Text(detail.title)
-                    .font(AinkradFont.display(16, weight: .semibold))
+                    .font(AinkradFont.display(skin.type.sizes.t16, weight: .semibold))
                     .foregroundStyle(tokens.foreground)
                 Text("#\(detail.number)")
-                    .font(AinkradFont.mono(12))
+                    .font(AinkradFont.mono(skin.type.sizes.t12))
                     .foregroundStyle(tokens.accentSecondary)
                 Spacer()
-                StatusPill(
+                AinkradBadge(
                     text: detail.state.lowercased() == "open" ? "Open" : "Closed",
-                    kind: detail.state.lowercased() == "open" ? .open : .closedMerged, tokens: tokens)
+                    tint: GMColor.status(detail.state.lowercased() == "open" ? .open : .closedMerged, tokens))
             }
             Text("opened by \(detail.author) · \(ForgeDate.short(detail.createdAt))")
-                .font(AinkradFont.mono(10))
-                .foregroundStyle(tokens.foreground.opacity(0.5))
+                .font(AinkradFont.mono(skin.type.sizes.t10))
+                .foregroundStyle(tokens.foreground.opacity(skin.opacity.o50))
         }
     }
 
     private func editors(_ detail: IssueDetail) -> some View {
-        VStack(alignment: .leading, spacing: 8) {
+        VStack(alignment: .leading, spacing: skin.spacing.sm) {
             LabelsEditor(model: model, detail: detail)
             AssigneesEditor(model: model, detail: detail, tokens: tokens)
         }
@@ -100,11 +101,12 @@ struct IssueDetailView: View {
 /// Editable labels control: a menu of repo labels with checkmarks on those
 /// currently applied, rendering colored chips for the current selection.
 private struct LabelsEditor: View {
+    @Environment(\.ainkradSkin) private var skin
     @ObservedObject var model: IssuesViewModel
     let detail: IssueDetail
 
     var body: some View {
-        HStack(spacing: 6) {
+        HStack(spacing: skin.size.s6) {
             AinkradMultiSelect(
                 items: model.repoLabels.map(\.name),
                 selection: Binding(
@@ -115,7 +117,7 @@ private struct LabelsEditor: View {
                 ),
                 label: { $0 },
                 swatch: { name in
-                    model.repoLabels.first { $0.name == name }.map { Color(hex: $0.color) }
+                    model.repoLabels.first { $0.name == name }.flatMap { Color(hex: $0.color) }  // design-lint: allow hex-color GitHub label data
                 }
             )
 
@@ -129,12 +131,13 @@ private struct LabelsEditor: View {
 /// Editable assignees control: a menu of assignable users with checkmarks on
 /// those currently assigned.
 private struct AssigneesEditor: View {
+    @Environment(\.ainkradSkin) private var skin
     @ObservedObject var model: IssuesViewModel
     let detail: IssueDetail
     let tokens: HostThemeTokens
 
     var body: some View {
-        HStack(spacing: 6) {
+        HStack(spacing: skin.size.s6) {
             AinkradMultiSelect(
                 items: model.assignableUsers.map(\.login),
                 selection: Binding(
@@ -147,20 +150,20 @@ private struct AssigneesEditor: View {
             )
 
             ForEach(detail.assignees, id: \.self) { login in
-                HStack(spacing: 4) {
+                HStack(spacing: skin.spacing.xs) {
                     ZStack {
-                        Circle().fill(tokens.accentSecondary.opacity(0.2))
+                        Circle().fill(tokens.accentSecondary.opacity(skin.opacity.o20))
                         Text(String(login.prefix(1)).uppercased())
-                            .font(AinkradFont.display(8, weight: .bold))
+                            .font(AinkradFont.display(skin.type.sizes.t8, weight: .bold))
                             .foregroundStyle(tokens.accentSecondary)
                     }
-                    .frame(width: 15, height: 15)
+                    .frame(width: skin.size.s15, height: skin.size.s15)
                     Text(login)
-                        .font(AinkradFont.mono(10))
-                        .foregroundStyle(tokens.foreground.opacity(0.75))
+                        .font(AinkradFont.mono(skin.type.sizes.t10))
+                        .foregroundStyle(tokens.foreground.opacity(skin.opacity.o75))
                 }
-                .padding(.horizontal, 6).padding(.vertical, 2)
-                .background(Capsule().fill(tokens.surfaceElevated.opacity(0.5)))
+                .padding(.horizontal, skin.size.s6).padding(.vertical, skin.size.s2)
+                .background(Capsule().fill(tokens.surfaceElevated.opacity(skin.opacity.o50)))
             }
         }
     }

@@ -2,6 +2,7 @@ import AinkradAppKit
 import SwiftUI
 
 struct StashesContextPane: View {
+    @Environment(\.ainkradSkin) private var skin
     @ObservedObject var model: GitMageViewModel
     let tokens: HostThemeTokens
     @State private var selectedStashID: String?
@@ -9,29 +10,28 @@ struct StashesContextPane: View {
     var body: some View {
         VStack(spacing: 0) {
             PaneHeader(title: "STASHES", count: model.stashes.count, tokens: tokens) {
-                HStack(spacing: 6) {
-                    AinkradIconButton(systemName: "tray.and.arrow.down", size: 22, tooltip: "Stash changes") {
+                HStack(spacing: skin.size.s6) {
+                    AinkradIconButton(systemName: "tray.and.arrow.down", size: skin.size.s22, tooltip: "Stash changes") {
                         model.stashChanges()
                     }
-                    AinkradIconButton(systemName: "tray.and.arrow.up", size: 22, tooltip: "Pop latest stash") {
+                    AinkradIconButton(systemName: "tray.and.arrow.up", size: skin.size.s22, tooltip: "Pop latest stash") {
                         model.popLatestStash()
                     }
-                    .opacity(model.stashes.isEmpty || model.isLoading ? 0.4 : 1)
+                    .opacity(model.stashes.isEmpty || model.isLoading ? skin.opacity.o40 : 1)
                     .allowsHitTesting(!model.stashes.isEmpty && !model.isLoading)
                 }
             }
 
             if model.stashes.isEmpty {
-                EmptyStateView(
+                AinkradEmptyState(
                     icon: "tray.2",
                     title: "No stashes",
-                    message: "Stash your working changes to set them aside.",
-                    tokens: tokens
+                    message: "Stash your working changes to set them aside."
                 )
                 .frame(maxWidth: .infinity, maxHeight: .infinity)
             } else {
                 ScrollView {
-                    LazyVStack(alignment: .leading, spacing: 4) {
+                    LazyVStack(alignment: .leading, spacing: skin.spacing.xs) {
                         ForEach(model.stashes) { stash in
                             StashRow(
                                 stash: stash,
@@ -46,7 +46,7 @@ struct StashesContextPane: View {
                             )
                         }
                     }
-                    .padding(.horizontal, 12).padding(.bottom, 12)
+                    .padding(.horizontal, skin.spacing.md).padding(.bottom, skin.spacing.md)
                 }
             }
         }
@@ -54,6 +54,7 @@ struct StashesContextPane: View {
 }
 
 private struct StashRow: View {
+    @Environment(\.ainkradSkin) private var skin
     let stash: GitStashEntry
     let isSelected: Bool
     let tokens: HostThemeTokens
@@ -61,34 +62,29 @@ private struct StashRow: View {
     let onApply: () -> Void
     let onDrop: () -> Void
     @State private var hovering = false
+    @Environment(\.ainkradReduceMotion) private var reduceMotion
 
     var body: some View {
-        HStack(spacing: 10) {
-            Image(systemName: "tray.full")
-                .font(.system(size: 12))
-                .foregroundStyle(isSelected ? tokens.accentPrimary : tokens.accentSecondary.opacity(0.7))
-                .frame(width: 16)
-
-            VStack(alignment: .leading, spacing: 2) {
-                Text(stash.message)
-                    .font(AinkradFont.display(12))
-                    .foregroundStyle(tokens.foreground.opacity(isSelected ? 1 : 0.88))
-                    .lineLimit(2)
-                Text(stash.id)
-                    .font(AinkradFont.mono(9))
-                    .foregroundStyle(tokens.foreground.opacity(0.45))
+        // The kit row owns the hover wash and selection; this one only reveals the actions.
+        AinkradListRow(
+            isSelected: isSelected, onTap: onSelect,
+            leading: {
+                Image(systemName: "tray.full")
+                    .font(skin.font(AinkradFontToken(sizeKey: "t12")))
+                    .foregroundStyle(isSelected ? tokens.accentPrimary : tokens.accentSecondary.opacity(skin.opacity.o70))
+                    .frame(width: skin.size.s16)
+            },
+            title: stash.message, subtitle: stash.id,
+            trailing: {
+                HStack(spacing: skin.spacing.xs) {
+                    AinkradIconButton(systemName: "arrow.down.circle", size: skin.size.s22, tooltip: "Apply", action: onApply)
+                    AinkradIconButton(systemName: "trash", size: skin.size.s22, tooltip: "Drop", action: onDrop)
+                }
+                .opacity(hovering ? 1 : 0)
+                .allowsHitTesting(hovering)
             }
-            Spacer(minLength: 4)
-
-            HStack(spacing: 4) {
-                AinkradIconButton(systemName: "arrow.down.circle", size: 22, tooltip: "Apply", action: onApply)
-                AinkradIconButton(systemName: "trash", size: 22, tooltip: "Drop", action: onDrop)
-            }
-            .opacity(hovering ? 1 : 0)
-            .allowsHitTesting(hovering)
-        }
-        .padding(.horizontal, 9).padding(.vertical, 8)
-        .gmListRowChrome(tokens: tokens, isSelected: isSelected, hovering: $hovering, spine: (20, 1))
-        .onTapGesture(perform: onSelect)
+        )
+        .onHover { hovering = $0 }
+        .animation(reduceMotion ? nil : .easeOut(duration: skin.motion.durations.d0_12), value: hovering)
     }
 }
