@@ -194,12 +194,11 @@ struct GitMageShell: View {
     private var navRail: some View {
         VStack(spacing: 6) {
             ForEach(NavArea.built) { area in
-                NavRailItem(
-                    area: area,
-                    isActive: model.selectedArea == area,
-                    tokens: tokens,
-                    namespace: navNamespace,
-                    shortcut: areaHint(area),
+                AinkradRailItem(
+                    systemName: area.icon,
+                    help: shortcutTooltip(area.title, areaHint(area)),
+                    isSelected: model.selectedArea == area,
+                    selectionNamespace: navNamespace,
                     action: { model.selectArea(area) }
                 )
             }
