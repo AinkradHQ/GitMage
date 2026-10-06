@@ -103,6 +103,25 @@ struct GitMageBasicModeTests {
         #expect(model.snapshot != nil, "the basic load must not clear advanced's state")
     }
 
+    @Test("A failed push sets errorMessage; dismiss and the next operation clear it")
+    func failedPushSurfacesAndClears() async throws {
+        let repo = try TempRepo()  // no remote, so push must fail
+        defer { repo.cleanUp() }
+        let model = makeModel(at: repo.path)
+
+        model.push()
+        try await settle(until: { model.errorMessage != nil })
+        #expect(model.errorMessage?.isEmpty == false)
+
+        model.dismissError()
+        #expect(model.errorMessage == nil)
+
+        model.errorMessage = "stale"
+        model.fetch()
+        #expect(model.errorMessage == nil, "starting the next operation clears the old error")
+        try await settle(until: { !model.isLoading })
+    }
+
     // MARK: - Helpers
 
     private func makeHost() -> FakeHostServices {
