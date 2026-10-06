@@ -1,10 +1,8 @@
 import AinkradAppKit
 import SwiftUI
 
-// MARK: - Chips that open the management overlays
-
-/// Top-bar chip that opens the full-surface repo-management overlay.
-struct RepoSwitcher: View {
+/// Top-bar chip that opens the full-surface branch-management overlay.
+struct BranchChip: View {
     @ObservedObject var model: GitMageViewModel
     let tokens: HostThemeTokens
     var shortcut: String? = nil
@@ -12,9 +10,9 @@ struct RepoSwitcher: View {
 
     var body: some View {
         TopBarChip(
-            icon: "folder.badge.gearshape",
-            label: model.activeRepo?.name ?? "No Repository",
-            tooltip: "Repositories",
+            icon: "arrow.triangle.branch",
+            label: model.snapshot?.branchName ?? "—",
+            tooltip: "Branches",
             shortcut: shortcut,
             tokens: tokens,
             action: onOpen
