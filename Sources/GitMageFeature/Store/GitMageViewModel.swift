@@ -245,7 +245,7 @@ final class GitMageViewModel: ObservableObject {
                 guard repositoryPath == path else { return }
                 diffSnapshot = GitDiffSnapshot(
                     title: change.path,
-                    body: (error as? LocalizedError)?.errorDescription ?? error.localizedDescription,
+                    body: error.displayMessage,
                     isEmpty: true
                 )
                 log.error("Failed to load diff for \(change.filePath): \(error.localizedDescription)")
@@ -257,7 +257,7 @@ final class GitMageViewModel: ObservableObject {
     func dismissError() { errorMessage = nil }
 
     func report(_ error: Error, context: String) {
-        errorMessage = (error as? LocalizedError)?.errorDescription ?? error.localizedDescription
+        errorMessage = error.displayMessage
         log.error("Failed to \(context): \(error.localizedDescription)")
     }
 }
