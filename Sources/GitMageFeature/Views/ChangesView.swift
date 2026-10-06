@@ -108,7 +108,6 @@ struct ChangeRow: View {
     let onUnstage: () -> Void
     let onDiscard: () -> Void
     @State private var hovering = false
-    @Environment(\.ainkradReduceMotion) private var reduceMotion
 
     private var fileName: String { (change.path as NSString).lastPathComponent }
     private var directory: String {
@@ -182,27 +181,8 @@ struct ChangeRow: View {
             .allowsHitTesting(hovering)
         }
         .padding(.horizontal, 9).padding(.vertical, 7)
-        .background(
-            ChamferShape(cut: AinkradRadius.md)
-                .fill(
-                    isSelected
-                        ? accent.opacity(0.13)
-                        : (hovering ? tokens.surfaceElevated.opacity(0.5) : .clear))
-        )
-        .overlay(alignment: .leading) {
-            // Glowing selection spine, matching the nav rail language.
-            Capsule()
-                .fill(accent)
-                .frame(width: 3, height: 18)
-                .shadow(color: accent.opacity(0.8), radius: 4)
-                .padding(.leading, 1)
-                .opacity(isSelected ? 1 : 0)
-        }
-        .contentShape(Rectangle())
+        .gmListRowChrome(tokens: tokens, isSelected: isSelected, hovering: $hovering, accent: accent)
         .onTapGesture(perform: onSelect)
-        .onHover { hovering = $0 }
-        .animation(reduceMotion ? nil : .easeOut(duration: 0.12), value: hovering)
-        .animation(reduceMotion ? nil : .easeOut(duration: 0.14), value: isSelected)
     }
 }
 

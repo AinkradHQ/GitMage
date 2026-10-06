@@ -144,7 +144,6 @@ private struct IssueRow: View {
     let isSelected: Bool
     let onSelect: () -> Void
     @State private var hovering = false
-    @Environment(\.ainkradReduceMotion) private var reduceMotion
 
     private var isOpen: Bool { issue.state.lowercased() == "open" }
 
@@ -179,23 +178,8 @@ private struct IssueRow: View {
             Spacer(minLength: 4)
         }
         .padding(.horizontal, 9).padding(.vertical, 7)
-        .background(
-            ChamferShape(cut: AinkradRadius.md)
-                .fill(
-                    isSelected
-                        ? tokens.accentPrimary.opacity(0.13)
-                        : (hovering ? tokens.surfaceElevated.opacity(0.5) : .clear))
-        )
-        .overlay(alignment: .leading) {
-            Capsule().fill(tokens.accentPrimary).frame(width: 3, height: 18)
-                .shadow(color: tokens.accentPrimary.opacity(0.8), radius: 4).padding(.leading, 1)
-                .opacity(isSelected ? 1 : 0)
-        }
-        .contentShape(Rectangle())
+        .gmListRowChrome(tokens: tokens, isSelected: isSelected, hovering: $hovering)
         .onTapGesture(perform: onSelect)
-        .onHover { hovering = $0 }
-        .animation(reduceMotion ? nil : .easeOut(duration: 0.12), value: hovering)
-        .animation(reduceMotion ? nil : .easeOut(duration: 0.14), value: isSelected)
     }
 }
 

@@ -68,7 +68,6 @@ private struct CommitRow: View {
     let tokens: HostThemeTokens
     let onSelect: () -> Void
     @State private var hovering = false
-    @Environment(\.ainkradReduceMotion) private var reduceMotion
 
     var body: some View {
         HStack(spacing: 10) {
@@ -112,19 +111,7 @@ private struct CommitRow: View {
             Spacer(minLength: 4)
         }
         .padding(.horizontal, 9)
-        .background(
-            ChamferShape(cut: AinkradRadius.md)
-                .fill(
-                    isSelected
-                        ? tokens.accentPrimary.opacity(0.13)
-                        : (hovering ? tokens.surfaceElevated.opacity(0.5) : .clear)
-                )
-                .padding(.vertical, 2)
-        )
-        .contentShape(Rectangle())
+        .gmListRowChrome(tokens: tokens, isSelected: isSelected, hovering: $hovering, spine: nil, fillInset: 2)
         .onTapGesture(perform: onSelect)
-        .onHover { hovering = $0 }
-        .animation(reduceMotion ? nil : .easeOut(duration: 0.12), value: hovering)
-        .animation(reduceMotion ? nil : .easeOut(duration: 0.14), value: isSelected)
     }
 }
