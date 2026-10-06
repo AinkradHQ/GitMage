@@ -53,7 +53,7 @@ struct GitMageBasicView: View {
                     triggerLabel: model.activeRepo?.name ?? "Repository",
                     searchPlaceholder: "Search repositories"
                 )
-                .frame(maxWidth: 220)
+                .frame(maxWidth: skin.size.s220)
             }
             AinkradButton(title: "Fetch", style: .secondary, icon: "arrow.down") {
                 model.fetch()
@@ -100,7 +100,7 @@ struct GitMageBasicView: View {
 
     private var branchList: some View {
         ScrollView {
-            VStack(spacing: 1) {
+            VStack(spacing: skin.size.s1) {
                 ForEach(model.branches) { branch in
                     AinkradListRow(
                         isSelected: branch.isCurrent,
@@ -115,7 +115,7 @@ struct GitMageBasicView: View {
                                     ? tokens.accentPrimary
                                     : tokens.foreground.opacity(skin.opacity.o35)
                             )
-                            .frame(width: 20)
+                            .frame(width: skin.size.s20)
                         },
                         title: branch.name,
                         subtitle: branch.subtitle,

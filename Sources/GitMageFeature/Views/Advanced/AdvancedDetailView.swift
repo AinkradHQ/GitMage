@@ -16,7 +16,7 @@ struct AdvancedDetailView: View {
 
     var body: some View {
         ScrollView {
-            VStack(alignment: .leading, spacing: 16) {
+            VStack(alignment: .leading, spacing: skin.spacing.lg) {
                 if model.operationState.isActive { inProgressBanner }
                 if let errorMessage = model.errorMessage {
                     AinkradBanner(message: errorMessage, status: .warning)
@@ -26,7 +26,7 @@ struct AdvancedDetailView: View {
                 rebaseCard
                 tagsCard
             }
-            .padding(20)
+            .padding(skin.size.s20)
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
         // Kit confirm dialog for destructive Advanced ops (rebase / hard reset).
@@ -54,8 +54,8 @@ struct AdvancedDetailView: View {
     // MARK: - In-progress banner
 
     private var inProgressBanner: some View {
-        VStack(alignment: .leading, spacing: 8) {
-            HStack(spacing: 6) {
+        VStack(alignment: .leading, spacing: skin.spacing.sm) {
+            HStack(spacing: skin.size.s6) {
                 Image(systemName: "exclamationmark.arrow.triangle.2.circlepath")
                     .foregroundStyle(tokens.accentTertiary)
                 Text(model.operationState.label)
@@ -64,14 +64,14 @@ struct AdvancedDetailView: View {
             Text("Resolve conflicts in Changes, then Continue.")
                 .font(AinkradFont.display(skin.type.sizes.t11))
                 .foregroundStyle(tokens.foreground.opacity(skin.opacity.o60))
-            HStack(spacing: 8) {
+            HStack(spacing: skin.spacing.sm) {
                 AinkradButton(title: "Continue", style: .primary) { Task { await model.continueOperation() } }
                     .disabled(model.isLoading)
                 AinkradButton(title: "Abort", style: .danger) { Task { await model.abortOperation() } }
                     .disabled(model.isLoading)
             }
         }
-        .padding(12)
+        .padding(skin.spacing.md)
         .frame(maxWidth: .infinity, alignment: .leading)
         .background(ChamferShape(cut: AinkradRadius.md).fill(tokens.accentTertiary.opacity(skin.opacity.o08)))
         .overlay(ChamferShape(cut: AinkradRadius.md).strokeBorder(tokens.accentTertiary.opacity(skin.opacity.o35)))
@@ -82,8 +82,8 @@ struct AdvancedDetailView: View {
     private var commitActionsCard: some View {
         card("SELECTED COMMIT") {
             if let commit = selectedCommit {
-                VStack(alignment: .leading, spacing: 12) {
-                    VStack(alignment: .leading, spacing: 3) {
+                VStack(alignment: .leading, spacing: skin.spacing.md) {
+                    VStack(alignment: .leading, spacing: skin.size.s3) {
                         Text(commit.summary)
                             .font(AinkradFont.display(skin.type.sizes.t13, weight: .medium))
                             .foregroundStyle(tokens.foreground)
@@ -93,7 +93,7 @@ struct AdvancedDetailView: View {
                             size: skin.type.sizes.t10, limitLines: false)
                     }
 
-                    HStack(spacing: 8) {
+                    HStack(spacing: skin.spacing.sm) {
                         AinkradButton(title: "Cherry-pick", style: .secondary, icon: "arrow.right.circle") {
                             Task { await model.cherryPick() }
                         }.disabled(model.isLoading)
@@ -104,13 +104,13 @@ struct AdvancedDetailView: View {
                     }
 
                     // Reset row
-                    HStack(spacing: 8) {
+                    HStack(spacing: skin.spacing.sm) {
                         AinkradSegmentedPicker(
                             items: ResetMode.allCases,
                             selection: $model.resetMode,
                             label: { $0.rawValue.capitalized }
                         )
-                        .frame(maxWidth: 240)
+                        .frame(maxWidth: skin.size.s240)
                         AinkradButton(title: "Reset to here", style: .danger, icon: "arrow.counterclockwise") {
                             model.requestReset()
                         }.disabled(model.isLoading)
@@ -129,8 +129,8 @@ struct AdvancedDetailView: View {
 
     private var rebaseCard: some View {
         card("REBASE") {
-            VStack(alignment: .leading, spacing: 10) {
-                HStack(spacing: 8) {
+            VStack(alignment: .leading, spacing: skin.size.s10) {
+                HStack(spacing: skin.spacing.sm) {
                     Text("Rebase \(model.currentBranchName) onto")
                         .font(AinkradFont.display(skin.type.sizes.t12))
                         .foregroundStyle(tokens.foreground.opacity(skin.opacity.o85))
@@ -142,7 +142,7 @@ struct AdvancedDetailView: View {
                         ),
                         label: { $0.isEmpty ? "Choose a branch" : $0 }
                     )
-                    .frame(width: 180)
+                    .frame(width: skin.size.s180)
                 }
                 AinkradButton(title: "Rebase", style: .primary, icon: "arrow.triangle.merge") {
                     model.requestRebase()
@@ -161,20 +161,20 @@ struct AdvancedDetailView: View {
 
     private var tagsCard: some View {
         card("TAGS") {
-            VStack(alignment: .leading, spacing: 10) {
+            VStack(alignment: .leading, spacing: skin.size.s10) {
                 if model.tags.isEmpty {
                     Text("No tags yet.")
                         .font(AinkradFont.display(skin.type.sizes.t11))
                         .foregroundStyle(tokens.foreground.opacity(skin.opacity.o45))
                 } else {
                     ScrollView {
-                        LazyVStack(alignment: .leading, spacing: 3) {
+                        LazyVStack(alignment: .leading, spacing: skin.size.s3) {
                             ForEach(model.tags) { tag in
                                 TagRow(tag: tag, tokens: tokens) { Task { await model.deleteTag(tag.name) } }
                             }
                         }
                     }
-                    .frame(maxHeight: 180)
+                    .frame(maxHeight: skin.size.s180)
                 }
 
                 Text("NEW TAG AT \(tagTarget)")
@@ -193,11 +193,11 @@ struct AdvancedDetailView: View {
     // MARK: - Card chrome
 
     @ViewBuilder private func card<Content: View>(_ title: String, @ViewBuilder content: () -> Content) -> some View {
-        VStack(alignment: .leading, spacing: 10) {
+        VStack(alignment: .leading, spacing: skin.size.s10) {
             GMHeaderLabel(text: title, tokens: tokens)
             content()
         }
-        .padding(14)
+        .padding(skin.size.s14)
         .frame(maxWidth: .infinity, alignment: .leading)
         .background(ChamferShape(cut: AinkradRadius.md).fill(tokens.surfaceElevated.opacity(skin.opacity.o25)))
         .overlay(ChamferShape(cut: AinkradRadius.md).strokeBorder(tokens.foreground.opacity(skin.opacity.o07)))
@@ -233,12 +233,12 @@ private struct TagRow: View {
         AinkradListRow(
             leading: {
                 Image(systemName: "tag").font(skin.font(AinkradFontToken(sizeKey: "t10"))).foregroundStyle(tokens.accentSecondary.opacity(skin.opacity.o80))
-                    .frame(width: 14)
+                    .frame(width: skin.size.s14)
             },
             title: tag.name,
             subtitle: tag.message.flatMap { $0.isEmpty ? nil : $0 },
             trailing: {
-                AinkradIconButton(systemName: "trash", size: 20, tooltip: "Delete tag", action: onDelete)
+                AinkradIconButton(systemName: "trash", size: skin.size.s20, tooltip: "Delete tag", action: onDelete)
                     .opacity(hovering ? 1 : 0)
                     .allowsHitTesting(hovering)
             }

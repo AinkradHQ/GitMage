@@ -10,11 +10,11 @@ struct StashesContextPane: View {
     var body: some View {
         VStack(spacing: 0) {
             PaneHeader(title: "STASHES", count: model.stashes.count, tokens: tokens) {
-                HStack(spacing: 6) {
-                    AinkradIconButton(systemName: "tray.and.arrow.down", size: 22, tooltip: "Stash changes") {
+                HStack(spacing: skin.size.s6) {
+                    AinkradIconButton(systemName: "tray.and.arrow.down", size: skin.size.s22, tooltip: "Stash changes") {
                         model.stashChanges()
                     }
-                    AinkradIconButton(systemName: "tray.and.arrow.up", size: 22, tooltip: "Pop latest stash") {
+                    AinkradIconButton(systemName: "tray.and.arrow.up", size: skin.size.s22, tooltip: "Pop latest stash") {
                         model.popLatestStash()
                     }
                     .opacity(model.stashes.isEmpty || model.isLoading ? skin.opacity.o40 : 1)
@@ -31,7 +31,7 @@ struct StashesContextPane: View {
                 .frame(maxWidth: .infinity, maxHeight: .infinity)
             } else {
                 ScrollView {
-                    LazyVStack(alignment: .leading, spacing: 4) {
+                    LazyVStack(alignment: .leading, spacing: skin.spacing.xs) {
                         ForEach(model.stashes) { stash in
                             StashRow(
                                 stash: stash,
@@ -46,7 +46,7 @@ struct StashesContextPane: View {
                             )
                         }
                     }
-                    .padding(.horizontal, 12).padding(.bottom, 12)
+                    .padding(.horizontal, skin.spacing.md).padding(.bottom, skin.spacing.md)
                 }
             }
         }
@@ -72,13 +72,13 @@ private struct StashRow: View {
                 Image(systemName: "tray.full")
                     .font(skin.font(AinkradFontToken(sizeKey: "t12")))
                     .foregroundStyle(isSelected ? tokens.accentPrimary : tokens.accentSecondary.opacity(skin.opacity.o70))
-                    .frame(width: 16)
+                    .frame(width: skin.size.s16)
             },
             title: stash.message, subtitle: stash.id,
             trailing: {
-                HStack(spacing: 4) {
-                    AinkradIconButton(systemName: "arrow.down.circle", size: 22, tooltip: "Apply", action: onApply)
-                    AinkradIconButton(systemName: "trash", size: 22, tooltip: "Drop", action: onDrop)
+                HStack(spacing: skin.spacing.xs) {
+                    AinkradIconButton(systemName: "arrow.down.circle", size: skin.size.s22, tooltip: "Apply", action: onApply)
+                    AinkradIconButton(systemName: "trash", size: skin.size.s22, tooltip: "Drop", action: onDrop)
                 }
                 .opacity(hovering ? 1 : 0)
                 .allowsHitTesting(hovering)

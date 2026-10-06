@@ -55,9 +55,9 @@ struct WorktreeDetailView: View {
     }
 
     private func header(for wt: GitWorktree) -> some View {
-        HStack(spacing: 10) {
-            VStack(alignment: .leading, spacing: 2) {
-                HStack(spacing: 8) {
+        HStack(spacing: skin.size.s10) {
+            VStack(alignment: .leading, spacing: skin.size.s2) {
+                HStack(spacing: skin.spacing.sm) {
                     Text((wt.path as NSString).lastPathComponent)
                         .font(AinkradFont.display(skin.type.sizes.t15, weight: .semibold))
                         .foregroundStyle(tokens.foreground)
@@ -65,7 +65,7 @@ struct WorktreeDetailView: View {
                         AinkradBadge(text: "CURRENT", tint: tokens.accentPrimary)
                     }
                 }
-                HStack(spacing: 6) {
+                HStack(spacing: skin.size.s6) {
                     Image(systemName: "arrow.triangle.branch").font(skin.font(AinkradFontToken(sizeKey: "t9"))).foregroundStyle(
                         tokens.foreground.opacity(skin.opacity.o50))
                     Text(wt.branch ?? "detached")
@@ -79,7 +79,7 @@ struct WorktreeDetailView: View {
                 model.open(wt)
             }
         }
-        .padding(.horizontal, 16).padding(.vertical, 12)
+        .padding(.horizontal, skin.spacing.lg).padding(.vertical, skin.spacing.md)
     }
 
     private var graphAndDiff: some View {
@@ -97,7 +97,7 @@ struct WorktreeDetailView: View {
                         )
                     }
                 }
-                .padding(.vertical, 6)
+                .padding(.vertical, skin.size.s6)
             }
             .frame(maxWidth: .infinity, maxHeight: .infinity)
 
@@ -106,7 +106,7 @@ struct WorktreeDetailView: View {
                     files: DiffFileSplitter.split(diff.body), tokens: tokens,
                     fontSize: fontSize, fallbackTitle: diff.title
                 )
-                .frame(height: 300)
+                .frame(height: skin.size.s300)
             }
         }
     }
@@ -120,7 +120,7 @@ private struct AddWorktreeSheet: View {
     @State private var destination: String = ""
 
     var body: some View {
-        VStack(alignment: .leading, spacing: 16) {
+        VStack(alignment: .leading, spacing: skin.spacing.lg) {
             Text("Add Worktree")
                 .font(AinkradFont.display(skin.type.sizes.t18, weight: .semibold))
 
@@ -157,11 +157,11 @@ private struct AddWorktreeSheet: View {
     }
 
     private var destinationPicker: some View {
-        VStack(alignment: .leading, spacing: 4) {
+        VStack(alignment: .leading, spacing: skin.spacing.xs) {
             Text("DESTINATION")
                 .font(AinkradFont.display(skin.type.sizes.t9, weight: .semibold))
                 .foregroundStyle(tokens.foreground.opacity(skin.opacity.o45))
-            HStack(spacing: 8) {
+            HStack(spacing: skin.spacing.sm) {
                 Text(destination.isEmpty ? "No folder chosen" : destination)
                     .font(AinkradFont.mono(skin.type.sizes.t11))
                     .foregroundStyle(tokens.foreground.opacity(destination.isEmpty ? skin.opacity.o40 : skin.opacity.o85))

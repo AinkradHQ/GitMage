@@ -114,10 +114,10 @@ struct GraphCommitRow: View {
     private var gutterWidth: CGFloat { GraphLayout.gutterWidth(laneCount: laneCount) }
 
     var body: some View {
-        HStack(spacing: 8) {
+        HStack(spacing: skin.spacing.sm) {
             GraphGutter(row: row, isSelected: isSelected, tokens: tokens)
                 .frame(width: gutterWidth, height: rowHeight)
-            VStack(alignment: .leading, spacing: 1) {
+            VStack(alignment: .leading, spacing: skin.size.s1) {
                 Text(row.commit.summary)
                     .font(AinkradFont.display(skin.type.sizes.t12))
                     .foregroundStyle(tokens.foreground.opacity(isSelected ? 1 : skin.opacity.o90))
@@ -128,7 +128,7 @@ struct GraphCommitRow: View {
             }
             Spacer(minLength: 4)
         }
-        .padding(.trailing, 10)
+        .padding(.trailing, skin.size.s10)
         .frame(height: rowHeight)
         .ainkradRowBackground(isSelected: isSelected, isHovered: hovering)
         .contentShape(Rectangle())

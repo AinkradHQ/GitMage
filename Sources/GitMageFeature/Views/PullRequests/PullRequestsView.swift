@@ -58,7 +58,7 @@ private struct PullRequestRow: View {
                 Image(systemName: "arrow.triangle.pull")
                     .font(skin.font(AinkradFontToken(sizeKey: "t12")))
                     .foregroundStyle(isOpen ? GMColor.status(.open, tokens) : GMColor.status(.closedMerged, tokens))
-                    .frame(width: 16)
+                    .frame(width: skin.size.s16)
             },
             title: pr.title, subtitle: "#\(pr.number) · \(pr.author)",
             trailing: {

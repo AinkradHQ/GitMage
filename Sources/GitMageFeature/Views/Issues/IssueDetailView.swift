@@ -14,7 +14,7 @@ struct IssueDetailView: View {
         VStack(spacing: 0) {
             if let detail = model.detail {
                 ScrollView {
-                    LazyVStack(alignment: .leading, spacing: 12) {
+                    LazyVStack(alignment: .leading, spacing: skin.spacing.md) {
                         header(detail)
                         editors(detail)
                         DiscussionCard(
@@ -24,7 +24,7 @@ struct IssueDetailView: View {
                             Text("\(model.comments.count) comment\(model.comments.count == 1 ? "" : "s")")
                                 .font(AinkradFont.display(skin.type.sizes.t10, weight: .semibold)).kerning(1.5)
                                 .foregroundStyle(tokens.foreground.opacity(skin.opacity.o45))
-                                .padding(.top, 2)
+                                .padding(.top, skin.size.s2)
                         }
                         ForEach(model.comments) { comment in
                             DiscussionCard(
@@ -32,7 +32,7 @@ struct IssueDetailView: View {
                                 text: comment.body, isPrimary: false, tokens: tokens)
                         }
                     }
-                    .padding(16)
+                    .padding(skin.spacing.lg)
                 }
                 composer(detail)
             } else {
@@ -51,8 +51,8 @@ struct IssueDetailView: View {
     }
 
     private func header(_ detail: IssueDetail) -> some View {
-        VStack(alignment: .leading, spacing: 5) {
-            HStack(spacing: 8) {
+        VStack(alignment: .leading, spacing: skin.size.s5) {
+            HStack(spacing: skin.spacing.sm) {
                 Text(detail.title)
                     .font(AinkradFont.display(skin.type.sizes.t16, weight: .semibold))
                     .foregroundStyle(tokens.foreground)
@@ -71,7 +71,7 @@ struct IssueDetailView: View {
     }
 
     private func editors(_ detail: IssueDetail) -> some View {
-        VStack(alignment: .leading, spacing: 8) {
+        VStack(alignment: .leading, spacing: skin.spacing.sm) {
             LabelsEditor(model: model, detail: detail)
             AssigneesEditor(model: model, detail: detail, tokens: tokens)
         }
@@ -101,11 +101,12 @@ struct IssueDetailView: View {
 /// Editable labels control: a menu of repo labels with checkmarks on those
 /// currently applied, rendering colored chips for the current selection.
 private struct LabelsEditor: View {
+    @Environment(\.ainkradSkin) private var skin
     @ObservedObject var model: IssuesViewModel
     let detail: IssueDetail
 
     var body: some View {
-        HStack(spacing: 6) {
+        HStack(spacing: skin.size.s6) {
             AinkradMultiSelect(
                 items: model.repoLabels.map(\.name),
                 selection: Binding(
@@ -136,7 +137,7 @@ private struct AssigneesEditor: View {
     let tokens: HostThemeTokens
 
     var body: some View {
-        HStack(spacing: 6) {
+        HStack(spacing: skin.size.s6) {
             AinkradMultiSelect(
                 items: model.assignableUsers.map(\.login),
                 selection: Binding(
@@ -149,19 +150,19 @@ private struct AssigneesEditor: View {
             )
 
             ForEach(detail.assignees, id: \.self) { login in
-                HStack(spacing: 4) {
+                HStack(spacing: skin.spacing.xs) {
                     ZStack {
                         Circle().fill(tokens.accentSecondary.opacity(skin.opacity.o20))
                         Text(String(login.prefix(1)).uppercased())
                             .font(AinkradFont.display(skin.type.sizes.t8, weight: .bold))
                             .foregroundStyle(tokens.accentSecondary)
                     }
-                    .frame(width: 15, height: 15)
+                    .frame(width: skin.size.s15, height: skin.size.s15)
                     Text(login)
                         .font(AinkradFont.mono(skin.type.sizes.t10))
                         .foregroundStyle(tokens.foreground.opacity(skin.opacity.o75))
                 }
-                .padding(.horizontal, 6).padding(.vertical, 2)
+                .padding(.horizontal, skin.size.s6).padding(.vertical, skin.size.s2)
                 .background(Capsule().fill(tokens.surfaceElevated.opacity(skin.opacity.o50)))
             }
         }

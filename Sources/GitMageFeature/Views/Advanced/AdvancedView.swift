@@ -5,13 +5,14 @@ import SwiftUI
 /// drives the contextual actions (cherry-pick / revert / reset / tag) in the
 /// detail pane — there is no per-action page.
 struct AdvancedContextPane: View {
+    @Environment(\.ainkradSkin) private var skin
     @ObservedObject var model: AdvancedViewModel
     let tokens: HostThemeTokens
 
     var body: some View {
         VStack(spacing: 0) {
             PaneHeader(title: "COMMITS", count: model.commits.count, tokens: tokens) {
-                if model.isLoading { AinkradSpinner(size: 16) }
+                if model.isLoading { AinkradSpinner(size: skin.size.s16) }
             }
 
             if model.commits.isEmpty {
@@ -22,7 +23,7 @@ struct AdvancedContextPane: View {
                 .frame(maxWidth: .infinity, maxHeight: .infinity)
             } else {
                 ScrollView {
-                    LazyVStack(alignment: .leading, spacing: 2) {
+                    LazyVStack(alignment: .leading, spacing: skin.size.s2) {
                         ForEach(model.commits) { commit in
                             AdvancedCommitRow(
                                 commit: commit,
@@ -32,7 +33,7 @@ struct AdvancedContextPane: View {
                             )
                         }
                     }
-                    .padding(.horizontal, 12).padding(.bottom, 12)
+                    .padding(.horizontal, skin.spacing.md).padding(.bottom, skin.spacing.md)
                 }
             }
         }
@@ -54,7 +55,7 @@ struct AdvancedCommitRow: View {
                 Image(systemName: "circle.fill")
                     .font(skin.font(AinkradFontToken(sizeKey: "t6")))
                     .foregroundStyle(isSelected ? tokens.accentPrimary : tokens.accentSecondary.opacity(skin.opacity.o60))
-                    .frame(width: 12)
+                    .frame(width: skin.size.s12)
             },
             title: commit.summary,
             subtitle: GMCommitMeta.text(sha: commit.shortSHA, author: commit.author, date: commit.relativeDate),

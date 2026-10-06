@@ -87,7 +87,7 @@ struct DiffView: View {
     }
 
     private func header(title: String, parsed: DiffRows) -> some View {
-        HStack(spacing: 8) {
+        HStack(spacing: skin.spacing.sm) {
             Image(systemName: "doc.text").font(skin.font(AinkradFontToken(sizeKey: "t11"))).foregroundStyle(tokens.accentSecondary)
             Text(title)
                 .font(AinkradFont.mono(skin.type.sizes.t11, weight: .medium))
@@ -103,7 +103,7 @@ struct DiffView: View {
                     GMColor.diffRemove(skin))
             }
         }
-        .padding(.horizontal, 14).padding(.vertical, 9)
+        .padding(.horizontal, skin.size.s14).padding(.vertical, skin.size.s9)
     }
 
     @ViewBuilder private func content(_ parsed: DiffRows) -> some View {
@@ -118,7 +118,7 @@ struct DiffView: View {
                 ForEach(parsed.rows) { row($0, codeWidth: parsed.codeWidth) }
             }
             .frame(width: parsed.codeWidth + gutterWidth + signWidth, alignment: .leading)
-            .padding(.vertical, 4)
+            .padding(.vertical, skin.spacing.xs)
             .textSelection(.enabled)
 
             if embedded {
@@ -134,7 +134,7 @@ struct DiffView: View {
             .frame(maxWidth: .infinity, maxHeight: .infinity)
         } else {
             Text("No textual changes.")
-                .font(AinkradFont.mono(skin.type.sizes.t10)).foregroundStyle(tokens.foreground.opacity(skin.opacity.o40)).padding(8)
+                .font(AinkradFont.mono(skin.type.sizes.t10)).foregroundStyle(tokens.foreground.opacity(skin.opacity.o40)).padding(skin.spacing.sm)
         }
     }
 
@@ -150,7 +150,7 @@ struct DiffView: View {
                     .foregroundStyle(tokens.accentSecondary.opacity(skin.opacity.o90))
                     .lineLimit(1)
                     .frame(width: codeWidth, alignment: .leading)
-                    .padding(.leading, 4)
+                    .padding(.leading, skin.spacing.xs)
             }
             .background(tokens.accentSecondary.opacity(skin.opacity.o08))
         default:
@@ -164,7 +164,7 @@ struct DiffView: View {
                     .font(AinkradFont.mono(fontSize))
                     .lineLimit(1)
                     .frame(width: codeWidth, alignment: .leading)
-                    .padding(.trailing, 8)
+                    .padding(.trailing, skin.spacing.sm)
             }
             .background(lineBackground(r.kind))
         }
@@ -179,7 +179,7 @@ struct DiffView: View {
         }
         .font(AinkradFont.mono(max(skin.type.sizes.t9, fontSize - 2)))
         .foregroundStyle(tokens.foreground.opacity(skin.opacity.o30))
-        .padding(.trailing, 8)
+        .padding(.trailing, skin.spacing.sm)
         .background(tokens.foreground.opacity(skin.opacity.o03))
     }
 

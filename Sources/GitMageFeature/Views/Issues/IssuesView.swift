@@ -4,6 +4,7 @@ import SwiftUI
 /// Context pane (left rail) for the Issues area: filter + issue list + New
 /// Issue entry point, gated on having a GitHub remote and a valid token.
 struct IssuesContextPane: View {
+    @Environment(\.ainkradSkin) private var skin
     @ObservedObject var model: IssuesViewModel
     let tokens: HostThemeTokens
     /// Whether the active repo resolved a GitHub `origin` remote. Passed in
@@ -25,7 +26,7 @@ struct IssuesContextPane: View {
                     selectedLabels: model.selectedLabels, toggleLabel: { model.toggleLabel($0) },
                     load: { Task { await model.load() } }
                 ) {
-                    AinkradIconButton(systemName: "plus", size: 22, tooltip: "New issue") { model.showNew = true }
+                    AinkradIconButton(systemName: "plus", size: skin.size.s22, tooltip: "New issue") { model.showNew = true }
                 }
                 ForgeItemList(
                     items: model.issues, isLoading: model.isLoading, isLoadingMore: model.isLoadingMore,
@@ -59,17 +60,17 @@ private struct IssueRow: View {
     private var isOpen: Bool { issue.state.lowercased() == "open" }
 
     var body: some View {
-        HStack(alignment: .top, spacing: 10) {
+        HStack(alignment: .top, spacing: skin.size.s10) {
             Image(systemName: isOpen ? "smallcircle.filled.circle" : "checkmark.circle")
                 .font(skin.font(AinkradFontToken(sizeKey: "t12")))
                 .foregroundStyle(isOpen ? GMColor.status(.open, tokens) : GMColor.status(.closedMerged, tokens))
-                .frame(width: 16)
-            VStack(alignment: .leading, spacing: 3) {
+                .frame(width: skin.size.s16)
+            VStack(alignment: .leading, spacing: skin.size.s3) {
                 Text(issue.title)
                     .font(AinkradFont.display(skin.type.sizes.t12))
                     .foregroundStyle(tokens.foreground.opacity(isSelected ? 1 : skin.opacity.o90))
                     .lineLimit(1)
-                HStack(spacing: 6) {
+                HStack(spacing: skin.size.s6) {
                     Text("#\(issue.number)")
                         .font(AinkradFont.mono(skin.type.sizes.t9, weight: .medium))
                         .foregroundStyle(tokens.accentSecondary)
@@ -88,7 +89,7 @@ private struct IssueRow: View {
             }
             Spacer(minLength: 4)
         }
-        .padding(.horizontal, 9).padding(.vertical, 7)
+        .padding(.horizontal, skin.size.s9).padding(.vertical, skin.size.s7)
         // The kit's row wash; the layout stays local (AinkradListRow is title + subtitle only).
         .ainkradRowBackground(isSelected: isSelected, isHovered: hovering)
         .contentShape(Rectangle())
@@ -100,11 +101,12 @@ private struct IssueRow: View {
 /// Small row of neutral label chips, used where only label names (not colors)
 /// are available (e.g. issue list rows).
 struct LabelChipsRow: View {
+    @Environment(\.ainkradSkin) private var skin
     let names: [String]
     let tokens: HostThemeTokens
 
     var body: some View {
-        HStack(spacing: 4) {
+        HStack(spacing: skin.spacing.xs) {
             ForEach(names, id: \.self) { name in
                 AinkradChip(label: name)
             }

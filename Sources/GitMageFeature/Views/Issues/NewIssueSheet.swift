@@ -12,14 +12,14 @@ struct NewIssueSheet: View {
     }
 
     var body: some View {
-        VStack(alignment: .leading, spacing: 14) {
+        VStack(alignment: .leading, spacing: skin.size.s14) {
             Text("New Issue").font(AinkradFont.display(skin.type.sizes.t18, weight: .semibold))
 
             AinkradTextField(text: $model.newTitle, placeholder: "Title")
 
             AinkradTextArea(text: $model.newBody, placeholder: "Description…")
 
-            HStack(spacing: 10) {
+            HStack(spacing: skin.size.s10) {
                 labelsMenu
                 assigneesMenu
             }

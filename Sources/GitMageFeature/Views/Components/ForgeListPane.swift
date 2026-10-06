@@ -66,7 +66,7 @@ struct ForgeFilterToolbar<Filter: Hashable, Trailing: View>: View {
     @Environment(\.ainkradSkin) private var skin
 
     var body: some View {
-        VStack(spacing: 8) {
+        VStack(spacing: skin.spacing.sm) {
             PaneHeader(
                 title: title, count: loaded, countText: total > 0 ? "\(loaded) / \(total)" : "\(loaded)",
                 tokens: tokens, trailing: trailing)
@@ -83,12 +83,12 @@ struct ForgeFilterToolbar<Filter: Hashable, Trailing: View>: View {
                 ),
                 label: filterLabel
             )
-            .padding(.horizontal, 12)
+            .padding(.horizontal, skin.spacing.md)
             AinkradSearchField(text: $searchText, placeholder: searchPlaceholder, onSubmit: load)
-                .padding(.horizontal, 12)
+                .padding(.horizontal, skin.spacing.md)
             if !labels.isEmpty {
                 ScrollView(.horizontal, showsIndicators: false) {
-                    HStack(spacing: 6) {
+                    HStack(spacing: skin.size.s6) {
                         ForEach(labels) { label in
                             AinkradSwatchChip(
                                 label: label.name,
@@ -99,10 +99,10 @@ struct ForgeFilterToolbar<Filter: Hashable, Trailing: View>: View {
                         }
                     }
                 }
-                .padding(.horizontal, 12)
+                .padding(.horizontal, skin.spacing.md)
             }
         }
-        .padding(.bottom, 8)
+        .padding(.bottom, skin.spacing.sm)
     }
 }
 
@@ -123,6 +123,7 @@ extension ForgeFilterToolbar where Trailing == EmptyView {
 
 /// Spinner, error, empty state, or the paged rows (loading more when the last one appears).
 struct ForgeItemList<Item: Identifiable, Row: View>: View {
+    @Environment(\.ainkradSkin) private var skin
     let items: [Item]
     let isLoading: Bool
     let isLoadingMore: Bool
@@ -143,14 +144,14 @@ struct ForgeItemList<Item: Identifiable, Row: View>: View {
             ForgeMessage(icon: icon, title: emptyTitle, message: "Nothing matches this filter.", tokens: tokens)
         } else {
             ScrollView {
-                LazyVStack(alignment: .leading, spacing: 3) {
+                LazyVStack(alignment: .leading, spacing: skin.size.s3) {
                     ForEach(Array(items.enumerated()), id: \.element.id) { index, item in
                         row(item)
                             .onAppear { if index == items.count - 1 { loadMore() } }
                     }
                     if isLoadingMore { AinkradLoadingState() }
                 }
-                .padding(.horizontal, 12).padding(.bottom, 12)
+                .padding(.horizontal, skin.spacing.md).padding(.bottom, skin.spacing.md)
             }
         }
     }

@@ -3,6 +3,7 @@ import SwiftUI
 
 /// Context pane (left rail) for the Worktrees area: header actions + worktree list.
 struct WorktreesContextPane: View {
+    @Environment(\.ainkradSkin) private var skin
     @ObservedObject var model: WorktreesViewModel
     let tokens: HostThemeTokens
 
@@ -15,9 +16,9 @@ struct WorktreesContextPane: View {
 
     private var header: some View {
         PaneHeader(title: "WORKTREES", count: model.worktrees.count, tokens: tokens) {
-            HStack(spacing: 6) {
-                AinkradIconButton(systemName: "plus", size: 22, tooltip: "Add worktree") { model.showAdd = true }
-                AinkradIconButton(systemName: "sparkles", size: 22, tooltip: "Prune stale worktrees") {
+            HStack(spacing: skin.size.s6) {
+                AinkradIconButton(systemName: "plus", size: skin.size.s22, tooltip: "Add worktree") { model.showAdd = true }
+                AinkradIconButton(systemName: "sparkles", size: skin.size.s22, tooltip: "Prune stale worktrees") {
                     Task { await model.prune() }
                 }
             }
@@ -38,7 +39,7 @@ struct WorktreesContextPane: View {
             .frame(maxWidth: .infinity, maxHeight: .infinity)
         } else {
             ScrollView {
-                LazyVStack(alignment: .leading, spacing: 3) {
+                LazyVStack(alignment: .leading, spacing: skin.size.s3) {
                     ForEach(model.worktrees) { wt in
                         WorktreeRow(
                             worktree: wt,
@@ -60,7 +61,7 @@ struct WorktreesContextPane: View {
                         )
                     }
                 }
-                .padding(.horizontal, 12).padding(.bottom, 12)
+                .padding(.horizontal, skin.spacing.md).padding(.bottom, skin.spacing.md)
             }
         }
     }
@@ -84,7 +85,7 @@ private struct WorktreeRow: View {
     }
 
     var body: some View {
-        VStack(alignment: .leading, spacing: 4) {
+        VStack(alignment: .leading, spacing: skin.spacing.xs) {
             topLine
             Text(worktree.path)
                 .font(AinkradFont.mono(skin.type.sizes.t9))
@@ -94,9 +95,9 @@ private struct WorktreeRow: View {
             actionsRow
                 .opacity(hovering ? 1 : 0)
                 .allowsHitTesting(hovering)
-                .frame(height: 22)
+                .frame(height: skin.size.s22)
         }
-        .padding(.horizontal, 9).padding(.vertical, 8)
+        .padding(.horizontal, skin.size.s9).padding(.vertical, skin.spacing.sm)
         // The kit's row wash; the layout stays local (AinkradListRow is title + subtitle only).
         .ainkradRowBackground(isSelected: isSelected, isHovered: hovering)
         .contentShape(Rectangle())
@@ -107,7 +108,7 @@ private struct WorktreeRow: View {
     }
 
     private var topLine: some View {
-        HStack(spacing: 6) {
+        HStack(spacing: skin.size.s6) {
             Text(lastPathComponent)
                 .font(AinkradFont.display(skin.type.sizes.t12, weight: .bold))
                 .lineLimit(1)
@@ -136,12 +137,12 @@ private struct WorktreeRow: View {
     }
 
     private var actionsRow: some View {
-        HStack(spacing: 4) {
-            AinkradIconButton(systemName: "arrow.up.forward.square", size: 20, tooltip: "Open", action: onOpen)
+        HStack(spacing: skin.spacing.xs) {
+            AinkradIconButton(systemName: "arrow.up.forward.square", size: skin.size.s20, tooltip: "Open", action: onOpen)
             AinkradIconButton(
                 systemName: worktree.isLocked ? "lock.open" : "lock",
                 size: 20, tooltip: worktree.isLocked ? "Unlock" : "Lock", action: onToggleLock)
-            AinkradIconButton(systemName: "trash", size: 20, tooltip: "Remove", action: onRemove)
+            AinkradIconButton(systemName: "trash", size: skin.size.s20, tooltip: "Remove", action: onRemove)
             Spacer()
         }
     }

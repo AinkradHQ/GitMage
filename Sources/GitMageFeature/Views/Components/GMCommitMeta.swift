@@ -15,7 +15,7 @@ struct GMCommitMeta: View {
     @Environment(\.ainkradSkin) private var skin
 
     var body: some View {
-        HStack(spacing: 8) {
+        HStack(spacing: skin.spacing.sm) {
             Text(sha)
                 .font(AinkradFont.mono(size ?? skin.type.sizes.t9, weight: .medium))
                 .foregroundStyle(tokens.accentSecondary)

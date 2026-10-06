@@ -25,7 +25,7 @@ struct MarkdownText: View {
         // wrapped in LazyVStack so a long issue/PR body doesn't build one
         // live view per block up front.
         let blocks = Self.parse(markdown)
-        LazyVStack(alignment: .leading, spacing: 6) {
+        LazyVStack(alignment: .leading, spacing: skin.size.s6) {
             ForEach(Array(blocks.enumerated()), id: \.offset) { _, block in
                 blockView(block)
             }
@@ -47,15 +47,15 @@ struct MarkdownText: View {
             inline(text, size: headingSize(level), weight: .semibold)
                 .foregroundStyle(tokens.foreground)
                 .frame(maxWidth: .infinity, alignment: .leading)
-                .padding(.top, 2)
+                .padding(.top, skin.size.s2)
 
         case .code(let code):
             AinkradCodeBlock(code)
 
         case .quote(let lines):
-            HStack(spacing: 8) {
-                ChamferShape(cut: AinkradRadius.sm).fill(tokens.accentPrimary.opacity(skin.opacity.o50)).frame(width: 3)
-                VStack(alignment: .leading, spacing: 2) {
+            HStack(spacing: skin.spacing.sm) {
+                ChamferShape(cut: AinkradRadius.sm).fill(tokens.accentPrimary.opacity(skin.opacity.o50)).frame(width: skin.size.s3)
+                VStack(alignment: .leading, spacing: skin.size.s2) {
                     ForEach(Array(lines.enumerated()), id: \.offset) { _, line in
                         inline(line, size: baseSize)
                             .frame(maxWidth: .infinity, alignment: .leading)
@@ -66,9 +66,9 @@ struct MarkdownText: View {
             .fixedSize(horizontal: false, vertical: true)
 
         case .list(let ordered, let items):
-            VStack(alignment: .leading, spacing: 3) {
+            VStack(alignment: .leading, spacing: skin.size.s3) {
                 ForEach(Array(items.enumerated()), id: \.offset) { idx, item in
-                    HStack(alignment: .firstTextBaseline, spacing: 7) {
+                    HStack(alignment: .firstTextBaseline, spacing: skin.size.s7) {
                         Text(ordered ? "\(idx + 1)." : "•")
                             .font(AinkradFont.mono(baseSize))
                             .foregroundStyle(tokens.accentSecondary)
@@ -85,7 +85,7 @@ struct MarkdownText: View {
                 colors: [.clear, tokens.accentPrimary.opacity(skin.opacity.o30), .clear],
                 startPoint: .leading, endPoint: .trailing
             )
-            .frame(height: 1).padding(.vertical, 3)
+            .frame(height: skin.size.s1).padding(.vertical, skin.size.s3)
         }
     }
 

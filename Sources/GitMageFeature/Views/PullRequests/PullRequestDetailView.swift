@@ -30,7 +30,7 @@ struct PullRequestDetailView: View {
                     selection: $tab,
                     label: { "\($0.rawValue) \(tabCount($0))" }
                 )
-                .padding(.horizontal, 16).padding(.vertical, 10)
+                .padding(.horizontal, skin.spacing.lg).padding(.vertical, skin.size.s10)
 
                 switch tab {
                 case .conversation:
@@ -52,8 +52,8 @@ struct PullRequestDetailView: View {
     }
 
     private func header(_ detail: PullRequestDetail) -> some View {
-        VStack(alignment: .leading, spacing: 6) {
-            HStack(spacing: 8) {
+        VStack(alignment: .leading, spacing: skin.size.s6) {
+            HStack(spacing: skin.spacing.sm) {
                 Text(detail.title)
                     .font(AinkradFont.display(skin.type.sizes.t16, weight: .semibold))
                     .foregroundStyle(tokens.foreground)
@@ -68,7 +68,7 @@ struct PullRequestDetailView: View {
                     text: detail.state.capitalized,
                     tint: GMColor.status(detail.state.lowercased() == "open" ? .open : .closedMerged, tokens))
             }
-            HStack(spacing: 6) {
+            HStack(spacing: skin.size.s6) {
                 Image(systemName: "arrow.triangle.branch")
                     .font(skin.font(AinkradFontToken(sizeKey: "t10"))).foregroundStyle(tokens.foreground.opacity(skin.opacity.o50))
                 Text("\(detail.baseBranch) ← \(detail.headBranch)")
@@ -79,7 +79,7 @@ struct PullRequestDetailView: View {
                 .font(AinkradFont.display(skin.type.sizes.t11))
                 .foregroundStyle(tokens.foreground.opacity(skin.opacity.o50))
         }
-        .padding(.horizontal, 16).padding(.top, 14).padding(.bottom, 2)
+        .padding(.horizontal, skin.spacing.lg).padding(.top, skin.size.s14).padding(.bottom, skin.size.s2)
     }
 
     private func statusSummary(_ detail: PullRequestDetail) -> String {
@@ -111,7 +111,7 @@ struct PullRequestDetailView: View {
     private func conversation(_ detail: PullRequestDetail) -> some View {
         VStack(spacing: 0) {
             ScrollView {
-                VStack(alignment: .leading, spacing: 12) {
+                VStack(alignment: .leading, spacing: skin.spacing.md) {
                     DiscussionCard(
                         author: detail.author, timestamp: detail.createdAt,
                         text: detail.body, isPrimary: true, tokens: tokens)
@@ -121,7 +121,7 @@ struct PullRequestDetailView: View {
                             text: comment.body, isPrimary: false, tokens: tokens)
                     }
                 }
-                .padding(16)
+                .padding(skin.spacing.lg)
             }
             composer
         }
@@ -131,20 +131,20 @@ struct PullRequestDetailView: View {
 
     private var commitsTab: some View {
         ScrollView {
-            VStack(alignment: .leading, spacing: 3) {
+            VStack(alignment: .leading, spacing: skin.size.s3) {
                 if model.commits.isEmpty {
                     AinkradEmptyState(
                         icon: "clock.arrow.circlepath", title: "No commits",
                         message: "This pull request has no commits."
                     )
-                    .frame(maxWidth: .infinity, minHeight: 160)
+                    .frame(maxWidth: .infinity, minHeight: skin.size.s160)
                 } else {
                     ForEach(model.commits) { commit in
                         PRCommitRow(commit: commit, tokens: tokens)
                     }
                 }
             }
-            .padding(12)
+            .padding(skin.spacing.md)
         }
     }
 
@@ -212,7 +212,7 @@ private struct PRCommitRow: View {
                 Image(systemName: "circle.fill")
                     .font(skin.font(AinkradFontToken(sizeKey: "t6")))
                     .foregroundStyle(tokens.accentSecondary.opacity(skin.opacity.o70))
-                    .frame(width: 14)
+                    .frame(width: skin.size.s14)
             },
             title: commit.message,
             subtitle: GMCommitMeta.text(sha: commit.shortSHA, author: commit.author, date: ForgeDate.short(commit.date)),

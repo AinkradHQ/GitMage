@@ -75,6 +75,7 @@ enum DiffFileSplitter {
 /// A scrolling list of collapsible file rows — click a file to reveal its diff
 /// inline. Shared by the PR Files tab and the History/Stash detail panes.
 struct FileDiffList: View {
+    @Environment(\.ainkradSkin) private var skin
     let files: [DiffFile]
     let tokens: HostThemeTokens
     let fontSize: Double
@@ -83,13 +84,13 @@ struct FileDiffList: View {
 
     var body: some View {
         ScrollView {
-            LazyVStack(alignment: .leading, spacing: 6) {
+            LazyVStack(alignment: .leading, spacing: skin.size.s6) {
                 if files.isEmpty {
                     AinkradEmptyState(
                         icon: "doc.text", title: "No changes",
                         message: "This diff has no files to show."
                     )
-                    .frame(maxWidth: .infinity, minHeight: 160)
+                    .frame(maxWidth: .infinity, minHeight: skin.size.s160)
                 } else {
                     ForEach(files) { file in
                         FileDisclosureRow(
@@ -111,7 +112,7 @@ struct FileDiffList: View {
                     }
                 }
             }
-            .padding(12)
+            .padding(skin.spacing.md)
         }
     }
 }
@@ -135,15 +136,15 @@ struct FileDisclosureRow: View {
 
     var body: some View {
         VStack(spacing: 0) {
-            HStack(spacing: 10) {
+            HStack(spacing: skin.size.s10) {
                 Image(systemName: isExpanded ? "chevron.down" : "chevron.right")
                     .font(skin.font(AinkradFontToken(sizeKey: "t9", weight: "bold")))
                     .foregroundStyle(tokens.foreground.opacity(skin.opacity.o50))
-                    .frame(width: 12)
+                    .frame(width: skin.size.s12)
                 Text(badgeLetter)
                     .font(AinkradFont.mono(skin.type.sizes.t10, weight: .bold))
                     .foregroundStyle(badgeColor)
-                    .frame(width: 18, height: 18)
+                    .frame(width: skin.size.s18, height: skin.size.s18)
                     .background(ChamferShape(cut: AinkradRadius.sm).fill(badgeColor.opacity(skin.opacity.o16)))
                 Text(filename.isEmpty ? "(diff)" : filename)
                     .font(AinkradFont.mono(skin.type.sizes.t11))
@@ -151,7 +152,7 @@ struct FileDisclosureRow: View {
                     .lineLimit(1).truncationMode(.middle)
                 Spacer()
             }
-            .padding(.horizontal, 10).padding(.vertical, 8)
+            .padding(.horizontal, skin.size.s10).padding(.vertical, skin.spacing.sm)
             .background(hovering ? tokens.surfaceElevated.opacity(skin.opacity.o50) : .clear)
             .contentShape(Rectangle())
             .onTapGesture(perform: onToggle)

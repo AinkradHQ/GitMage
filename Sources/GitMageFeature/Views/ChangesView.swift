@@ -2,6 +2,7 @@ import AinkradAppKit
 import SwiftUI
 
 struct ChangesContextPane: View {
+    @Environment(\.ainkradSkin) private var skin
     @ObservedObject var model: GitMageViewModel
     let tokens: HostThemeTokens
     let accent: Color
@@ -30,11 +31,11 @@ struct ChangesContextPane: View {
                 .frame(maxWidth: .infinity, maxHeight: .infinity)
             } else {
                 ScrollView {
-                    LazyVStack(alignment: .leading, spacing: 16) {
+                    LazyVStack(alignment: .leading, spacing: skin.spacing.lg) {
                         group(title: "STAGED", changes: staged, staged: true)
                         group(title: "UNSTAGED", changes: unstaged, staged: false)
                     }
-                    .padding(12)
+                    .padding(skin.spacing.md)
                 }
             }
             CommitBox(model: model, tokens: tokens, accent: accent, stagedCount: staged.count)
@@ -43,22 +44,22 @@ struct ChangesContextPane: View {
 
     @ViewBuilder private func group(title: String, changes: [GitChange], staged: Bool) -> some View {
         if !changes.isEmpty {
-            LazyVStack(alignment: .leading, spacing: 5) {
-                HStack(spacing: 8) {
+            LazyVStack(alignment: .leading, spacing: skin.size.s5) {
+                HStack(spacing: skin.spacing.sm) {
                     GMHeaderLabel(text: title, tokens: tokens)
                     AinkradBadge(text: "\(changes.count)")
                     Spacer()
                     if staged {
-                        AinkradIconButton(systemName: "minus", size: 20, tooltip: "Unstage all") {
+                        AinkradIconButton(systemName: "minus", size: skin.size.s20, tooltip: "Unstage all") {
                             model.unstageAllChanges()
                         }
                     } else {
-                        AinkradIconButton(systemName: "plus", size: 20, tooltip: "Stage all") {
+                        AinkradIconButton(systemName: "plus", size: skin.size.s20, tooltip: "Stage all") {
                             model.stageAllChanges()
                         }
                     }
                 }
-                .padding(.horizontal, 4)
+                .padding(.horizontal, skin.spacing.xs)
 
                 ForEach(changes, id: \.id) { change in
                     let rowID = "\(staged ? "staged" : "unstaged"):\(change.id)"
@@ -126,7 +127,7 @@ struct ChangeRow: View {
         Text(badgeLetter)
             .font(AinkradFont.mono(skin.type.sizes.t10, weight: .bold))
             .foregroundStyle(badgeColor)
-            .frame(width: 20, height: 20)
+            .frame(width: skin.size.s20, height: skin.size.s20)
             .background(
                 ChamferShape(cut: AinkradRadius.sm)
                     .fill(badgeColor.opacity(skin.opacity.o16))
@@ -140,11 +141,11 @@ struct ChangeRow: View {
     /// Always laid out (reserves width so nothing shifts); revealed on hover.
     /// Not hit-testable while hidden so it never steals a click.
     private var actions: some View {
-        HStack(spacing: 4) {
+        HStack(spacing: skin.spacing.xs) {
             if staged {
-                AinkradIconButton(systemName: "minus", size: 22, tooltip: "Unstage", action: onUnstage)
+                AinkradIconButton(systemName: "minus", size: skin.size.s22, tooltip: "Unstage", action: onUnstage)
             } else {
-                AinkradIconButton(systemName: "plus", size: 22, tooltip: "Stage", action: onStage)
+                AinkradIconButton(systemName: "plus", size: skin.size.s22, tooltip: "Stage", action: onStage)
                 AinkradIconButton(
                     systemName: "arrow.uturn.backward", size: 22, tooltip: "Discard", action: onDiscard)
             }
@@ -168,7 +169,7 @@ struct CommitBox: View {
     }
 
     var body: some View {
-        VStack(alignment: .leading, spacing: 10) {
+        VStack(alignment: .leading, spacing: skin.size.s10) {
             HStack {
                 GMHeaderLabel(text: "COMMIT", tokens: tokens)
                 Spacer()
@@ -184,13 +185,13 @@ struct CommitBox: View {
                     .font(AinkradFont.display(skin.type.sizes.t12))
                     .scrollContentBackground(.hidden)
                     .focused($editorFocused)
-                    .frame(height: 70)
-                    .padding(7)
+                    .frame(height: skin.size.s70)
+                    .padding(skin.size.s7)
                 if model.draftCommitMessage.isEmpty {
                     Text("Summary of your changes…")
                         .font(AinkradFont.display(skin.type.sizes.t12))
                         .foregroundStyle(tokens.foreground.opacity(skin.opacity.o35))
-                        .padding(.horizontal, 12).padding(.vertical, 15)
+                        .padding(.horizontal, skin.spacing.md).padding(.vertical, skin.size.s15)
                         .allowsHitTesting(false)
                 }
             }
@@ -204,7 +205,7 @@ struct CommitBox: View {
                         accent.opacity(editorFocused ? skin.opacity.o60 : skin.opacity.o20),
                         lineWidth: editorFocused ? 1.2 : 1)
             )
-            .shadow(color: editorFocused ? accent.opacity(skin.opacity.o25) : .clear, radius: 8)
+            .shadow(color: editorFocused ? accent.opacity(skin.opacity.o25) : .clear, radius: skin.size.s8)
 
             HStack {
                 Spacer()
@@ -215,7 +216,7 @@ struct CommitBox: View {
                 .opacity(canCommit ? 1 : skin.opacity.o50)
             }
         }
-        .padding(12)
+        .padding(skin.spacing.md)
         .background(tokens.surface.opacity(skin.opacity.o40))
     }
 }
