@@ -111,11 +111,7 @@ private struct RepoCard: View {
                     .foregroundStyle(isActive ? tokens.accentPrimary : tokens.foreground.opacity(0.6))
                 Spacer()
                 if isActive {
-                    Text("ACTIVE")
-                        .font(AinkradFont.mono(8, weight: .bold)).tracking(1)
-                        .foregroundStyle(tokens.accentPrimary)
-                        .padding(.horizontal, 6).padding(.vertical, 2)
-                        .background(Capsule().fill(tokens.accentPrimary.opacity(0.16)))
+                    AinkradBadge(text: "ACTIVE", tint: tokens.accentPrimary)
                 } else if hovering {
                     AinkradIconButton(
                         systemName: "trash", size: skin.size.s24, tooltip: "Remove from library", action: onRemove)

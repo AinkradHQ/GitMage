@@ -147,11 +147,7 @@ private struct BranchRow: View {
             Spacer(minLength: 6)
 
             if branch.isCurrent {
-                Text("CURRENT")
-                    .font(AinkradFont.mono(8, weight: .bold)).tracking(1)
-                    .foregroundStyle(tokens.accentPrimary)
-                    .padding(.horizontal, 6).padding(.vertical, 2)
-                    .background(Capsule().fill(tokens.accentPrimary.opacity(0.16)))
+                AinkradBadge(text: "CURRENT", tint: tokens.accentPrimary)
             } else if hovering {
                 AinkradIconButton(systemName: "trash", size: skin.size.s24, tooltip: "Delete branch", action: onDelete)
             }
