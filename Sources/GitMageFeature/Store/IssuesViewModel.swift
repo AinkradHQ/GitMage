@@ -32,11 +32,10 @@ final class IssuesViewModel: ObservableObject {
     @Published var newAssignees: Set<String> = []
 
     private let repo: RepoRef?
-    // SAFETY: `provider` is a `let` set once in `init` and never mutated;
-    // all access happens on the main actor via this @MainActor class's
-    // isolated methods, so concurrent mutation cannot occur.
-    private nonisolated(unsafe) let provider: GitForgeProvider?
+    private let provider: GitForgeProvider?
     private let auth: GitForgeAuth
+    /// The filter-driven reload; a newer filter change cancels it.
+    private var reloadTask: Task<Void, Never>?
 
     init(repo: RepoRef?, provider: GitForgeProvider?, auth: GitForgeAuth) {
         self.repo = repo
@@ -98,7 +97,8 @@ final class IssuesViewModel: ObservableObject {
 
     func toggleLabel(_ name: String) {
         if selectedLabels.contains(name) { selectedLabels.remove(name) } else { selectedLabels.insert(name) }
-        Task { await load() }
+        reloadTask?.cancel()
+        reloadTask = Task { await load() }
     }
 
     func select(_ number: Int) async {

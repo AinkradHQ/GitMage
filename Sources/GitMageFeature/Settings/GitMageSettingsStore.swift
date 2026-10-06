@@ -40,10 +40,8 @@ final class GitMageSettingsStore {
     /// Pushes the current typography settings into `AinkradFont` so every
     /// `display`/`mono` call across the UI reflects them.
     private func applyTypography() {
-        AinkradFont.config = AinkradFont.Config(
-            scale: CGFloat(settings.textScale),
-            displayFamily: settings.displayFontName,
-            monoFamily: settings.monoFontName
-        )
+        AinkradFont.config.scale = CGFloat(settings.textScale)
+        AinkradFont.config.displayFamily = settings.displayFontName
+        AinkradFont.config.monoFamily = settings.monoFontName
     }
 }

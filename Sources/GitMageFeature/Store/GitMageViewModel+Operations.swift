@@ -61,7 +61,7 @@ extension GitMageViewModel {
 
     func selectStash(_ entry: GitStashEntry) {
         let path = repositoryPath
-        Task { @MainActor in
+        trackRead { [self] in
             do {
                 let diff = try await client.stashDiff(entry.id, in: path)
                 guard repositoryPath == path else { return }  // switched repos mid-load

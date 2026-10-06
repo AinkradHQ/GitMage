@@ -32,6 +32,9 @@ final class WorktreesViewModel: ObservableObject {
     private let currentRoot: String
     private let branches: [GitBranchSummary]
     private let onOpen: (String) -> Void
+    /// The graph and commit-diff loads of the current selection; a new selection cancels them.
+    private var graphTask: Task<Void, Never>?
+    private var commitDiffTask: Task<Void, Never>?
 
     init(
         client: GitRepositoryClient,
@@ -71,7 +74,9 @@ final class WorktreesViewModel: ObservableObject {
         selectedCommitSHA = nil
         selectedCommitDiff = nil
         graphRows = []
-        Task { await loadGraph(for: path) }
+        graphTask?.cancel()
+        commitDiffTask?.cancel()
+        graphTask = Task { await loadGraph(for: path) }
     }
 
     private func loadGraph(for path: String) async {
@@ -88,7 +93,8 @@ final class WorktreesViewModel: ObservableObject {
     func selectCommit(_ sha: String) {
         guard let path = selectedPath else { return }
         selectedCommitSHA = sha
-        Task {
+        commitDiffTask?.cancel()
+        commitDiffTask = Task {
             let diff = try? await client.loadCommitDiff(sha: sha, in: path)
             guard selectedCommitSHA == sha else { return }
             selectedCommitDiff = diff

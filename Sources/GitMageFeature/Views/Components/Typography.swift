@@ -1,3 +1,4 @@
+import Observation
 import SwiftUI
 
 /// The two brand typefaces — see 06 Brand/Brand Identity.md. Exo 2 for
@@ -19,16 +20,18 @@ enum AinkradFont {
 
     /// Live typography configuration. Mutated only on the main actor when
     /// settings change; read from view bodies (also main actor).
-    struct Config {
+    @MainActor
+    @Observable
+    final class Config {
         var scale: CGFloat = 1.0
         var displayFamily = "Exo 2"
         var monoFamily = "JetBrains Mono"
     }
-    // SAFETY: only mutated on the main actor (settings apply) and read on the
-    // main actor (view bodies).
-    nonisolated(unsafe) static var config = Config()
+    /// Observable, so a view body that calls `display`/`mono` depends on it and
+    /// redraws when the settings change; no rebuild of the whole shell needed.
+    @MainActor static let config = Config()
 
-    static func display(_ size: CGFloat, weight: Font.Weight = .regular) -> Font {
+    @MainActor static func display(_ size: CGFloat, weight: Font.Weight = .regular) -> Font {
         let scaled = size * config.scale
         if config.displayFamily == systemFamily {
             return .system(size: scaled).weight(weight)
@@ -36,7 +39,7 @@ enum AinkradFont {
         return .custom(config.displayFamily, size: scaled).weight(weight)
     }
 
-    static func mono(_ size: CGFloat, weight: Font.Weight = .regular) -> Font {
+    @MainActor static func mono(_ size: CGFloat, weight: Font.Weight = .regular) -> Font {
         let scaled = size * config.scale
         if config.monoFamily == systemFamily {
             return .system(size: scaled, design: .monospaced).weight(weight)

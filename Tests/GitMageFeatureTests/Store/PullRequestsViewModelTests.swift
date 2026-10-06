@@ -111,7 +111,8 @@ private final class MemorySecretStore: PluginSecretStore {
     }
 }
 
-private final class StubForgeProvider: GitForgeProvider {
+// SAFETY: test double; each test builds its own and drives it from one task at a time.
+private final class StubForgeProvider: GitForgeProvider, @unchecked Sendable {
     var summaries: [PullRequestSummary] = []
     var detail: PullRequestDetail?
     var prFiles: [PRFile] = []

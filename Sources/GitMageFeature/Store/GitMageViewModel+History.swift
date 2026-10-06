@@ -22,7 +22,7 @@ extension GitMageViewModel {
             totalCommits = nil
             return
         }
-        Task { @MainActor in
+        trackRead { [self] in
             let total = try? await client.commitCount(in: path)
             guard repositoryPath == path else { return }  // switched repos mid-load
             totalCommits = total
@@ -37,7 +37,7 @@ extension GitMageViewModel {
         guard !path.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty else { return }
         let skip = commits.count
         isLoadingCommits = true
-        Task { @MainActor in
+        trackRead { [self] in
             let page = (try? await client.loadLog(skip: skip, limit: commitPageSize, in: path)) ?? []
             // Guard against a concurrent refresh having reset the list.
             if commits.count == skip {
@@ -54,7 +54,7 @@ extension GitMageViewModel {
     func selectCommit(_ commit: GitCommitSummary) {
         selectedCommitID = commit.id
         let path = repositoryPath
-        Task { @MainActor in
+        trackRead { [self] in
             do {
                 var diff = try await client.loadCommitDiff(sha: commit.id, in: path)
                 guard repositoryPath == path else { return }  // switched repos mid-load

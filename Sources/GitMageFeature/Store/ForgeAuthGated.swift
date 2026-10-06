@@ -15,11 +15,8 @@ extension ForgeAuthGated {
             authState = .missingToken
             return
         }
-        // SAFETY: the provider is immutable and only used here, on the main actor;
-        // the same exemption the view models' stored `provider` already carries.
-        nonisolated(unsafe) let forge = provider
         do {
-            _ = try await forge.verify()
+            _ = try await provider.verify()
             authState = .valid
         } catch let error as ForgeError {
             if error == .unauthorized {
@@ -33,6 +30,7 @@ extension ForgeAuthGated {
     }
 
     func handleForgeError(_ error: ForgeError) {
+        if Task.isCancelled { return }  // a superseded load, not a failure to show
         errorMessage = error.errorDescription
         if error == .unauthorized {
             authState = .invalid(error.errorDescription ?? "Invalid token.")

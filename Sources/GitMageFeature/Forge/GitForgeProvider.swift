@@ -32,7 +32,7 @@ enum ForgeError: Error, LocalizedError, Equatable {
 
 /// A forge (e.g. GitHub) pull-request backend. Implementations map their
 /// wire format to the plain models in `ForgeModels.swift`.
-protocol GitForgeProvider {
+protocol GitForgeProvider: Sendable {
     func verify() async throws -> ForgeUser
     func listPullRequests(_ repo: RepoRef, state: PRState) async throws -> [PullRequestSummary]
     /// Paginated PR search (text + labels) via the forge search API.

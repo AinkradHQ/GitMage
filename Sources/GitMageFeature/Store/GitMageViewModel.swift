@@ -64,6 +64,27 @@ final class GitMageViewModel: ObservableObject {
     let client = GitRepositoryClient()
     let log: PluginLogger
     private var didBootstrap = false
+    /// In-flight read loads that write state after an await. Cancelled when the
+    /// active repo changes, so a slow load never outlives the repo it was for.
+    private var readTasks: [UUID: Task<Void, Never>] = [:]
+
+    /// Starts a read load owned by this model (see `readTasks`).
+    @discardableResult
+    func trackRead(_ body: @escaping @MainActor () async -> Void) -> Task<Void, Never> {
+        let id = UUID()
+        let task = Task { @MainActor in
+            await body()
+            readTasks[id] = nil
+        }
+        readTasks[id] = task
+        return task
+    }
+
+    private func cancelReads() {
+        for task in readTasks.values { task.cancel() }
+        readTasks = [:]
+        isLoadingCommits = false
+    }
 
     /// Files Git Mage's notifications. Generation 9 onward; every host that
     /// can load this bundle supplies one.
@@ -108,6 +129,7 @@ final class GitMageViewModel: ObservableObject {
         diffSnapshot = nil
         selectedStashDiff = nil
         errorMessage = nil
+        cancelReads()
     }
 
     /// Folds the live editor state back into the active repo config.
@@ -142,7 +164,7 @@ final class GitMageViewModel: ObservableObject {
     private func refreshBranchesOnly(at path: String) -> Task<Void, Never> {
         isLoading = true
         errorMessage = nil
-        return Task { @MainActor in
+        return trackRead { [self] in
             let loaded = (try? await client.loadBranches(at: path)) ?? []
             guard repositoryPath == path else { return }  // switched repos mid-load
             branches = loaded
@@ -172,7 +194,7 @@ final class GitMageViewModel: ObservableObject {
         isLoading = true
         errorMessage = nil
 
-        return Task { @MainActor in
+        return trackRead { [self] in
             do {
                 // Concurrent: the three loads are independent read-only commands.
                 async let loadedSnapshot = client.loadSnapshot(at: path)
@@ -236,7 +258,7 @@ final class GitMageViewModel: ObservableObject {
 
     func loadDiff(for change: GitChange) {
         let path = repositoryPath
-        Task { @MainActor in
+        trackRead { [self] in
             do {
                 let diff = try await client.loadDiff(for: change, in: path)
                 guard repositoryPath == path else { return }  // switched repos mid-load

@@ -11,8 +11,7 @@ import Foundation
 /// in-memory provider and never open a socket or run `git`.
 ///
 /// A `MainActor` class rather than a struct so it is `Sendable` and can be
-/// captured by `GitMageMCPServer.make`'s `@Sendable` forwarder while holding a
-/// `GitForgeProvider`, which is not `Sendable`.
+/// captured by `GitMageMCPServer.make`'s `@Sendable` forwarder.
 @MainActor
 final class PrOpActionHandler {
     /// Resolves a repository path to its forge coordinates. Nil when the repo
@@ -22,12 +21,7 @@ final class PrOpActionHandler {
     private let makeProvider: () -> GitForgeProvider?
 
     /// The provider, built once on first use.
-    ///
-    /// SAFETY: written and read only on the main actor. `nonisolated(unsafe)`
-    /// is the same opt-out `PullRequestsViewModel` uses for its provider —
-    /// `GitForgeProvider` is a non-`Sendable` existential, so without it every
-    /// `await provider.…` below is a region-isolation error.
-    private nonisolated(unsafe) var cachedProvider: GitForgeProvider?
+    private var cachedProvider: GitForgeProvider?
 
     private func prepareProvider() -> Bool {
         if cachedProvider == nil { cachedProvider = makeProvider() }
@@ -79,10 +73,6 @@ final class PrOpActionHandler {
 
     // MARK: - dispatch
 
-    /// Reads `cachedProvider` directly rather than taking it as a parameter:
-    /// the `nonisolated(unsafe)` opt-out applies to the property access, and
-    /// threading the existential through a parameter would put it back into the
-    /// main actor's isolation region.
     private func perform(
         _ operation: String, repo: RepoRef,
         args: [String: Any]

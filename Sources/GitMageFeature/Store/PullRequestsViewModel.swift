@@ -28,9 +28,10 @@ final class PullRequestsViewModel: ObservableObject {
     private var page = 1
 
     private let repo: RepoRef?
-    // SAFETY: immutable, only accessed on the main actor
-    private nonisolated(unsafe) let provider: GitForgeProvider?
+    private let provider: GitForgeProvider?
     private let auth: GitForgeAuth
+    /// The filter-driven reload; a newer filter change cancels it.
+    private var reloadTask: Task<Void, Never>?
 
     init(repo: RepoRef?, provider: GitForgeProvider?, auth: GitForgeAuth) {
         self.repo = repo
@@ -89,7 +90,8 @@ final class PullRequestsViewModel: ObservableObject {
 
     func toggleLabel(_ name: String) {
         if selectedLabels.contains(name) { selectedLabels.remove(name) } else { selectedLabels.insert(name) }
-        Task { await load() }
+        reloadTask?.cancel()
+        reloadTask = Task { await load() }
     }
 
     func select(_ number: Int) async {
