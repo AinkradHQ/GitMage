@@ -6,21 +6,6 @@ import Testing
 
 // MARK: - doubles
 
-/// Records the payloads the PR tools forward, so a routing test can prove a
-/// call went down the PR path and NOT the git path.
-@MainActor
-private final class RecordingForwarder {
-    private(set) var payloads: [String] = []
-    func forward(_ json: String) async -> AgentActionResult {
-        payloads.append(json)
-        return AgentActionResult(text: "ok", isError: false)
-    }
-    var lastObject: [String: Any]? {
-        guard let json = payloads.last, let data = json.data(using: .utf8) else { return nil }
-        return (try? JSONSerialization.jsonObject(with: data)) as? [String: Any]
-    }
-}
-
 /// A `GitForgeProvider` that answers from memory and records every call.
 /// Nothing here touches the network — the handler is built with this instance
 /// injected in place of `GitHubProvider`.
@@ -121,83 +106,9 @@ private final class StubForgeProvider: GitForgeProvider {
     func setAssignees(_ repo: RepoRef, number: Int, assignees: [String]) async throws {}
 }
 
-// MARK: - helpers
-
-@MainActor
-private func listedTools(_ server: MCPAppServer) async -> [[String: Any]] {
-    let reply = await server.handle(#"{"jsonrpc":"2.0","id":1,"method":"tools/list"}"#)
-    guard let data = reply.data(using: .utf8),
-        let root = (try? JSONSerialization.jsonObject(with: data)) as? [String: Any],
-        let result = root["result"] as? [String: Any],
-        let tools = result["tools"] as? [[String: Any]]
-    else { return [] }
-    return tools
-}
-
-@MainActor
-private func call(
-    _ server: MCPAppServer, _ name: String,
-    arguments: [String: Any]
-) async -> (text: String, isError: Bool) {
-    let params: [String: Any] = ["name": name, "arguments": arguments]
-    let request: [String: Any] = ["jsonrpc": "2.0", "id": 7, "method": "tools/call", "params": params]
-    let data = try! JSONSerialization.data(withJSONObject: request)
-    let reply = await server.handle(String(decoding: data, as: UTF8.self))
-    guard let replyData = reply.data(using: .utf8),
-        let root = (try? JSONSerialization.jsonObject(with: replyData)) as? [String: Any],
-        let result = root["result"] as? [String: Any],
-        let content = result["content"] as? [[String: Any]]
-    else {
-        return ("<no result>", true)
-    }
-    return (content.first?["text"] as? String ?? "", result["isError"] as? Bool ?? false)
-}
-
-private func destructiveHint(_ tool: [String: Any]) -> Bool {
-    (tool["annotations"] as? [String: Any])?["destructiveHint"] as? Bool ?? false
-}
-
 private func readOnlyHint(_ tool: [String: Any]) -> Bool {
     (tool["annotations"] as? [String: Any])?["readOnlyHint"] as? Bool ?? false
 }
-
-// MARK: - evasion cases
-//
-// File-scope (not nested in the suite) because `@Test(arguments:)` reads the
-// table from outside the actor, and the suite is `@MainActor`.
-
-/// One spelling of an approving review event. Built by a closure so the table
-/// can hold heterogeneous JSON values and still be `Sendable`.
-struct PREvasion: Sendable, CustomStringConvertible {
-    let label: String
-    let value: @Sendable () -> Any
-    init(_ label: String, _ value: @escaping @Sendable () -> Any) {
-        self.label = label
-        self.value = value
-    }
-    var description: String { label }
-}
-
-/// Spellings a caller could try in place of the plain `event: "approve"` that
-/// `pr_review`'s guard rejects.
-///
-/// Unlike `reset`'s `mode`, the sink here is LOOSE — `PrOpActionHandler`
-/// lowercases and aliases `"approved"` — so the casing variants are NOT saved
-/// by a strict sink the way `"Hard"` is. They have to be caught by the guard
-/// itself, which is why it resolves through the sink's own parser.
-let approveEvasions: [PREvasion] = [
-    PREvasion("plain") { "approve" },
-    PREvasion("capitalised") { "Approve" },
-    PREvasion("upper-cased") { "APPROVE" },
-    PREvasion("mixed case") { "aPpRoVe" },
-    PREvasion("the past-tense alias") { "approved" },
-    PREvasion("the capitalised alias") { "Approved" },
-    PREvasion("the GitHub wire value") { "APPROVED" },
-    PREvasion("leading space") { " approve" },
-    PREvasion("trailing space") { "approve " },
-    PREvasion("array wrapping the string") { ["approve"] },
-    PREvasion("object wrapping the string") { ["event": "approve"] },
-]
 
 // MARK: - tests
 
