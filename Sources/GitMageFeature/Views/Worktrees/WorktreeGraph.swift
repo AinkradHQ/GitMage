@@ -88,12 +88,12 @@ struct GraphGutter: View {
 
             // The commit node.
             let nodeColor = isSelected ? tokens.accentPrimary : GraphPalette.color(row.col, tokens)
-            let r: CGFloat = isSelected ? 5 : 4
+            let r: CGFloat = isSelected ? skin.size.s5 : skin.size.s4
             let dot = CGRect(x: x(row.col) - r, y: center - r, width: 2 * r, height: 2 * r)
             ctx.fill(Path(ellipseIn: dot), with: .color(nodeColor))
             if isSelected {
                 ctx.stroke(
-                    Path(ellipseIn: dot.insetBy(dx: -2.5, dy: -2.5)),
+                    Path(ellipseIn: dot.insetBy(dx: -skin.size.s2_5, dy: -skin.size.s2_5)),
                     with: .color(tokens.accentPrimary.opacity(skin.opacity.o50)), lineWidth: 1.5)
             }
         }
@@ -110,7 +110,7 @@ struct GraphCommitRow: View {
     let onSelect: () -> Void
     @State private var hovering = false
 
-    private let rowHeight: CGFloat = 34
+    private var rowHeight: CGFloat { skin.size.s34 }
     private var gutterWidth: CGFloat { GraphLayout.gutterWidth(laneCount: laneCount) }
 
     var body: some View {

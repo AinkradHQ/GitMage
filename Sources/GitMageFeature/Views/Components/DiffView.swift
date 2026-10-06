@@ -53,9 +53,9 @@ struct DiffView: View {
     var showHeader: Bool = true
     @Environment(\.ainkradSkin) private var skin
 
-    private let numberWidth: CGFloat = 34
-    private let signWidth: CGFloat = 16
-    private var gutterWidth: CGFloat { numberWidth * 2 + 8 }
+    private var numberWidth: CGFloat { skin.size.s34 }
+    private var signWidth: CGFloat { skin.size.s16 }
+    private var gutterWidth: CGFloat { numberWidth * 2 + skin.spacing.sm }
 
     enum LineKind { case hunk, add, remove, context, meta }
     struct Row: Identifiable, Equatable {
