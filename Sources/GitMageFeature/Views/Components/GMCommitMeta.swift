@@ -26,4 +26,7 @@ struct GMCommitMeta: View {
                 .lineLimit(limitLines ? 1 : nil)
         }
     }
+
+    /// The same line as plain text, for a kit row's subtitle.
+    static func text(sha: String, author: String, date: String) -> String { "\(sha) · \(author) · \(date)" }
 }

@@ -102,7 +102,10 @@ private struct CommitRow: View {
             Spacer(minLength: 4)
         }
         .padding(.horizontal, 9)
-        .gmListRowChrome(tokens: tokens, isSelected: isSelected, hovering: $hovering, spine: nil, fillInset: 2)
+        // The kit's row wash; the layout stays local (AinkradListRow is title + subtitle only).
+        .ainkradRowBackground(isSelected: isSelected, isHovered: hovering)
+        .contentShape(Rectangle())
+        .onHover { hovering = $0 }
         .onTapGesture(perform: onSelect)
     }
 }

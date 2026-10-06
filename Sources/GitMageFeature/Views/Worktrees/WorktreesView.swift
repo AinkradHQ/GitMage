@@ -77,6 +77,7 @@ private struct WorktreeRow: View {
     let onToggleLock: () -> Void
     let onRemove: () -> Void
     @State private var hovering = false
+    @Environment(\.ainkradReduceMotion) private var reduceMotion
 
     private var lastPathComponent: String {
         (worktree.path as NSString).lastPathComponent
@@ -96,7 +97,11 @@ private struct WorktreeRow: View {
                 .frame(height: 22)
         }
         .padding(.horizontal, 9).padding(.vertical, 8)
-        .gmListRowChrome(tokens: tokens, isSelected: isSelected, hovering: $hovering, spine: (20, 1))
+        // The kit's row wash; the layout stays local (AinkradListRow is title + subtitle only).
+        .ainkradRowBackground(isSelected: isSelected, isHovered: hovering)
+        .contentShape(Rectangle())
+        .onHover { hovering = $0 }
+        .animation(reduceMotion ? nil : .easeOut(duration: 0.12), value: hovering)
         .onTapGesture(count: 2, perform: onOpen)
         .onTapGesture(perform: onSelect)
     }

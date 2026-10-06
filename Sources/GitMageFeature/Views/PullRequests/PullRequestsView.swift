@@ -47,38 +47,24 @@ private struct PullRequestRow: View {
     let tokens: HostThemeTokens
     let isSelected: Bool
     let onSelect: () -> Void
-    @State private var hovering = false
 
     private var isOpen: Bool { pr.state.lowercased() == "open" }
 
     var body: some View {
-        HStack(spacing: 10) {
-            Image(systemName: "arrow.triangle.pull")
-                .font(.system(size: 12))
-                .foregroundStyle(isOpen ? GMColor.status(.open, tokens) : GMColor.status(.closedMerged, tokens))
-                .frame(width: 16)
-
-            VStack(alignment: .leading, spacing: 2) {
-                Text(pr.title)
-                    .font(AinkradFont.display(12))
-                    .foregroundStyle(tokens.foreground.opacity(isSelected ? 1 : 0.9))
-                    .lineLimit(1)
-                HStack(spacing: 6) {
-                    Text("#\(pr.number)")
-                        .font(AinkradFont.mono(9, weight: .medium))
-                        .foregroundStyle(tokens.accentSecondary)
-                    Text(pr.author)
-                        .font(AinkradFont.mono(9))
-                        .foregroundStyle(tokens.foreground.opacity(0.5)).lineLimit(1)
+        AinkradListRow(
+            isSelected: isSelected, onTap: onSelect,
+            leading: {
+                Image(systemName: "arrow.triangle.pull")
+                    .font(.system(size: 12))
+                    .foregroundStyle(isOpen ? GMColor.status(.open, tokens) : GMColor.status(.closedMerged, tokens))
+                    .frame(width: 16)
+            },
+            title: pr.title, subtitle: "#\(pr.number) · \(pr.author)",
+            trailing: {
+                if pr.isDraft {
+                    StatusPill(text: "Draft", kind: .neutral, tokens: tokens)
                 }
             }
-            Spacer(minLength: 4)
-            if pr.isDraft {
-                StatusPill(text: "Draft", kind: .neutral, tokens: tokens)
-            }
-        }
-        .padding(.horizontal, 9).padding(.vertical, 7)
-        .gmListRowChrome(tokens: tokens, isSelected: isSelected, hovering: $hovering)
-        .onTapGesture(perform: onSelect)
+        )
     }
 }

@@ -226,27 +226,20 @@ private struct TagRow: View {
     @State private var hovering = false
 
     var body: some View {
-        HStack(spacing: 8) {
-            Image(systemName: "tag").font(.system(size: 10)).foregroundStyle(tokens.accentSecondary.opacity(0.8)).frame(
-                width: 14)
-            VStack(alignment: .leading, spacing: 2) {
-                Text(tag.name).font(AinkradFont.display(12, weight: .medium)).foregroundStyle(
-                    tokens.foreground.opacity(0.9))
-                if let message = tag.message, !message.isEmpty {
-                    Text(message)
-                        .font(AinkradFont.display(10))
-                        .foregroundStyle(tokens.foreground.opacity(0.5))
-                        .lineLimit(1)
-                }
+        // The kit row owns the hover wash; this one only reveals the trash.
+        AinkradListRow(
+            leading: {
+                Image(systemName: "tag").font(.system(size: 10)).foregroundStyle(tokens.accentSecondary.opacity(0.8))
+                    .frame(width: 14)
+            },
+            title: tag.name,
+            subtitle: tag.message.flatMap { $0.isEmpty ? nil : $0 },
+            trailing: {
+                AinkradIconButton(systemName: "trash", size: 20, tooltip: "Delete tag", action: onDelete)
+                    .opacity(hovering ? 1 : 0)
+                    .allowsHitTesting(hovering)
             }
-            Spacer()
-            AinkradIconButton(systemName: "trash", size: 20, tooltip: "Delete tag", action: onDelete)
-                .opacity(hovering ? 1 : 0)
-                .allowsHitTesting(hovering)
-        }
-        .padding(.horizontal, 9).padding(.vertical, 7)
-        .background(hovering ? tokens.surfaceElevated.opacity(0.5) : .clear, in: ChamferShape(cut: AinkradRadius.md))
-        .contentShape(Rectangle())
+        )
         .onHover { hovering = $0 }
     }
 }

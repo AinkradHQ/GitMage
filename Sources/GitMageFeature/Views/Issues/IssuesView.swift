@@ -88,7 +88,10 @@ private struct IssueRow: View {
             Spacer(minLength: 4)
         }
         .padding(.horizontal, 9).padding(.vertical, 7)
-        .gmListRowChrome(tokens: tokens, isSelected: isSelected, hovering: $hovering)
+        // The kit's row wash; the layout stays local (AinkradListRow is title + subtitle only).
+        .ainkradRowBackground(isSelected: isSelected, isHovered: hovering)
+        .contentShape(Rectangle())
+        .onHover { hovering = $0 }
         .onTapGesture(perform: onSelect)
     }
 }

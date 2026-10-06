@@ -69,7 +69,6 @@ struct ChangesContextPane: View {
                     let rowID = "\(staged ? "staged" : "unstaged"):\(change.id)"
                     ChangeRow(
                         change: change, isSelected: selectedRowID == rowID, staged: staged, tokens: tokens,
-                        accent: accent,
                         onSelect: {
                             selectedRowID = rowID
                             model.selectChange(change)
@@ -100,12 +99,12 @@ struct ChangeRow: View {
     let isSelected: Bool
     let staged: Bool
     let tokens: HostThemeTokens
-    let accent: Color
     let onSelect: () -> Void
     let onStage: () -> Void
     let onUnstage: () -> Void
     let onDiscard: () -> Void
     @State private var hovering = false
+    @Environment(\.ainkradReduceMotion) private var reduceMotion
 
     private var fileName: String { (change.path as NSString).lastPathComponent }
     private var directory: String {
@@ -118,51 +117,44 @@ struct ChangeRow: View {
     private var badgeColor: Color { status.color(tokens) }
 
     var body: some View {
-        HStack(spacing: 10) {
-            Text(badgeLetter)
-                .font(AinkradFont.mono(10, weight: .bold))
-                .foregroundStyle(badgeColor)
-                .frame(width: 20, height: 20)
-                .background(
-                    ChamferShape(cut: AinkradRadius.sm)
-                        .fill(badgeColor.opacity(0.16))
-                )
-                .overlay(
-                    ChamferShape(cut: AinkradRadius.sm)
-                        .strokeBorder(badgeColor.opacity(0.35), lineWidth: 0.5)
-                )
+        // The kit row owns the hover wash and selection; this one only reveals the actions.
+        AinkradListRow(
+            isSelected: isSelected, onTap: onSelect, leading: { badge }, title: fileName,
+            subtitle: directory.isEmpty ? nil : directory, trailing: { actions }
+        )
+        .onHover { hovering = $0 }
+        .animation(reduceMotion ? nil : .easeOut(duration: 0.12), value: hovering)
+    }
 
-            VStack(alignment: .leading, spacing: 1) {
-                Text(fileName)
-                    .font(AinkradFont.display(12))
-                    .foregroundStyle(tokens.foreground.opacity(isSelected ? 1 : 0.9))
-                    .lineLimit(1)
-                if !directory.isEmpty {
-                    Text(directory)
-                        .font(AinkradFont.mono(9))
-                        .foregroundStyle(tokens.foreground.opacity(0.4))
-                        .lineLimit(1).truncationMode(.middle)
-                }
-            }
-            Spacer(minLength: 4)
+    private var badge: some View {
+        Text(badgeLetter)
+            .font(AinkradFont.mono(10, weight: .bold))
+            .foregroundStyle(badgeColor)
+            .frame(width: 20, height: 20)
+            .background(
+                ChamferShape(cut: AinkradRadius.sm)
+                    .fill(badgeColor.opacity(0.16))
+            )
+            .overlay(
+                ChamferShape(cut: AinkradRadius.sm)
+                    .strokeBorder(badgeColor.opacity(0.35), lineWidth: 0.5)
+            )
+    }
 
-            // Always laid out (reserves width so nothing shifts); revealed on
-            // hover. Not hit-testable while hidden so it never steals a click.
-            HStack(spacing: 4) {
-                if staged {
-                    AinkradIconButton(systemName: "minus", size: 22, tooltip: "Unstage", action: onUnstage)
-                } else {
-                    AinkradIconButton(systemName: "plus", size: 22, tooltip: "Stage", action: onStage)
-                    AinkradIconButton(
-                        systemName: "arrow.uturn.backward", size: 22, tooltip: "Discard", action: onDiscard)
-                }
+    /// Always laid out (reserves width so nothing shifts); revealed on hover.
+    /// Not hit-testable while hidden so it never steals a click.
+    private var actions: some View {
+        HStack(spacing: 4) {
+            if staged {
+                AinkradIconButton(systemName: "minus", size: 22, tooltip: "Unstage", action: onUnstage)
+            } else {
+                AinkradIconButton(systemName: "plus", size: 22, tooltip: "Stage", action: onStage)
+                AinkradIconButton(
+                    systemName: "arrow.uturn.backward", size: 22, tooltip: "Discard", action: onDiscard)
             }
-            .opacity(hovering ? 1 : 0)
-            .allowsHitTesting(hovering)
         }
-        .padding(.horizontal, 9).padding(.vertical, 7)
-        .gmListRowChrome(tokens: tokens, isSelected: isSelected, hovering: $hovering, accent: accent)
-        .onTapGesture(perform: onSelect)
+        .opacity(hovering ? 1 : 0)
+        .allowsHitTesting(hovering)
     }
 }
 

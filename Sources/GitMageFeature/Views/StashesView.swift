@@ -61,34 +61,29 @@ private struct StashRow: View {
     let onApply: () -> Void
     let onDrop: () -> Void
     @State private var hovering = false
+    @Environment(\.ainkradReduceMotion) private var reduceMotion
 
     var body: some View {
-        HStack(spacing: 10) {
-            Image(systemName: "tray.full")
-                .font(.system(size: 12))
-                .foregroundStyle(isSelected ? tokens.accentPrimary : tokens.accentSecondary.opacity(0.7))
-                .frame(width: 16)
-
-            VStack(alignment: .leading, spacing: 2) {
-                Text(stash.message)
-                    .font(AinkradFont.display(12))
-                    .foregroundStyle(tokens.foreground.opacity(isSelected ? 1 : 0.88))
-                    .lineLimit(2)
-                Text(stash.id)
-                    .font(AinkradFont.mono(9))
-                    .foregroundStyle(tokens.foreground.opacity(0.45))
+        // The kit row owns the hover wash and selection; this one only reveals the actions.
+        AinkradListRow(
+            isSelected: isSelected, onTap: onSelect,
+            leading: {
+                Image(systemName: "tray.full")
+                    .font(.system(size: 12))
+                    .foregroundStyle(isSelected ? tokens.accentPrimary : tokens.accentSecondary.opacity(0.7))
+                    .frame(width: 16)
+            },
+            title: stash.message, subtitle: stash.id,
+            trailing: {
+                HStack(spacing: 4) {
+                    AinkradIconButton(systemName: "arrow.down.circle", size: 22, tooltip: "Apply", action: onApply)
+                    AinkradIconButton(systemName: "trash", size: 22, tooltip: "Drop", action: onDrop)
+                }
+                .opacity(hovering ? 1 : 0)
+                .allowsHitTesting(hovering)
             }
-            Spacer(minLength: 4)
-
-            HStack(spacing: 4) {
-                AinkradIconButton(systemName: "arrow.down.circle", size: 22, tooltip: "Apply", action: onApply)
-                AinkradIconButton(systemName: "trash", size: 22, tooltip: "Drop", action: onDrop)
-            }
-            .opacity(hovering ? 1 : 0)
-            .allowsHitTesting(hovering)
-        }
-        .padding(.horizontal, 9).padding(.vertical, 8)
-        .gmListRowChrome(tokens: tokens, isSelected: isSelected, hovering: $hovering, spine: (20, 1))
-        .onTapGesture(perform: onSelect)
+        )
+        .onHover { hovering = $0 }
+        .animation(reduceMotion ? nil : .easeOut(duration: 0.12), value: hovering)
     }
 }

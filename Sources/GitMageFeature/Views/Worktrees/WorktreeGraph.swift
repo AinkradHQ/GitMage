@@ -128,11 +128,7 @@ struct GraphCommitRow: View {
         }
         .padding(.trailing, 10)
         .frame(height: rowHeight)
-        .background(
-            isSelected
-                ? tokens.accentPrimary.opacity(0.13)
-                : (hovering ? tokens.surfaceElevated.opacity(0.45) : .clear)
-        )
+        .ainkradRowBackground(isSelected: isSelected, isHovered: hovering)
         .contentShape(Rectangle())
         .onTapGesture(perform: onSelect)
         .onHover { hovering = $0 }

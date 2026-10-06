@@ -203,32 +203,18 @@ struct PullRequestDetailView: View {
 private struct PRCommitRow: View {
     let commit: PRCommit
     let tokens: HostThemeTokens
-    @State private var hovering = false
-    @Environment(\.ainkradReduceMotion) private var reduceMotion
 
     var body: some View {
-        HStack(spacing: 10) {
-            Image(systemName: "circle.fill")
-                .font(.system(size: 6))
-                .foregroundStyle(tokens.accentSecondary.opacity(0.7))
-                .frame(width: 14)
-            VStack(alignment: .leading, spacing: 2) {
-                Text(commit.message)
-                    .font(AinkradFont.display(12))
-                    .foregroundStyle(tokens.foreground.opacity(0.9))
-                    .lineLimit(1)
-                GMCommitMeta(
-                    sha: commit.shortSHA, author: commit.author, date: ForgeDate.short(commit.date), tokens: tokens)
-            }
-            Spacer()
-        }
-        .padding(.horizontal, 9).padding(.vertical, 7)
-        .background(
-            ChamferShape(cut: AinkradRadius.md)
-                .fill(hovering ? tokens.surfaceElevated.opacity(0.5) : .clear)
+        AinkradListRow(
+            leading: {
+                Image(systemName: "circle.fill")
+                    .font(.system(size: 6))
+                    .foregroundStyle(tokens.accentSecondary.opacity(0.7))
+                    .frame(width: 14)
+            },
+            title: commit.message,
+            subtitle: GMCommitMeta.text(sha: commit.shortSHA, author: commit.author, date: ForgeDate.short(commit.date)),
+            trailing: { EmptyView() }
         )
-        .contentShape(Rectangle())
-        .onHover { hovering = $0 }
-        .animation(reduceMotion ? nil : .easeOut(duration: 0.12), value: hovering)
     }
 }

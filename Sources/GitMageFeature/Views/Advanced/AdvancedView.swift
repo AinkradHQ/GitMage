@@ -45,26 +45,19 @@ struct AdvancedCommitRow: View {
     let isSelected: Bool
     let tokens: HostThemeTokens
     let onSelect: () -> Void
-    @State private var hovering = false
 
     var body: some View {
-        HStack(spacing: 10) {
-            Image(systemName: "circle.fill")
-                .font(.system(size: 6))
-                .foregroundStyle(isSelected ? tokens.accentPrimary : tokens.accentSecondary.opacity(0.6))
-                .frame(width: 12)
-            VStack(alignment: .leading, spacing: 2) {
-                Text(commit.summary)
-                    .font(AinkradFont.display(12))
-                    .foregroundStyle(tokens.foreground.opacity(isSelected ? 1 : 0.9))
-                    .lineLimit(1)
-                GMCommitMeta(
-                    sha: commit.shortSHA, author: commit.author, date: commit.relativeDate, tokens: tokens)
-            }
-            Spacer(minLength: 4)
-        }
-        .padding(.horizontal, 9).padding(.vertical, 7)
-        .gmListRowChrome(tokens: tokens, isSelected: isSelected, hovering: $hovering, spine: (16, 0), animatesSelection: false)
-        .onTapGesture(perform: onSelect)
+        AinkradListRow(
+            isSelected: isSelected, onTap: onSelect,
+            leading: {
+                Image(systemName: "circle.fill")
+                    .font(.system(size: 6))
+                    .foregroundStyle(isSelected ? tokens.accentPrimary : tokens.accentSecondary.opacity(0.6))
+                    .frame(width: 12)
+            },
+            title: commit.summary,
+            subtitle: GMCommitMeta.text(sha: commit.shortSHA, author: commit.author, date: commit.relativeDate),
+            trailing: { EmptyView() }
+        )
     }
 }
