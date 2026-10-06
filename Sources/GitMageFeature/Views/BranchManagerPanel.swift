@@ -153,11 +153,7 @@ private struct BranchRow: View {
                     .padding(.horizontal, 6).padding(.vertical, 2)
                     .background(Capsule().fill(tokens.accentPrimary.opacity(0.16)))
             } else if hovering {
-                Button(action: onDelete) {
-                    Image(systemName: "trash").font(.system(size: 11))
-                        .foregroundStyle(tokens.foreground.opacity(0.5))
-                }
-                .buttonStyle(.plain).help("Delete branch")
+                AinkradIconButton(systemName: "trash", size: skin.size.s24, tooltip: "Delete branch", action: onDelete)
             }
         }
         .padding(.horizontal, 12)

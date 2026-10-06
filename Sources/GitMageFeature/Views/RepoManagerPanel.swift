@@ -117,11 +117,8 @@ private struct RepoCard: View {
                         .padding(.horizontal, 6).padding(.vertical, 2)
                         .background(Capsule().fill(tokens.accentPrimary.opacity(0.16)))
                 } else if hovering {
-                    Button(action: onRemove) {
-                        Image(systemName: "trash").font(.system(size: 11))
-                            .foregroundStyle(tokens.foreground.opacity(0.55))
-                    }
-                    .buttonStyle(.plain).help("Remove from library")
+                    AinkradIconButton(
+                        systemName: "trash", size: skin.size.s24, tooltip: "Remove from library", action: onRemove)
                 }
             }
             Spacer(minLength: 0)
