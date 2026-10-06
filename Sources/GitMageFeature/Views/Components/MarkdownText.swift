@@ -49,15 +49,7 @@ struct MarkdownText: View {
                 .padding(.top, 2)
 
         case .code(let code):
-            ScrollView(.horizontal, showsIndicators: false) {
-                Text(code)
-                    .font(AinkradFont.mono(baseSize - 0.5))
-                    .foregroundStyle(tokens.foreground.opacity(0.85))
-                    .textSelection(.enabled)
-                    .padding(8)
-            }
-            .background(ChamferShape(cut: AinkradRadius.sm).fill(tokens.surfaceElevated.opacity(0.55)))
-            .overlay(ChamferShape(cut: AinkradRadius.sm).strokeBorder(tokens.foreground.opacity(0.07)))
+            AinkradCodeBlock(code)
 
         case .quote(let lines):
             HStack(spacing: 8) {
