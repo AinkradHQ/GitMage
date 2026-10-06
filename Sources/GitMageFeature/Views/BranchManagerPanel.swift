@@ -125,47 +125,38 @@ private struct BranchRow: View {
     @Environment(\.ainkradReduceMotion) private var reduceMotion
 
     var body: some View {
-        HStack(spacing: 12) {
-            ZStack {
-                Circle()
-                    .fill(branch.isCurrent ? tokens.accentPrimary : tokens.foreground.opacity(0.25))
-                    .frame(width: 8, height: 8)
+        // The kit row owns its own hover wash; this one only reveals the trash.
+        AinkradListRow(
+            isSelected: isSelected,
+            onTap: branch.isCurrent ? nil : onCheckout,
+            leading: { dot },
+            title: branch.name,
+            subtitle: branch.subtitle,
+            trailing: {
                 if branch.isCurrent {
-                    Circle().stroke(tokens.accentPrimary.opacity(0.4), lineWidth: 4).frame(width: 8, height: 8)
+                    AinkradBadge(text: "CURRENT", tint: tokens.accentPrimary)
+                } else if hovering {
+                    AinkradIconButton(
+                        systemName: "trash", size: skin.size.s24, tooltip: "Delete branch", action: onDelete)
                 }
             }
-            .frame(width: 16)
-
-            VStack(alignment: .leading, spacing: 2) {
-                Text(branch.name)
-                    .font(AinkradFont.display(13, weight: branch.isCurrent ? .semibold : .regular))
-                    .foregroundStyle(tokens.foreground.opacity(branch.isCurrent ? 1 : 0.9))
-                Text(branch.subtitle)
-                    .font(AinkradFont.mono(9))
-                    .foregroundStyle(tokens.foreground.opacity(0.42)).lineLimit(1)
-            }
-            Spacer(minLength: 6)
-
-            if branch.isCurrent {
-                AinkradBadge(text: "CURRENT", tint: tokens.accentPrimary)
-            } else if hovering {
-                AinkradIconButton(systemName: "trash", size: skin.size.s24, tooltip: "Delete branch", action: onDelete)
-            }
-        }
-        .padding(.horizontal, 12)
-        .frame(height: 46)
-        .background(
-            ChamferShape(cut: AinkradRadius.sm)
-                .fill(
-                    branch.isCurrent
-                        ? tokens.accentPrimary.opacity(0.09)
-                        : ((hovering || isSelected) ? tokens.accentPrimary.opacity(0.10) : .clear))
         )
         .overlay {
             if isSelected { Color.clear.cornerBrackets(length: skin.size.s8, inset: skin.size.s1) }
         }
-        .contentShape(Rectangle())
-        .onTapGesture { if !branch.isCurrent { onCheckout() } }
         .onHover { h in withAnimation(reduceMotion ? nil : .easeOut(duration: 0.14)) { hovering = h } }
+    }
+
+    /// Filled accent dot with a halo for the checked-out branch, a dim dot otherwise.
+    private var dot: some View {
+        ZStack {
+            Circle()
+                .fill(branch.isCurrent ? tokens.accentPrimary : tokens.foreground.opacity(0.25))
+                .frame(width: 8, height: 8)
+            if branch.isCurrent {
+                Circle().stroke(tokens.accentPrimary.opacity(0.4), lineWidth: 4).frame(width: 8, height: 8)
+            }
+        }
+        .frame(width: 16)
     }
 }
