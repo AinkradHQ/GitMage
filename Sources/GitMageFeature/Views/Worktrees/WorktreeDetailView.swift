@@ -211,12 +211,7 @@ private struct AddWorktreeSheet: View {
     }
 
     private func chooseDestination() {
-        let panel = NSOpenPanel()
-        panel.canChooseDirectories = true
-        panel.canChooseFiles = false
-        panel.canCreateDirectories = true
-        panel.allowsMultipleSelection = false
-        if panel.runModal() == .OK, let url = panel.url {
+        if let url = FolderPicker.pick() {
             destination = url.path
         }
     }
