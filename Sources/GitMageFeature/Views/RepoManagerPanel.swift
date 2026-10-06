@@ -100,6 +100,7 @@ private struct RepoCard: View {
     let onSelect: () -> Void
     let onRemove: () -> Void
     @State private var hovering = false
+    @Environment(\.ainkradSkin) private var skin
     @Environment(\.ainkradReduceMotion) private var reduceMotion
 
     var body: some View {
@@ -152,11 +153,9 @@ private struct RepoCard: View {
                         : tokens.foreground.opacity(hovering ? 0.14 : 0.06),
                     lineWidth: isActive ? 1.2 : 1)
         )
-        .overlay(
-            GMTargetingBrackets()
-                .stroke(isSelected ? tokens.accentSecondary.opacity(0.9) : .clear, lineWidth: 1.5)
-                .padding(2)
-        )
+        .overlay {
+            if isSelected { Color.clear.cornerBrackets(length: skin.size.s8, inset: skin.size.s2) }
+        }
         .contentShape(Rectangle())
         .onTapGesture(perform: onSelect)
         .onHover { h in withAnimation(reduceMotion ? nil : .easeOut(duration: 0.14)) { hovering = h } }

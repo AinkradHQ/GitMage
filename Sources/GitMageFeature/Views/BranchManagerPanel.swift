@@ -121,6 +121,7 @@ private struct BranchRow: View {
     let onCheckout: () -> Void
     let onDelete: () -> Void
     @State private var hovering = false
+    @Environment(\.ainkradSkin) private var skin
     @Environment(\.ainkradReduceMotion) private var reduceMotion
 
     var body: some View {
@@ -168,11 +169,9 @@ private struct BranchRow: View {
                         ? tokens.accentPrimary.opacity(0.09)
                         : ((hovering || isSelected) ? tokens.accentPrimary.opacity(0.10) : .clear))
         )
-        .overlay(
-            GMTargetingBrackets()
-                .stroke(isSelected ? tokens.accentSecondary.opacity(0.9) : .clear, lineWidth: 1.5)
-                .padding(1)
-        )
+        .overlay {
+            if isSelected { Color.clear.cornerBrackets(length: skin.size.s8, inset: skin.size.s1) }
+        }
         .contentShape(Rectangle())
         .onTapGesture { if !branch.isCurrent { onCheckout() } }
         .onHover { h in withAnimation(reduceMotion ? nil : .easeOut(duration: 0.14)) { hovering = h } }
