@@ -136,7 +136,7 @@ struct GitMageBasicModeTests {
 }
 
 /// A real git repository in a temp directory, with one commit.
-private struct TempRepo {
+struct TempRepo {
     let path: String
 
     init() throws {

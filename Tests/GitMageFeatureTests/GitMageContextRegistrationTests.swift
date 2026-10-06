@@ -97,9 +97,13 @@ final class FakeHostServices: HostServices {
     /// it is the documented cost of adding a protocol requirement: a compiled
     /// bundle keeps loading, but a plugin's test double needs the new member.
     /// `NoopSignalEmitter` is what the SDK ships for exactly this.
-    let signals: PluginSignalEmitter = NoopSignalEmitter()
-    init(context: PluginContextRegistry, actions: AgentActionProvider = RecordingActionRegistry()) {
+    let signals: PluginSignalEmitter
+    init(
+        context: PluginContextRegistry, actions: AgentActionProvider = RecordingActionRegistry(),
+        signals: PluginSignalEmitter = NoopSignalEmitter()
+    ) {
         self.context = context
+        self.signals = signals
         self.actions = actions
         FakeHostServices.liveInstances.append(self)
     }

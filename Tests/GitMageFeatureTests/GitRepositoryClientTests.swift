@@ -298,6 +298,33 @@ final class GitRepositoryClientTests: XCTestCase {
         try runGit(["rev-parse", "--verify", "refs/heads/feature/push"], in: bareURL)
     }
 
+    /// An upstream that is configured but unreadable is NOT "no upstream":
+    /// pushing with `-u origin` anyway would silently re-point the branch.
+    func testPushDoesNotMistakeABrokenUpstreamForNone() async throws {
+        let (bareURL, _) = try makeBareRemoteWithCommit()
+        let client = GitRepositoryClient()
+        let parent = FileManager.default.temporaryDirectory.appendingPathComponent(
+            UUID().uuidString, isDirectory: true)
+        try FileManager.default.createDirectory(at: parent, withIntermediateDirectories: true)
+        let clonedPath = try await client.clone(remoteURL: bareURL.path, into: parent.path)
+        let clonedURL = URL(fileURLWithPath: clonedPath)
+        try runGit(["config", "user.email", "gitmage@example.com"], in: clonedURL)
+        try runGit(["config", "user.name", "Git Mage"], in: clonedURL)
+        try await client.createBranch("feature/broken", in: clonedPath)
+        // Configured upstream whose remote-tracking ref does not exist.
+        try runGit(["config", "branch.feature/broken.remote", "origin"], in: clonedURL)
+        try runGit(["config", "branch.feature/broken.merge", "refs/heads/feature/broken"], in: clonedURL)
+
+        do {
+            try await client.push(in: clonedPath)
+            XCTFail("expected the broken upstream to surface")
+        } catch let GitRepositoryError.commandFailed(message) {
+            XCTAssertFalse(message.contains("no upstream configured"), message)
+        }
+        let pushed = (try? runGit(["rev-parse", "--verify", "refs/heads/feature/broken"], in: bareURL)) != nil
+        XCTAssertFalse(pushed, "the branch must not have been pushed with -u")
+    }
+
     func testRepositoryNameFromRemote() {
         XCTAssertEqual(GitRepositoryClient.repositoryName(fromRemote: "https://github.com/owner/repo.git"), "repo")
         XCTAssertEqual(GitRepositoryClient.repositoryName(fromRemote: "https://github.com/owner/repo"), "repo")

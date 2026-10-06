@@ -275,10 +275,10 @@ final class GitMageViewModel: ObservableObject {
     /// Deliberately does NOT clear `snapshot`, `commits` or `stashes`. Switching
     /// a pane basic -> advanced keeps this model, and wiping what advanced
     /// already loaded would make the switch look like a reload every time.
-    private func refreshBranchesOnly(at path: String) {
+    private func refreshBranchesOnly(at path: String) -> Task<Void, Never> {
         isLoading = true
         errorMessage = nil
-        Task { @MainActor in
+        return Task { @MainActor in
             let loaded = (try? await client.loadBranches(at: path)) ?? []
             guard repositoryPath == path else { return }  // switched repos mid-load
             branches = loaded
@@ -292,22 +292,23 @@ final class GitMageViewModel: ObservableObject {
 
     /// `includeHistory: false` is the lighter reload after an action that
     /// cannot move HEAD (stage, unstage, discard, stash): history is kept.
-    func refresh(includeHistory: Bool = true) {
+    /// Returns the load so `run()` can await it before reading the state it produces.
+    @discardableResult
+    func refresh(includeHistory: Bool = true) -> Task<Void, Never>? {
         let path = repositoryPath
         guard !path.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty else {
             errorMessage = GitRepositoryError.missingPath.localizedDescription
-            return
+            return nil
         }
 
         if loadScope == .basic {
-            refreshBranchesOnly(at: path)
-            return
+            return refreshBranchesOnly(at: path)
         }
 
         isLoading = true
         errorMessage = nil
 
-        Task { @MainActor in
+        return Task { @MainActor in
             do {
                 // Concurrent: the three loads are independent read-only commands.
                 async let loadedSnapshot = client.loadSnapshot(at: path)
@@ -406,7 +407,9 @@ final class GitMageViewModel: ObservableObject {
             return
         }
         Task { @MainActor in
-            totalCommits = try? await client.commitCount(in: path)
+            let total = try? await client.commitCount(in: path)
+            guard repositoryPath == path else { return }  // switched repos mid-load
+            totalCommits = total
         }
     }
 
@@ -438,10 +441,12 @@ final class GitMageViewModel: ObservableObject {
         Task { @MainActor in
             do {
                 var diff = try await client.loadCommitDiff(sha: commit.id, in: path)
+                guard repositoryPath == path else { return }  // switched repos mid-load
                 diff = GitDiffSnapshot(
                     title: "\(commit.shortSHA) · \(commit.summary)", body: diff.body, isEmpty: diff.isEmpty)
                 commitDiff = diff
             } catch {
+                guard repositoryPath == path else { return }
                 commitDiff = GitDiffSnapshot(title: commit.shortSHA, body: error.localizedDescription, isEmpty: true)
             }
         }
@@ -487,8 +492,11 @@ final class GitMageViewModel: ObservableObject {
         let path = repositoryPath
         Task { @MainActor in
             do {
-                selectedStashDiff = try await client.stashDiff(entry.id, in: path)
+                let diff = try await client.stashDiff(entry.id, in: path)
+                guard repositoryPath == path else { return }  // switched repos mid-load
+                selectedStashDiff = diff
             } catch {
+                guard repositoryPath == path else { return }
                 selectedStashDiff = GitDiffSnapshot(title: entry.id, body: error.localizedDescription, isEmpty: true)
             }
         }
@@ -507,9 +515,17 @@ final class GitMageViewModel: ObservableObject {
         Task { @MainActor in
             do {
                 let diff = try await client.loadDiff(for: change, in: path)
+                guard repositoryPath == path else {  // switched repos mid-load
+                    isLoadingDiff = false
+                    return
+                }
                 diffSnapshot = diff
                 isLoadingDiff = false
             } catch {
+                guard repositoryPath == path else {
+                    isLoadingDiff = false
+                    return
+                }
                 diffSnapshot = GitDiffSnapshot(
                     title: change.path,
                     body: (error as? LocalizedError)?.errorDescription ?? error.localizedDescription,
@@ -593,7 +609,7 @@ final class GitMageViewModel: ObservableObject {
             do {
                 try await action()
                 log.info("Completed \(context) in \(repository)")
-                refresh(includeHistory: movesHead)
+                await refresh(includeHistory: movesHead)?.value
                 let elapsed = Date().timeIntervalSince(startedAt)
                 // Success only past the threshold: a 200ms status refresh is
                 // not news, a four-minute clone is the thing the user walked
