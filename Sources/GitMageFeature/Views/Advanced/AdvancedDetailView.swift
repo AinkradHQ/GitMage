@@ -214,7 +214,7 @@ private struct AutostashToggle: View {
                 .font(AinkradFont.display(12))
                 .foregroundStyle(tokens.foreground.opacity(0.85))
             Spacer()
-            NeonToggle(isOn: $isOn, tokens: tokens)
+            AinkradToggle(isOn: $isOn)
         }
     }
 }
