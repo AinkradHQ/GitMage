@@ -40,7 +40,7 @@ struct TopBarChip: View {
         }
         .buttonStyle(.plain)
         .ainkradTooltip(shortcutTooltip(tooltip ?? label, shortcut))
-        .onHover { h in withAnimation(reduceMotion ? nil : .easeOut(duration: 0.14)) { hovering = h } }
+        .onHover { h in withAnimation(reduceMotion ? nil : .easeOut(duration: skin.motion.durations.d0_14)) { hovering = h } }
     }
 }
 

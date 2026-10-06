@@ -142,7 +142,7 @@ private struct BranchRow: View {
         .overlay {
             if isSelected { Color.clear.cornerBrackets(length: skin.size.s8, inset: skin.size.s1) }
         }
-        .onHover { h in withAnimation(reduceMotion ? nil : .easeOut(duration: 0.14)) { hovering = h } }
+        .onHover { h in withAnimation(reduceMotion ? nil : .easeOut(duration: skin.motion.durations.d0_14)) { hovering = h } }
     }
 
     /// Filled accent dot with a halo for the checked-out branch, a dim dot otherwise.

@@ -67,7 +67,11 @@ struct GitMageShell: View {
                     model: model,
                     tokens: tokens,
                     kind: management,
-                    dismiss: { withAnimation(reduceMotion ? nil : .easeOut(duration: 0.16)) { self.management = nil } }
+                    dismiss: {
+                        withAnimation(reduceMotion ? nil : .easeOut(duration: skin.motion.durations.d0_16)) {
+                            self.management = nil
+                        }
+                    }
                 )
             }
 
@@ -93,7 +97,7 @@ struct GitMageShell: View {
             confirmTitle: "Initialize",
             onConfirm: { model.confirmInitPendingRepository() }
         )
-        .animation(reduceMotion ? nil : .spring(response: 0.32, dampingFraction: 0.85), value: management)
+        .animation(managementSpring, value: management)
         .background(
             ShortcutLayer(
                 shortcuts: settingsStore.settings.shortcuts,
@@ -171,8 +175,18 @@ struct GitMageShell: View {
         return hint(command)
     }
 
+    /// The management overlay's present spring; nil under Reduce Motion.
+    private var managementSpring: Animation? {
+        reduceMotion ? nil : skin.motion.springs["sp32_85"].map { skin.animation($0) }
+    }
+
+    /// The nav rail's area-switch spring; nil under Reduce Motion.
+    private var areaSpring: Animation? {
+        reduceMotion ? nil : skin.motion.springs["sp32_74"].map { skin.animation($0) }
+    }
+
     private func openManagement(_ kind: GitMageManagementKind) {
-        withAnimation(reduceMotion ? nil : .spring(response: 0.32, dampingFraction: 0.85)) { management = kind }
+        withAnimation(managementSpring) { management = kind }
     }
 
     /// Central handler for every keyboard-dispatched command.
@@ -185,7 +199,7 @@ struct GitMageShell: View {
         case .push: model.push()
         default:
             if let area = command.area {
-                withAnimation(reduceMotion ? nil : .spring(response: 0.32, dampingFraction: 0.74)) {
+                withAnimation(areaSpring) {
                     model.selectArea(area)
                 }
             }
@@ -208,7 +222,7 @@ struct GitMageShell: View {
         .padding(.vertical, skin.size.s14)
         .frame(width: skin.size.s56)
         .frame(maxHeight: .infinity)
-        .animation(reduceMotion ? nil : .spring(response: 0.32, dampingFraction: 0.74), value: model.selectedArea)
+        .animation(areaSpring, value: model.selectedArea)
     }
 
 
