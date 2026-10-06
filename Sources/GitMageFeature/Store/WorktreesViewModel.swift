@@ -81,10 +81,17 @@ final class WorktreesViewModel: ObservableObject {
 
     private func loadGraph(for path: String) async {
         isLoadingGraph = true
-        let commits = (try? await client.loadGraphCommits(limit: 200, in: path)) ?? []
+        var commits: [GraphCommit] = []
+        var failure: Error?
+        do {
+            commits = try await client.loadGraphCommits(limit: 200, in: path)
+        } catch {
+            failure = error
+        }
         // A newer selection superseded this load — leave the spinner on for it
         // (don't flip it off here, which would flicker an empty state).
         guard selectedPath == path else { return }
+        if let failure { report(failure) }
         graphRows = GitGraphBuilder.build(commits)
         isLoadingGraph = false
     }
@@ -95,7 +102,15 @@ final class WorktreesViewModel: ObservableObject {
         selectedCommitSHA = sha
         commitDiffTask?.cancel()
         commitDiffTask = Task {
-            let diff = try? await client.loadCommitDiff(sha: sha, in: path)
+            let diff: GitDiffSnapshot
+            do {
+                diff = try await client.loadCommitDiff(sha: sha, in: path)
+            } catch {
+                guard selectedCommitSHA == sha else { return }
+                report(error)
+                selectedCommitDiff = GitDiffSnapshot(title: String(sha.prefix(7)), body: error.displayMessage, isEmpty: true)
+                return
+            }
             guard selectedCommitSHA == sha else { return }
             selectedCommitDiff = diff
         }

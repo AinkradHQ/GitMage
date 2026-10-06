@@ -25,7 +25,29 @@ extension ForgeAuthGated {
                 errorMessage = error.errorDescription
             }
         } catch {
-            errorMessage = error.localizedDescription
+            errorMessage = error.displayMessage
+        }
+    }
+
+    /// A secondary load: on failure it is logged, shown in the banner (unless
+    /// `showFailure` is false, for a failure that is routine) and the caller
+    /// gets `fallback`, so an empty list is never a hidden error.
+    func optionalLoad<T>(
+        _ what: String, fallback: T, showFailure: Bool = true, _ load: () async throws -> T
+    ) async -> T {
+        do {
+            return try await load()
+        } catch {
+            if Task.isCancelled { return fallback }
+            Log.forge.error("Failed to load \(what): \(error.displayMessage)")
+            if showFailure {
+                if let forgeError = error as? ForgeError {
+                    handleForgeError(forgeError)
+                } else {
+                    errorMessage = error.displayMessage
+                }
+            }
+            return fallback
         }
     }
 

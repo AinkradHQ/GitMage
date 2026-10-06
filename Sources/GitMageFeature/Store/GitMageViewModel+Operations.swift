@@ -68,7 +68,7 @@ extension GitMageViewModel {
                 selectedStashDiff = diff
             } catch {
                 guard repositoryPath == path else { return }
-                selectedStashDiff = GitDiffSnapshot(title: entry.id, body: error.localizedDescription, isEmpty: true)
+                selectedStashDiff = GitDiffSnapshot(title: entry.id, body: error.displayMessage, isEmpty: true)
             }
         }
     }

@@ -53,7 +53,7 @@ final class PullRequestsViewModel: ObservableObject {
         isLoading = true
         defer { isLoading = false }
         if availableLabels.isEmpty {
-            availableLabels = (try? await provider.repoLabels(repo)) ?? []
+            availableLabels = await optionalLoad("labels", fallback: []) { try await provider.repoLabels(repo) }
         }
         do {
             let result = try await provider.searchPullRequests(
@@ -64,7 +64,7 @@ final class PullRequestsViewModel: ObservableObject {
         } catch let error as ForgeError {
             handleForgeError(error)
         } catch {
-            errorMessage = error.localizedDescription
+            errorMessage = error.displayMessage
         }
     }
 
@@ -84,7 +84,7 @@ final class PullRequestsViewModel: ObservableObject {
         } catch let error as ForgeError {
             handleForgeError(error)
         } catch {
-            errorMessage = error.localizedDescription
+            errorMessage = error.displayMessage
         }
     }
 
@@ -100,14 +100,19 @@ final class PullRequestsViewModel: ObservableObject {
         do {
             let detail = try await provider.pullRequest(repo, number: number)
             self.detail = detail
-            self.files = (try? await provider.files(repo, number: number)) ?? []
-            self.commits = (try? await provider.pullRequestCommits(repo, number: number)) ?? []
-            self.comments = (try? await provider.comments(repo, number: number)) ?? []
-            self.checks = (try? await provider.checks(repo, ref: detail.headBranch)) ?? []
+            self.files = await optionalLoad("changed files", fallback: []) { try await provider.files(repo, number: number) }
+            self.commits = await optionalLoad("commits", fallback: []) {
+                try await provider.pullRequestCommits(repo, number: number)
+            }
+            self.comments = await optionalLoad("comments", fallback: []) { try await provider.comments(repo, number: number) }
+            self.checks = await optionalLoad("checks", fallback: [], showFailure: false) {
+                // Routine failure: a token without checks access, or a repo without CI.
+                try await provider.checks(repo, ref: detail.headBranch)
+            }
         } catch let error as ForgeError {
             handleForgeError(error)
         } catch {
-            errorMessage = error.localizedDescription
+            errorMessage = error.displayMessage
         }
     }
 
@@ -119,7 +124,7 @@ final class PullRequestsViewModel: ObservableObject {
         } catch let error as ForgeError {
             handleForgeError(error)
         } catch {
-            errorMessage = error.localizedDescription
+            errorMessage = error.displayMessage
         }
     }
 
@@ -131,7 +136,7 @@ final class PullRequestsViewModel: ObservableObject {
         } catch let error as ForgeError {
             handleForgeError(error)
         } catch {
-            errorMessage = error.localizedDescription
+            errorMessage = error.displayMessage
         }
     }
 
@@ -143,7 +148,7 @@ final class PullRequestsViewModel: ObservableObject {
         } catch let error as ForgeError {
             handleForgeError(error)
         } catch {
-            errorMessage = error.localizedDescription
+            errorMessage = error.displayMessage
         }
     }
 }

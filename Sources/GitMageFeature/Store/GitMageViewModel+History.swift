@@ -23,7 +23,14 @@ extension GitMageViewModel {
             return
         }
         trackRead { [self] in
-            let total = try? await client.commitCount(in: path)
+            let total: Int?
+            do {
+                total = try await client.commitCount(in: path)
+            } catch {
+                // The header just shows no total; the page load reports real trouble.
+                Log.store.error("Failed to count commits: \(error.displayMessage)")
+                total = nil
+            }
             guard repositoryPath == path else { return }  // switched repos mid-load
             totalCommits = total
         }
@@ -38,7 +45,12 @@ extension GitMageViewModel {
         let skip = commits.count
         isLoadingCommits = true
         trackRead { [self] in
-            let page = (try? await client.loadLog(skip: skip, limit: commitPageSize, in: path)) ?? []
+            var page: [GitCommitSummary] = []
+            do {
+                page = try await client.loadLog(skip: skip, limit: commitPageSize, in: path)
+            } catch {
+                if repositoryPath == path { report(error, context: "load history") }
+            }
             // Guard against a concurrent refresh having reset the list.
             if commits.count == skip {
                 commits.append(contentsOf: page)
@@ -63,7 +75,7 @@ extension GitMageViewModel {
                 commitDiff = diff
             } catch {
                 guard repositoryPath == path else { return }
-                commitDiff = GitDiffSnapshot(title: commit.shortSHA, body: error.localizedDescription, isEmpty: true)
+                commitDiff = GitDiffSnapshot(title: commit.shortSHA, body: error.displayMessage, isEmpty: true)
             }
         }
     }

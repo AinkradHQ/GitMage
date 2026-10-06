@@ -67,7 +67,7 @@ final class PrOpActionHandler {
         } catch let error as ForgeError {
             return bad(error.errorDescription ?? "GitHub request failed.")
         } catch {
-            return bad(error.localizedDescription)
+            return bad(error.displayMessage)
         }
     }
 

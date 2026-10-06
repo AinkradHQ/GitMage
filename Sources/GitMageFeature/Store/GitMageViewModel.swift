@@ -163,7 +163,7 @@ final class GitMageViewModel: ObservableObject {
         isLoading = true
         errorMessage = nil
         return trackRead { [self] in
-            let loaded = (try? await client.loadBranches(at: path)) ?? []
+            let loaded = await loadOrReport("load branches", fallback: []) { try await client.loadBranches(at: path) }
             guard repositoryPath == path else { return }  // switched repos mid-load
             branches = loaded
             if let current = loaded.first(where: { $0.isCurrent }) {
@@ -181,7 +181,7 @@ final class GitMageViewModel: ObservableObject {
     func refresh(includeHistory: Bool = true) -> Task<Void, Never>? {
         let path = repositoryPath
         guard !path.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty else {
-            errorMessage = GitRepositoryError.missingPath.localizedDescription
+            errorMessage = GitRepositoryError.missingPath.displayMessage
             return nil
         }
 
@@ -196,11 +196,15 @@ final class GitMageViewModel: ObservableObject {
             do {
                 // Concurrent: the three loads are independent read-only commands.
                 async let loadedSnapshot = client.loadSnapshot(at: path)
-                async let loadedBranches = try? client.loadBranches(at: path)
-                async let loadedStashes = try? client.loadStashes(in: path)
+                async let loadedBranches = loadOrReport("load branches", fallback: []) {
+                    try await client.loadBranches(at: path)
+                }
+                async let loadedStashes = loadOrReport("load stashes", fallback: []) {
+                    try await client.loadStashes(in: path)
+                }
                 let newSnapshot = try await loadedSnapshot
-                let newBranches = await loadedBranches ?? []
-                let newStashes = await loadedStashes ?? []
+                let newBranches = await loadedBranches
+                let newStashes = await loadedStashes
                 // The user switched repos while this ran: painting these results
                 // would show one repository's state under another's name.
                 guard repositoryPath == path else { return }
@@ -275,6 +279,17 @@ final class GitMageViewModel: ObservableObject {
 
     /// Clears the banner the shell shows for `errorMessage`.
     func dismissError() { errorMessage = nil }
+
+    /// A secondary load: on failure it is logged and shown in the banner, and
+    /// the caller gets `fallback`, so an empty list is never a hidden error.
+    func loadOrReport<T>(_ context: String, fallback: T, _ load: () async throws -> T) async -> T {
+        do {
+            return try await load()
+        } catch {
+            if !Task.isCancelled { report(error, context: context) }
+            return fallback
+        }
+    }
 
     func report(_ error: Error, context: String) {
         errorMessage = error.displayMessage
