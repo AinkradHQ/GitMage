@@ -193,9 +193,7 @@ struct AdvancedDetailView: View {
 
     @ViewBuilder private func card<Content: View>(_ title: String, @ViewBuilder content: () -> Content) -> some View {
         VStack(alignment: .leading, spacing: 10) {
-            Text(title)
-                .font(AinkradFont.display(10, weight: .semibold)).kerning(2)
-                .foregroundStyle(tokens.foreground.opacity(0.5))
+            GMHeaderLabel(text: title, tokens: tokens)
             content()
         }
         .padding(14)

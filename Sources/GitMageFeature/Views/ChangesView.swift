@@ -46,9 +46,7 @@ struct ChangesContextPane: View {
         if !changes.isEmpty {
             LazyVStack(alignment: .leading, spacing: 5) {
                 HStack(spacing: 8) {
-                    Text(title)
-                        .font(AinkradFont.display(10, weight: .semibold)).kerning(2)
-                        .foregroundStyle(tokens.foreground.opacity(0.5))
+                    GMHeaderLabel(text: title, tokens: tokens)
                     Text("\(changes.count)")
                         .font(AinkradFont.mono(9, weight: .medium))
                         .foregroundStyle(tokens.foreground.opacity(0.5))
@@ -190,9 +188,7 @@ struct CommitBox: View {
             .frame(height: 1)
 
             HStack {
-                Text("COMMIT")
-                    .font(AinkradFont.display(10, weight: .semibold)).kerning(2)
-                    .foregroundStyle(tokens.foreground.opacity(0.5))
+                GMHeaderLabel(text: "COMMIT", tokens: tokens)
                 Spacer()
                 Text("\(stagedCount) staged")
                     .font(AinkradFont.mono(9, weight: .medium))
