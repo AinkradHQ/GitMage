@@ -10,130 +10,40 @@ struct IssuesContextPane: View {
     /// from the shell, since the view model does not expose its `repo`.
     let hasGitHubRemote: Bool
 
+    private var gate: ForgeGate { ForgeGate(hasGitHubRemote: hasGitHubRemote, authState: model.authState) }
+
     var body: some View {
         VStack(spacing: 0) {
-            switch gate {
-            case .needsGitHubRemote:
-                gateMessage("Issues need a GitHub `origin` remote.")
-            case .needsToken:
-                gateMessage("Add a GitHub token in Settings.")
-            case .invalidToken(let message):
-                gateMessage(message)
-            case .ready:
-                toolbar
-                list
+            if let message = gate.message(area: "Issues") {
+                ForgeMessage(icon: "smallcircle.filled.circle", title: "Issues", message: message, tokens: tokens)
+            } else {
+                ForgeFilterToolbar(
+                    title: "ISSUES", loaded: model.issues.count, total: model.totalCount, tokens: tokens,
+                    filters: [IssueState.open, IssueState.closed], filter: $model.filter,
+                    filterLabel: { $0 == .open ? "Open" : "Closed" }, searchText: $model.searchText,
+                    searchPlaceholder: "Search issues…", labels: model.repoLabels,
+                    selectedLabels: model.selectedLabels, toggleLabel: { model.toggleLabel($0) },
+                    load: { Task { await model.load() } }
+                ) {
+                    AinkradIconButton(systemName: "plus", size: 22, tooltip: "New issue") { model.showNew = true }
+                }
+                ForgeItemList(
+                    items: model.issues, isLoading: model.isLoading, isLoadingMore: model.isLoadingMore,
+                    errorMessage: model.errorMessage, icon: "smallcircle.filled.circle", areaTitle: "Issues",
+                    emptyTitle: "No issues", tokens: tokens,
+                    loadMore: { Task { await model.loadMore() } }
+                ) { issue in
+                    IssueRow(
+                        issue: issue,
+                        tokens: tokens,
+                        isSelected: model.selectedNumber == issue.number,
+                        onSelect: { Task { await model.select(issue.number) } }
+                    )
+                }
             }
         }
         .ainkradModal(isPresented: $model.showNew) {
             NewIssueSheet(model: model, tokens: tokens)
-        }
-    }
-
-    private enum Gate {
-        case needsGitHubRemote
-        case needsToken
-        case invalidToken(String)
-        case ready
-    }
-
-    private var gate: Gate {
-        guard hasGitHubRemote else { return .needsGitHubRemote }
-        switch model.authState {
-        case .missingToken: return .needsToken
-        case .invalid(let message): return .invalidToken(message)
-        case .unknown, .valid: return .ready
-        }
-    }
-
-    private func gateMessage(_ text: String) -> some View {
-        EmptyStateView(icon: "smallcircle.filled.circle", title: "Issues", message: text, tokens: tokens)
-            .frame(maxWidth: .infinity, maxHeight: .infinity)
-    }
-
-    private var countText: String {
-        model.totalCount > 0 ? "\(model.issues.count) / \(model.totalCount)" : "\(model.issues.count)"
-    }
-
-    private var toolbar: some View {
-        VStack(spacing: 8) {
-            PaneHeader(title: "ISSUES", count: model.issues.count, countText: countText, tokens: tokens) {
-                AinkradIconButton(systemName: "plus", size: 22, tooltip: "New issue") { model.showNew = true }
-            }
-            AinkradSegmentedPicker(
-                items: [IssueState.open, IssueState.closed],
-                selection: Binding(
-                    get: { model.filter },
-                    set: { newValue in
-                        if model.filter != newValue {
-                            model.filter = newValue
-                            Task { await model.load() }
-                        }
-                    }
-                ),
-                label: { $0 == .open ? "Open" : "Closed" }
-            )
-            .padding(.horizontal, 12)
-            AinkradSearchField(
-                text: $model.searchText, placeholder: "Search issues…",
-                onSubmit: { Task { await model.load() } }
-            )
-            .padding(.horizontal, 12)
-            if !model.repoLabels.isEmpty {
-                ScrollView(.horizontal, showsIndicators: false) {
-                    HStack(spacing: 6) {
-                        ForEach(model.repoLabels) { label in
-                            AinkradSwatchChip(
-                                label: label.name,
-                                swatch: Color(hex: label.color),
-                                isOn: model.selectedLabels.contains(label.name),
-                                onTap: { model.toggleLabel(label.name) }
-                            )
-                        }
-                    }
-                }
-                .padding(.horizontal, 12)
-            }
-        }
-        .padding(.bottom, 8)
-    }
-
-    @ViewBuilder private var list: some View {
-        if model.isLoading {
-            AinkradSpinner(size: 22)
-                .frame(maxWidth: .infinity, maxHeight: .infinity)
-        } else if let errorMessage = model.errorMessage {
-            gateMessage(errorMessage)
-        } else if model.issues.isEmpty {
-            EmptyStateView(
-                icon: "smallcircle.filled.circle", title: "No issues",
-                message: "Nothing matches this filter.", tokens: tokens
-            )
-            .frame(maxWidth: .infinity, maxHeight: .infinity)
-        } else {
-            ScrollView {
-                LazyVStack(alignment: .leading, spacing: 3) {
-                    ForEach(Array(model.issues.enumerated()), id: \.element.id) { index, issue in
-                        IssueRow(
-                            issue: issue,
-                            tokens: tokens,
-                            isSelected: model.selectedNumber == issue.number,
-                            onSelect: { Task { await model.select(issue.number) } }
-                        )
-                        .onAppear {
-                            if index == model.issues.count - 1 { Task { await model.loadMore() } }
-                        }
-                    }
-                    if model.isLoadingMore {
-                        HStack {
-                            Spacer()
-                            AinkradSpinner(size: 16)
-                            Spacer()
-                        }
-                        .padding(.vertical, 12)
-                    }
-                }
-                .padding(.horizontal, 12).padding(.bottom, 12)
-            }
         }
     }
 }
