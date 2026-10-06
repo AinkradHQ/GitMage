@@ -657,6 +657,9 @@ final class GitMageViewModel: ObservableObject {
         (error as? LocalizedError)?.errorDescription ?? error.localizedDescription
     }
 
+    /// Clears the banner the shell shows for `errorMessage`.
+    func dismissError() { errorMessage = nil }
+
     private func report(_ error: Error, context: String) {
         errorMessage = (error as? LocalizedError)?.errorDescription ?? error.localizedDescription
         log.error("Failed to \(context): \(error.localizedDescription)")

@@ -48,6 +48,10 @@ struct GitMageShell: View {
         ZStack {
             VStack(spacing: 0) {
                 topBar
+                if let errorMessage = model.errorMessage {
+                    AinkradBanner(message: errorMessage, status: .warning, onDismiss: model.dismissError)
+                        .padding([.horizontal, .bottom])
+                }
                 HStack(spacing: 0) {
                     navRail
                     if model.hasActiveRepo {
