@@ -4,8 +4,7 @@ import SwiftUI
 
 /// Git Mage's settings as DECLARED fields, so the host draws them in the shared
 /// settings style. Its "Appearance" group is merged by the host into the one
-/// Appearance tab (after Open as / Open in, before Blur). `GitMageSettingsView`
-/// stays as the page for hosts that predate this.
+/// Appearance tab (after Open as / Open in, before Blur).
 @MainActor
 enum GitMageSettingsCatalog {
     static func page(
@@ -119,11 +118,7 @@ enum GitMageSettingsCatalog {
                 path: group.appending("reset"), label: "Reset shortcuts",
                 help: "Restore every command's default combination.",
                 keywords: ["shortcuts", "reset", "defaults"],
-                kind: .action(title: "Reset to defaults") {
-                    state.stopRecording()
-                    store.update { $0.shortcuts = GitMageShortcutDefaults.map }
-                    state.reassignNote = nil
-                })
+                kind: .action(title: "Reset to defaults") { state.resetShortcuts(in: store) })
         ]
         for (section, commands) in [("Actions", GitMageCommand.actions), ("Areas", GitMageCommand.areaCommands)] {
             for command in commands {
@@ -212,9 +207,7 @@ final class GitMageSettingsPageState {
             guard let self, let command = self.recording else { return event }
             switch event.keyCode {
             case 53: self.stopRecording()  // esc
-            case 51, 117:  // delete, fwd delete
-                store.update { $0.shortcuts.removeValue(forKey: command.rawValue) }
-                self.stopRecording()
+            case 51, 117: self.clear(command, in: store)  // delete, fwd delete
             default:
                 if let chord = KeyChord(event), chord.hasModifier { self.assign(chord, to: command, in: store) }
             }
@@ -226,6 +219,19 @@ final class GitMageSettingsPageState {
         if let monitor { NSEvent.removeMonitor(monitor) }
         monitor = nil
         recording = nil
+    }
+
+    /// Unbinds `command` and ends the recording.
+    func clear(_ command: GitMageCommand, in store: GitMageSettingsStore) {
+        store.update { $0.shortcuts.removeValue(forKey: command.rawValue) }
+        stopRecording()
+    }
+
+    /// Restores every default combination and drops any reassignment note.
+    func resetShortcuts(in store: GitMageSettingsStore) {
+        stopRecording()
+        store.update { $0.shortcuts = GitMageShortcutDefaults.map }
+        reassignNote = nil
     }
 
     func assign(_ chord: KeyChord, to command: GitMageCommand, in store: GitMageSettingsStore) {

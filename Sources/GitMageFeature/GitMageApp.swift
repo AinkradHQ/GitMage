@@ -16,14 +16,9 @@ public struct GitMageApp: AinkradApp {
             state: GitMageRuntime.settingsPageState(for: host), host: host)
     }
 
-    public static func makeSettingsView(host: HostServices) -> AnyView {
-        AnyView(
-            GitMageSettingsView(
-                settingsStore: GitMageRuntime.settingsStore(for: host),
-                theme: host.theme,
-                host: host
-            ))
-    }
+    /// Empty: the host draws Git Mage's settings from `settingsCatalog`, and
+    /// only falls back to this view when there is no catalog.
+    public static func makeSettingsView(host: HostServices) -> AnyView { AnyView(EmptyView()) }
 
     /// The window surface: the theme surface at the configured opacity so the
     /// title bar reads continuous with the body, and the host reveals its shared
