@@ -15,20 +15,34 @@ enum GraphPalette {
     }
 }
 
+/// Shared geometry for the graph gutter, so the canvas that draws the lanes and
+/// the frame that reserves room for them can never disagree.
+enum GraphLayout {
+    static let laneSpacing: CGFloat = 14
+    static let gutterPadding: CGFloat = 8
+
+    /// Grows with the lane count — every lane's node and edges stay inside it.
+    static func gutterWidth(laneCount: Int) -> CGFloat {
+        CGFloat(max(laneCount, 1)) * laneSpacing + gutterPadding
+    }
+
+    /// Center x of a lane inside the gutter.
+    static func laneX(_ lane: Int) -> CGFloat { CGFloat(lane) * laneSpacing + laneSpacing / 2 }
+}
+
 /// Draws one row's slice of the commit graph: pass-through/merge lanes and the
 /// node, using the row's `before`/`after` lane occupancy.
 struct GraphGutter: View {
     let row: GraphRow
     let isSelected: Bool
     let tokens: HostThemeTokens
-    let laneSpacing: CGFloat = 14
 
     var body: some View {
         Canvas { ctx, size in
             let h = size.height
             let center = h / 2
             let sha = row.commit.sha
-            func x(_ c: Int) -> CGFloat { CGFloat(c) * laneSpacing + laneSpacing / 2 }
+            func x(_ c: Int) -> CGFloat { GraphLayout.laneX(c) }
 
             // A connector that leaves/enters each end vertically (an S-curve when
             // the columns differ), so lanes read as smooth branches, not steep
@@ -95,8 +109,7 @@ struct GraphCommitRow: View {
     @State private var hovering = false
 
     private let rowHeight: CGFloat = 34
-    private let laneSpacing: CGFloat = 13
-    private var gutterWidth: CGFloat { CGFloat(min(max(laneCount, 1), 12)) * laneSpacing + 8 }
+    private var gutterWidth: CGFloat { GraphLayout.gutterWidth(laneCount: laneCount) }
 
     var body: some View {
         HStack(spacing: 8) {
