@@ -18,7 +18,10 @@ struct ShortcutLayer: View {
                     chord.hasModifier,
                     let equivalent = chord.keyEquivalent
                 {
-                    Button(action: { perform(command) }) { Color.clear.frame(width: 0, height: 0) }
+                    // The kit has no invisible shortcut carrier, so this stays a plain Button.
+                    Button(action: { perform(command) }) {  // design-lint: allow raw-control kit gap: shortcut carrier
+                        Color.clear.frame(width: 0, height: 0)
+                    }
                         .buttonStyle(.plain)
                         .frame(width: 0, height: 0)
                         .keyboardShortcut(equivalent, modifiers: chord.eventModifiers)

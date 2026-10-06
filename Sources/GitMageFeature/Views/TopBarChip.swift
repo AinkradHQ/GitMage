@@ -17,7 +17,8 @@ struct TopBarChip: View {
     @Environment(\.ainkradReduceMotion) private var reduceMotion
 
     var body: some View {
-        Button(action: action) {
+        // No kit trigger chip yet (AinkradSelect keeps its trigger private), so the chip is local.
+        Button(action: action) {  // design-lint: allow raw-control kit gap: trigger chip
             HStack(spacing: skin.size.s7) {
                 Image(systemName: icon)
                     .font(skin.font(AinkradFontToken(sizeKey: "t12", weight: "semibold")))
