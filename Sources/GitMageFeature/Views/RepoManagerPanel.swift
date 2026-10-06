@@ -27,7 +27,6 @@ struct RepoManagerPanel: View {
                 onActivate: { activate(results) },
                 onEscape: dismiss
             )
-            GlowRule(tokens: tokens)
             SectionLabel(text: "REPOSITORIES · \(model.repos.count)", tokens: tokens)
 
             if results.isEmpty {
@@ -55,7 +54,6 @@ struct RepoManagerPanel: View {
                 .frame(maxHeight: 340)
             }
 
-            GlowRule(tokens: tokens)
             HStack(spacing: 10) {
                 AinkradButton(title: "Add Local", style: .primary, icon: "plus") {
                     dismiss()

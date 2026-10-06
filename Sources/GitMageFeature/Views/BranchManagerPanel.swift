@@ -33,7 +33,6 @@ struct BranchManagerPanel: View {
                 onActivate: { activate(results) },
                 onEscape: dismiss
             )
-            GlowRule(tokens: tokens)
             SectionLabel(text: "BRANCHES · \(model.branches.count)", tokens: tokens)
 
             if results.isEmpty {
@@ -60,7 +59,6 @@ struct BranchManagerPanel: View {
                 .frame(maxHeight: 340)
             }
 
-            GlowRule(tokens: tokens)
             HStack(spacing: 10) {
                 AinkradButton(
                     title: canCreate ? "Create \"\(createName)\"" : "Create Branch",
