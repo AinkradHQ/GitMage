@@ -20,11 +20,10 @@ struct RepoManagerPanel: View {
     var body: some View {
         let results = filtered
         VStack(alignment: .leading, spacing: 0) {
-            OverlaySearchField(
-                placeholder: "Search repositories…",
-                text: $picker.query, tokens: tokens, focus: $focused,
-                onMove: { picker.move($0, count: results.count) },
-                onActivate: { activate(results) },
+            AinkradCommandField(
+                "Search repositories…", text: $picker.query, focus: $focused,
+                onArrow: { picker.move($0, count: results.count) },
+                onSubmit: { activate(results) },
                 onEscape: dismiss
             )
             SectionLabel(text: "REPOSITORIES · \(model.repos.count)", tokens: tokens)
@@ -71,7 +70,7 @@ struct RepoManagerPanel: View {
             .padding(.horizontal, 18)
             .padding(.vertical, 12)
         }
-        .hudPanelChrome(tokens)
+        .ainkradPanel()
         .onAppear { focused = true }
         .onChange(of: picker.query) { _, _ in picker.selected = 0 }
     }
