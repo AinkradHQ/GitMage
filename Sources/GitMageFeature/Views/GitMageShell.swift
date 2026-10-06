@@ -51,7 +51,7 @@ struct GitMageShell: View {
                     navRail
                     if model.hasActiveRepo {
                         contextPane
-                            .frame(width: 300)
+                            .frame(width: skin.size.s300)
                             .background(tokens.surface.opacity(skin.opacity.o35))
                         detailPane
                             .frame(maxWidth: .infinity, maxHeight: .infinity)
@@ -128,7 +128,7 @@ struct GitMageShell: View {
     }
 
     private var topBar: some View {
-        HStack(spacing: 14) {
+        HStack(spacing: skin.size.s14) {
             RepoSwitcher(model: model, tokens: tokens, shortcut: hint(.openRepos)) {
                 openManagement(.repos)
             }
@@ -156,8 +156,8 @@ struct GitMageShell: View {
                 .ainkradTooltip(shortcutTooltip("Push", hint(.push)))
             }
         }
-        .padding(.horizontal, 16)
-        .frame(height: 44)
+        .padding(.horizontal, skin.spacing.lg)
+        .frame(height: skin.size.s44)
     }
 
     /// Display string for a command's bound chord, or nil when unbound.
@@ -193,7 +193,7 @@ struct GitMageShell: View {
     }
 
     private var navRail: some View {
-        VStack(spacing: 6) {
+        VStack(spacing: skin.size.s6) {
             ForEach(NavArea.built) { area in
                 AinkradRailItem(
                     systemName: area.icon,
@@ -205,15 +205,15 @@ struct GitMageShell: View {
             }
             Spacer()
         }
-        .padding(.vertical, 14)
-        .frame(width: 56)
+        .padding(.vertical, skin.size.s14)
+        .frame(width: skin.size.s56)
         .frame(maxHeight: .infinity)
         .animation(reduceMotion ? nil : .spring(response: 0.32, dampingFraction: 0.74), value: model.selectedArea)
     }
 
 
     private var emptyLibraryState: some View {
-        VStack(spacing: 12) {
+        VStack(spacing: skin.spacing.md) {
             Image(systemName: "wand.and.stars").font(skin.font(AinkradFontToken(sizeKey: "t34", weight: "light"))).foregroundStyle(
                 tokens.accentPrimary.opacity(skin.opacity.o60))
             Text("No repository").font(AinkradFont.display(skin.type.sizes.t18, weight: .semibold))

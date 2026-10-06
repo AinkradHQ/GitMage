@@ -24,19 +24,19 @@ struct PaneHeader<Trailing: View>: View {
     }
 
     var body: some View {
-        HStack(spacing: 8) {
+        HStack(spacing: skin.spacing.sm) {
             GMHeaderLabel(text: title, tokens: tokens)
             Text(countText ?? "\(count)")
                 .font(AinkradFont.mono(skin.type.sizes.t9, weight: .medium))
                 .foregroundStyle(tokens.foreground.opacity(skin.opacity.o50))
-                .padding(.horizontal, 5).padding(.vertical, 1)
+                .padding(.horizontal, skin.size.s5).padding(.vertical, skin.size.s1)
                 .background(Capsule().fill(tokens.surfaceElevated.opacity(skin.opacity.o60)))
             Spacer()
             trailing()
         }
-        .padding(.horizontal, 14)
-        .padding(.top, 14)
-        .padding(.bottom, 8)
+        .padding(.horizontal, skin.size.s14)
+        .padding(.top, skin.size.s14)
+        .padding(.bottom, skin.spacing.sm)
     }
 }
 

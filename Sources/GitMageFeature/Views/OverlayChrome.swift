@@ -13,8 +13,8 @@ struct SectionLabel: View {
             .font(AinkradFont.mono(skin.type.sizes.t9, weight: .medium))
             .kerning(2.5)
             .foregroundStyle(tokens.foreground.opacity(skin.opacity.o40))
-            .padding(.horizontal, 18)
-            .padding(.top, 14)
-            .padding(.bottom, 6)
+            .padding(.horizontal, skin.size.s18)
+            .padding(.top, skin.size.s14)
+            .padding(.bottom, skin.size.s6)
     }
 }

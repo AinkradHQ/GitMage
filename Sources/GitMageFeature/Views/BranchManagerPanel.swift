@@ -39,7 +39,7 @@ struct BranchManagerPanel: View {
                 emptyState
             } else {
                 ScrollView {
-                    VStack(spacing: 3) {
+                    VStack(spacing: skin.size.s3) {
                         ForEach(Array(results.enumerated()), id: \.element.id) { index, branch in
                             BranchRow(
                                 branch: branch,
@@ -53,13 +53,13 @@ struct BranchManagerPanel: View {
                             )
                         }
                     }
-                    .padding(.horizontal, 12)
-                    .padding(.vertical, 6)
+                    .padding(.horizontal, skin.spacing.md)
+                    .padding(.vertical, skin.size.s6)
                 }
-                .frame(maxHeight: 340)
+                .frame(maxHeight: skin.size.s340)
             }
 
-            HStack(spacing: 10) {
+            HStack(spacing: skin.size.s10) {
                 AinkradButton(
                     title: canCreate ? "Create \"\(createName)\"" : "Create Branch",
                     style: .primary, icon: "arrow.branch"
@@ -72,8 +72,8 @@ struct BranchManagerPanel: View {
                     .font(AinkradFont.mono(skin.type.sizes.t9))
                     .foregroundStyle(tokens.foreground.opacity(skin.opacity.o35))
             }
-            .padding(.horizontal, 18)
-            .padding(.vertical, 12)
+            .padding(.horizontal, skin.size.s18)
+            .padding(.vertical, skin.spacing.md)
         }
         .ainkradPanel()
         .onAppear { focused = true }
@@ -86,7 +86,7 @@ struct BranchManagerPanel: View {
             title: canCreate ? "No matching branch" : "No branches",
             message: canCreate ? "Press ↩ or Create to make \"\(createName)\"." : "Create your first branch below."
         )
-        .frame(maxWidth: .infinity, minHeight: 150)
+        .frame(maxWidth: .infinity, minHeight: skin.size.s150)
     }
 
     /// Return key: if the query matches branches, checkout the selected one;
@@ -150,11 +150,12 @@ private struct BranchRow: View {
         ZStack {
             Circle()
                 .fill(branch.isCurrent ? tokens.accentPrimary : tokens.foreground.opacity(skin.opacity.o25))
-                .frame(width: 8, height: 8)
+                .frame(width: skin.size.s8, height: skin.size.s8)
             if branch.isCurrent {
-                Circle().stroke(tokens.accentPrimary.opacity(skin.opacity.o40), lineWidth: 4).frame(width: 8, height: 8)
+                Circle().stroke(tokens.accentPrimary.opacity(skin.opacity.o40), lineWidth: 4)
+                    .frame(width: skin.size.s8, height: skin.size.s8)
             }
         }
-        .frame(width: 16)
+        .frame(width: skin.size.s16)
     }
 }

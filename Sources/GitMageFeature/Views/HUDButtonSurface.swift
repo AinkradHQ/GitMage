@@ -49,7 +49,7 @@ private struct HUDButtonSurface: ViewModifier {
 
     private var glowRadius: CGFloat {
         switch kind {
-        case .chip: return hovering ? 11 : 3
+        case .chip: return hovering ? skin.size.s11 : skin.size.s3
         }
     }
 }

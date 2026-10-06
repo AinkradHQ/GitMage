@@ -12,7 +12,9 @@ struct RepoManagerPanel: View {
     @FocusState private var focused: Bool
     @Environment(\.ainkradSkin) private var skin
 
-    private let columns = [GridItem(.flexible(), spacing: 12), GridItem(.flexible(), spacing: 12)]
+    private var columns: [GridItem] {
+        [GridItem(.flexible(), spacing: skin.spacing.md), GridItem(.flexible(), spacing: skin.spacing.md)]
+    }
 
     private var filtered: [GitMageRepoConfig] {
         picker.filter(model.repos) { [$0.name, $0.path] }
@@ -33,7 +35,7 @@ struct RepoManagerPanel: View {
                 emptyState
             } else {
                 ScrollView {
-                    LazyVGrid(columns: columns, spacing: 12) {
+                    LazyVGrid(columns: columns, spacing: skin.spacing.md) {
                         ForEach(Array(results.enumerated()), id: \.element.id) { index, repo in
                             RepoCard(
                                 repo: repo,
@@ -48,13 +50,13 @@ struct RepoManagerPanel: View {
                             )
                         }
                     }
-                    .padding(.horizontal, 14)
-                    .padding(.vertical, 6)
+                    .padding(.horizontal, skin.size.s14)
+                    .padding(.vertical, skin.size.s6)
                 }
-                .frame(maxHeight: 340)
+                .frame(maxHeight: skin.size.s340)
             }
 
-            HStack(spacing: 10) {
+            HStack(spacing: skin.size.s10) {
                 AinkradButton(title: "Add Local", style: .primary, icon: "plus") {
                     dismiss()
                     model.addRepositoryFolder()
@@ -68,8 +70,8 @@ struct RepoManagerPanel: View {
                     .font(AinkradFont.mono(skin.type.sizes.t9))
                     .foregroundStyle(tokens.foreground.opacity(skin.opacity.o35))
             }
-            .padding(.horizontal, 18)
-            .padding(.vertical, 12)
+            .padding(.horizontal, skin.size.s18)
+            .padding(.vertical, skin.spacing.md)
         }
         .ainkradPanel()
         .onAppear { focused = true }
@@ -82,7 +84,7 @@ struct RepoManagerPanel: View {
             title: picker.query.isEmpty ? "No repositories yet" : "No matches",
             message: picker.query.isEmpty ? "Add a local folder or clone one to begin." : "Try a different search."
         )
-        .frame(maxWidth: .infinity, minHeight: 150)
+        .frame(maxWidth: .infinity, minHeight: skin.size.s150)
     }
 
     private func activate(_ results: [GitMageRepoConfig]) {
@@ -104,7 +106,7 @@ private struct RepoCard: View {
     @Environment(\.ainkradReduceMotion) private var reduceMotion
 
     var body: some View {
-        VStack(alignment: .leading, spacing: 10) {
+        VStack(alignment: .leading, spacing: skin.size.s10) {
             HStack {
                 Image(systemName: "folder.fill")
                     .font(skin.font(AinkradFontToken(sizeKey: "t15")))
@@ -118,7 +120,7 @@ private struct RepoCard: View {
                 }
             }
             Spacer(minLength: 0)
-            VStack(alignment: .leading, spacing: 3) {
+            VStack(alignment: .leading, spacing: skin.size.s3) {
                 Text(repo.name)
                     .font(AinkradFont.display(skin.type.sizes.t14, weight: .semibold))
                     .foregroundStyle(tokens.foreground).lineLimit(1)
@@ -128,8 +130,8 @@ private struct RepoCard: View {
                     .lineLimit(1).truncationMode(.middle)
             }
         }
-        .padding(14)
-        .frame(height: 96, alignment: .topLeading)
+        .padding(skin.size.s14)
+        .frame(height: skin.size.s96, alignment: .topLeading)
         .frame(maxWidth: .infinity)
         .background(
             ChamferShape(cut: AinkradRadius.md)

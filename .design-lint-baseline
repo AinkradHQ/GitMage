@@ -3,8 +3,8 @@
 version 1
 format off
 font-size 19
-padding-literal 81
-spacing-literal 100
+padding-literal 61
+spacing-literal 87
 radius-literal 3
 hex-color 7
 raw-color 10
@@ -15,6 +15,6 @@ force-cast 0
 force-unwrap 1
 print 0
 opacity-literal 117
-frame-literal 41
+frame-literal 29
 chamfer-literal 0
 motion-literal 11

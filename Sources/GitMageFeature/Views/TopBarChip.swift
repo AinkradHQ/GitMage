@@ -18,11 +18,13 @@ struct TopBarChip: View {
 
     var body: some View {
         Button(action: action) {
-            HStack(spacing: 7) {
+            HStack(spacing: skin.size.s7) {
                 Image(systemName: icon)
                     .font(skin.font(AinkradFontToken(sizeKey: "t12", weight: "semibold")))
                     .foregroundStyle(tokens.accentSecondary)
-                    .shadow(color: tokens.accentSecondary.opacity(hovering ? skin.opacity.o80 : skin.opacity.o40), radius: hovering ? 5 : 2)
+                    .shadow(
+                        color: tokens.accentSecondary.opacity(hovering ? skin.opacity.o80 : skin.opacity.o40),
+                        radius: hovering ? skin.size.s5 : skin.size.s2)
                 Text(label)
                     .font(AinkradFont.display(skin.type.sizes.t13, weight: .medium))
                     .foregroundStyle(tokens.foreground.opacity(skin.opacity.o92))
@@ -31,8 +33,8 @@ struct TopBarChip: View {
                     .font(skin.font(AinkradFontToken(sizeKey: "t8", weight: "bold")))
                     .foregroundStyle(tokens.foreground.opacity(hovering ? skin.opacity.o70 : skin.opacity.o40))
             }
-            .padding(.horizontal, 12)
-            .padding(.vertical, 7)
+            .padding(.horizontal, skin.spacing.md)
+            .padding(.vertical, skin.size.s7)
             .hudButtonSurface(tokens: tokens, kind: .chip, hovering: hovering)
             .contentShape(Rectangle())
         }
