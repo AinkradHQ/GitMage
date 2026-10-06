@@ -18,7 +18,7 @@ struct AdvancedDetailView: View {
             VStack(alignment: .leading, spacing: 16) {
                 if model.operationState.isActive { inProgressBanner }
                 if let errorMessage = model.errorMessage {
-                    ErrorBanner(message: errorMessage, tokens: tokens)
+                    AinkradBanner(message: errorMessage, status: .warning)
                 }
                 AutostashToggle(isOn: $model.autostash, tokens: tokens)
                 commitActionsCard
