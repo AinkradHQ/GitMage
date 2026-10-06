@@ -117,7 +117,7 @@ struct GitOpActionHandler {
         } catch let error as GitRepositoryError {
             return AgentActionResult(text: error.errorDescription ?? "git error", isError: true)
         } catch {
-            return AgentActionResult(text: error.localizedDescription, isError: true)
+            return AgentActionResult(text: error.displayMessage, isError: true)
         }
     }
 

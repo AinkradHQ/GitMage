@@ -1,7 +1,15 @@
 import Foundation
+import AinkradAppKit
 import Testing
 
 @testable import GitMageFeature
+
+extension GitMageViewModel {
+    /// The tests hold a whole fake host; the model takes only the two capabilities it uses.
+    convenience init(host: HostServices) {
+        self.init(documents: host.documents, signals: host.signals)
+    }
+}
 
 /// Shared setup for the `GitMageViewModel` suites. The model's loads are
 /// `Task { @MainActor }`, so tests poll instead of sleeping a fixed time.

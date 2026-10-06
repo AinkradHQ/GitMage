@@ -61,14 +61,14 @@ extension GitMageViewModel {
 
     func selectStash(_ entry: GitStashEntry) {
         let path = repositoryPath
-        Task { @MainActor in
+        trackRead { [self] in
             do {
                 let diff = try await client.stashDiff(entry.id, in: path)
                 guard repositoryPath == path else { return }  // switched repos mid-load
                 selectedStashDiff = diff
             } catch {
                 guard repositoryPath == path else { return }
-                selectedStashDiff = GitDiffSnapshot(title: entry.id, body: error.localizedDescription, isEmpty: true)
+                selectedStashDiff = GitDiffSnapshot(title: entry.id, body: error.displayMessage, isEmpty: true)
             }
         }
     }
@@ -144,7 +144,7 @@ extension GitMageViewModel {
         Task { @MainActor in
             do {
                 try await action()
-                log.info("Completed \(context) in \(repository)")
+                Log.store.info("Completed \(context) in \(repository)")
                 await refresh(includeHistory: movesHead)?.value
                 let elapsed = Date().timeIntervalSince(startedAt)
                 // Success only past the threshold: a 200ms status refresh is

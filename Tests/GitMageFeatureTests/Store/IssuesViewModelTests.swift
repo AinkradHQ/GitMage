@@ -101,7 +101,8 @@ private final class MemorySecretStore: PluginSecretStore {
     }
 }
 
-private final class StubIssueForgeProvider: GitForgeProvider {
+// SAFETY: test double; each test builds its own and drives it from one task at a time.
+private final class StubIssueForgeProvider: GitForgeProvider, @unchecked Sendable {
     var summaries: [IssueSummary] = []
     var detail: IssueDetail?
     var comments: [ForgeComment] = []

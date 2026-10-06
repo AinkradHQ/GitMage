@@ -18,16 +18,10 @@ struct GitMageShell: View {
     init(host: HostServices, settingsStore: GitMageSettingsStore) {
         self.host = host
         self.settingsStore = settingsStore
-        _model = StateObject(wrappedValue: GitMageViewModel(host: host))
+        _model = StateObject(wrappedValue: GitMageViewModel(documents: host.documents, signals: host.signals))
     }
 
     var tokens: HostThemeTokens { host.theme.tokens }
-    /// Changes whenever typography settings change — drives a content rebuild
-    /// so font edits apply live without needing another interaction.
-    private var typographyToken: String {
-        let s = settingsStore.settings
-        return "\(s.textScale)|\(s.displayFontName)|\(s.monoFontName)"
-    }
     /// Bridges GitMage's per-plugin typography into the kit's `\.ainkradTypography`
     /// env so swapped kit components (text fields, editors, search, and later
     /// waves) honor the user's display font + text scale. Recomputes with `body`,
@@ -66,10 +60,6 @@ struct GitMageShell: View {
                     }
                 }
             }
-            // Rebuild the content when typography settings change so every
-            // AinkradFont call re-evaluates immediately (fonts are read
-            // statically, so there's otherwise no dependency to invalidate on).
-            .id(typographyToken)
 
             if let management {
                 GitMageManagementOverlay(

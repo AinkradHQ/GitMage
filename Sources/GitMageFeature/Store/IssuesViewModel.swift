@@ -32,11 +32,10 @@ final class IssuesViewModel: ObservableObject {
     @Published var newAssignees: Set<String> = []
 
     private let repo: RepoRef?
-    // SAFETY: `provider` is a `let` set once in `init` and never mutated;
-    // all access happens on the main actor via this @MainActor class's
-    // isolated methods, so concurrent mutation cannot occur.
-    private nonisolated(unsafe) let provider: GitForgeProvider?
+    private let provider: GitForgeProvider?
     private let auth: GitForgeAuth
+    /// The filter-driven reload; a newer filter change cancels it.
+    private var reloadTask: Task<Void, Never>?
 
     init(repo: RepoRef?, provider: GitForgeProvider?, auth: GitForgeAuth) {
         self.repo = repo
@@ -58,10 +57,10 @@ final class IssuesViewModel: ObservableObject {
         isLoading = true
         defer { isLoading = false }
         if repoLabels.isEmpty {
-            repoLabels = (try? await provider.repoLabels(repo)) ?? []
+            repoLabels = await optionalLoad("labels", fallback: []) { try await provider.repoLabels(repo) }
         }
         if assignableUsers.isEmpty {
-            assignableUsers = (try? await provider.assignableUsers(repo)) ?? []
+            assignableUsers = await optionalLoad("assignable users", fallback: []) { try await provider.assignableUsers(repo) }
         }
         do {
             let result = try await provider.searchIssues(
@@ -72,7 +71,7 @@ final class IssuesViewModel: ObservableObject {
         } catch let error as ForgeError {
             handleForgeError(error)
         } catch {
-            errorMessage = error.localizedDescription
+            errorMessage = error.displayMessage
         }
     }
 
@@ -92,13 +91,14 @@ final class IssuesViewModel: ObservableObject {
         } catch let error as ForgeError {
             handleForgeError(error)
         } catch {
-            errorMessage = error.localizedDescription
+            errorMessage = error.displayMessage
         }
     }
 
     func toggleLabel(_ name: String) {
         if selectedLabels.contains(name) { selectedLabels.remove(name) } else { selectedLabels.insert(name) }
-        Task { await load() }
+        reloadTask?.cancel()
+        reloadTask = Task { await load() }
     }
 
     func select(_ number: Int) async {
@@ -107,11 +107,11 @@ final class IssuesViewModel: ObservableObject {
         do {
             let detail = try await provider.issue(repo, number: number)
             self.detail = detail
-            self.comments = (try? await provider.issueComments(repo, number: number)) ?? []
+            self.comments = await optionalLoad("comments", fallback: []) { try await provider.issueComments(repo, number: number) }
         } catch let error as ForgeError {
             handleForgeError(error)
         } catch {
-            errorMessage = error.localizedDescription
+            errorMessage = error.displayMessage
         }
     }
 
@@ -123,7 +123,7 @@ final class IssuesViewModel: ObservableObject {
         } catch let error as ForgeError {
             handleForgeError(error)
         } catch {
-            errorMessage = error.localizedDescription
+            errorMessage = error.displayMessage
         }
     }
 
@@ -146,7 +146,7 @@ final class IssuesViewModel: ObservableObject {
         } catch let error as ForgeError {
             handleForgeError(error)
         } catch {
-            errorMessage = error.localizedDescription
+            errorMessage = error.displayMessage
         }
     }
 
@@ -159,7 +159,7 @@ final class IssuesViewModel: ObservableObject {
         } catch let error as ForgeError {
             handleForgeError(error)
         } catch {
-            errorMessage = error.localizedDescription
+            errorMessage = error.displayMessage
         }
     }
 
@@ -171,7 +171,7 @@ final class IssuesViewModel: ObservableObject {
         } catch let error as ForgeError {
             handleForgeError(error)
         } catch {
-            errorMessage = error.localizedDescription
+            errorMessage = error.displayMessage
         }
     }
 
@@ -183,7 +183,7 @@ final class IssuesViewModel: ObservableObject {
         } catch let error as ForgeError {
             handleForgeError(error)
         } catch {
-            errorMessage = error.localizedDescription
+            errorMessage = error.displayMessage
         }
     }
 }

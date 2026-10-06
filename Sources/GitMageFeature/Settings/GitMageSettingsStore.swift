@@ -28,22 +28,21 @@ final class GitMageSettingsStore {
         settings = updated
         applyTypography()
         guard canSave else {
-            AinkradLog.logger(app: "gitmage", area: "persistence")
-                .error("saving is off: the loaded document did not decode and could not be set aside")
+            Log.persistence.error("saving is off: the loaded document did not decode and could not be set aside")
             return
         }
-        if let data = try? JSONEncoder().encode(updated) {
-            documents.setData(data, forKey: Self.key)
+        do {
+            documents.setData(try JSONEncoder().encode(updated), forKey: Self.key)
+        } catch {
+            Log.persistence.error("settings were not saved: \(error.displayMessage)")
         }
     }
 
     /// Pushes the current typography settings into `AinkradFont` so every
     /// `display`/`mono` call across the UI reflects them.
     private func applyTypography() {
-        AinkradFont.config = AinkradFont.Config(
-            scale: CGFloat(settings.textScale),
-            displayFamily: settings.displayFontName,
-            monoFamily: settings.monoFontName
-        )
+        AinkradFont.config.scale = CGFloat(settings.textScale)
+        AinkradFont.config.displayFamily = settings.displayFontName
+        AinkradFont.config.monoFamily = settings.monoFontName
     }
 }

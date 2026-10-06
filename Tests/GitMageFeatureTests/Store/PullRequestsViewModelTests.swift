@@ -49,6 +49,30 @@ final class PullRequestsViewModelTests: XCTestCase {
         XCTAssertEqual(provider.checksRefArgs, ["feat"])
     }
 
+    func testFailedFilesLoadShowsTheErrorInsteadOfAnEmptyList() async {
+        let provider = StubForgeProvider()
+        provider.detail = makeDetail()
+        provider.filesError = .server(502)
+        let vm = PullRequestsViewModel(repo: repo, provider: provider, auth: GitForgeAuth(secrets: MemorySecretStore()))
+
+        await vm.select(7)
+
+        XCTAssertTrue(vm.files.isEmpty)
+        XCTAssertEqual(vm.errorMessage, "GitHub server error (502).")
+    }
+
+    func testRoutineChecksFailureStaysQuiet() async {
+        let provider = StubForgeProvider()
+        provider.detail = makeDetail()
+        provider.checksError = .forbidden("no checks access")
+        let vm = PullRequestsViewModel(repo: repo, provider: provider, auth: GitForgeAuth(secrets: MemorySecretStore()))
+
+        await vm.select(7)
+
+        XCTAssertTrue(vm.checks.isEmpty)
+        XCTAssertNil(vm.errorMessage)
+    }
+
     func testReviewApproveCallsProviderAndReloads() async {
         let provider = StubForgeProvider()
         provider.detail = makeDetail()
@@ -111,13 +135,16 @@ private final class MemorySecretStore: PluginSecretStore {
     }
 }
 
-private final class StubForgeProvider: GitForgeProvider {
+// SAFETY: test double; each test builds its own and drives it from one task at a time.
+private final class StubForgeProvider: GitForgeProvider, @unchecked Sendable {
     var summaries: [PullRequestSummary] = []
     var detail: PullRequestDetail?
     var prFiles: [PRFile] = []
     var prComments: [ForgeComment] = []
     var checkRuns: [CheckRun] = []
     var verifyError: ForgeError?
+    var filesError: ForgeError?
+    var checksError: ForgeError?
     var listPullRequestsError: ForgeError?
 
     var listPullRequestsCallCount = 0
@@ -152,7 +179,8 @@ private final class StubForgeProvider: GitForgeProvider {
     }
 
     func files(_ repo: RepoRef, number: Int) async throws -> [PRFile] {
-        prFiles
+        if let filesError { throw filesError }
+        return prFiles
     }
 
     func pullRequestCommits(_ repo: RepoRef, number: Int) async throws -> [PRCommit] { [] }
@@ -163,6 +191,7 @@ private final class StubForgeProvider: GitForgeProvider {
 
     func checks(_ repo: RepoRef, ref: String) async throws -> [CheckRun] {
         checksRefArgs.append(ref)
+        if let checksError { throw checksError }
         return checkRuns
     }
 

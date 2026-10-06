@@ -9,7 +9,8 @@ import Testing
 /// A `GitForgeProvider` that answers from memory and records every call.
 /// Nothing here touches the network — the handler is built with this instance
 /// injected in place of `GitHubProvider`.
-private final class StubForgeProvider: GitForgeProvider {
+// SAFETY: test double; each test builds its own and drives it from one task at a time.
+private final class StubForgeProvider: GitForgeProvider, @unchecked Sendable {
     var summaries: [PullRequestSummary] = []
     var detail: PullRequestDetail?
     var checkRuns: [CheckRun] = []

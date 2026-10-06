@@ -62,17 +62,36 @@ final class GitMageViewModel: ObservableObject {
 
     private let workspaceStore: GitMageWorkspaceStore
     let client = GitRepositoryClient()
-    let log: PluginLogger
     private var didBootstrap = false
+    /// In-flight read loads that write state after an await. Cancelled when the
+    /// active repo changes, so a slow load never outlives the repo it was for.
+    private var readTasks: [UUID: Task<Void, Never>] = [:]
+
+    /// Starts a read load owned by this model (see `readTasks`).
+    @discardableResult
+    func trackRead(_ body: @escaping @MainActor () async -> Void) -> Task<Void, Never> {
+        let id = UUID()
+        let task = Task { @MainActor in
+            await body()
+            readTasks[id] = nil
+        }
+        readTasks[id] = task
+        return task
+    }
+
+    private func cancelReads() {
+        for task in readTasks.values { task.cancel() }
+        readTasks = [:]
+        isLoadingCommits = false
+    }
 
     /// Files Git Mage's notifications. Generation 9 onward; every host that
     /// can load this bundle supplies one.
     let reporter: GitMageSignalReporter
 
-    init(host: HostServices) {
-        self.workspaceStore = GitMageWorkspaceStore(documents: host.documents)
-        self.log = host.log
-        self.reporter = GitMageSignalReporter(signals: host.signals)
+    init(documents: PluginDocumentStore, signals: PluginSignalEmitter) {
+        self.workspaceStore = GitMageWorkspaceStore(documents: documents)
+        self.reporter = GitMageSignalReporter(signals: signals)
         let library = workspaceStore.loadLibrary()
         self.repos = library.repos
         self.activeRepoID = library.activeRepoID ?? library.repos.first?.id
@@ -108,6 +127,7 @@ final class GitMageViewModel: ObservableObject {
         diffSnapshot = nil
         selectedStashDiff = nil
         errorMessage = nil
+        cancelReads()
     }
 
     /// Folds the live editor state back into the active repo config.
@@ -142,8 +162,8 @@ final class GitMageViewModel: ObservableObject {
     private func refreshBranchesOnly(at path: String) -> Task<Void, Never> {
         isLoading = true
         errorMessage = nil
-        return Task { @MainActor in
-            let loaded = (try? await client.loadBranches(at: path)) ?? []
+        return trackRead { [self] in
+            let loaded = await loadOrReport("load branches", fallback: []) { try await client.loadBranches(at: path) }
             guard repositoryPath == path else { return }  // switched repos mid-load
             branches = loaded
             if let current = loaded.first(where: { $0.isCurrent }) {
@@ -161,7 +181,7 @@ final class GitMageViewModel: ObservableObject {
     func refresh(includeHistory: Bool = true) -> Task<Void, Never>? {
         let path = repositoryPath
         guard !path.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty else {
-            errorMessage = GitRepositoryError.missingPath.localizedDescription
+            errorMessage = GitRepositoryError.missingPath.displayMessage
             return nil
         }
 
@@ -172,15 +192,19 @@ final class GitMageViewModel: ObservableObject {
         isLoading = true
         errorMessage = nil
 
-        return Task { @MainActor in
+        return trackRead { [self] in
             do {
                 // Concurrent: the three loads are independent read-only commands.
                 async let loadedSnapshot = client.loadSnapshot(at: path)
-                async let loadedBranches = try? client.loadBranches(at: path)
-                async let loadedStashes = try? client.loadStashes(in: path)
+                async let loadedBranches = loadOrReport("load branches", fallback: []) {
+                    try await client.loadBranches(at: path)
+                }
+                async let loadedStashes = loadOrReport("load stashes", fallback: []) {
+                    try await client.loadStashes(in: path)
+                }
                 let newSnapshot = try await loadedSnapshot
-                let newBranches = await loadedBranches ?? []
-                let newStashes = await loadedStashes ?? []
+                let newBranches = await loadedBranches
+                let newStashes = await loadedStashes
                 // The user switched repos while this ran: painting these results
                 // would show one repository's state under another's name.
                 guard repositoryPath == path else { return }
@@ -198,7 +222,7 @@ final class GitMageViewModel: ObservableObject {
                     selectedBranchName = newSnapshot.branchName
                 }
                 persistLibrary()
-                log.info("Loaded repository snapshot for \(path)")
+                Log.store.info("Loaded repository snapshot for \(path)")
                 isLoading = false
                 activeOperation = nil
                 // Only the change the user already picked is re-diffed. No eager
@@ -236,7 +260,7 @@ final class GitMageViewModel: ObservableObject {
 
     func loadDiff(for change: GitChange) {
         let path = repositoryPath
-        Task { @MainActor in
+        trackRead { [self] in
             do {
                 let diff = try await client.loadDiff(for: change, in: path)
                 guard repositoryPath == path else { return }  // switched repos mid-load
@@ -248,7 +272,7 @@ final class GitMageViewModel: ObservableObject {
                     body: error.displayMessage,
                     isEmpty: true
                 )
-                log.error("Failed to load diff for \(change.filePath): \(error.localizedDescription)")
+                Log.store.error("Failed to load diff for \(change.filePath): \(error.displayMessage)")
             }
         }
     }
@@ -256,8 +280,19 @@ final class GitMageViewModel: ObservableObject {
     /// Clears the banner the shell shows for `errorMessage`.
     func dismissError() { errorMessage = nil }
 
+    /// A secondary load: on failure it is logged and shown in the banner, and
+    /// the caller gets `fallback`, so an empty list is never a hidden error.
+    func loadOrReport<T>(_ context: String, fallback: T, _ load: () async throws -> T) async -> T {
+        do {
+            return try await load()
+        } catch {
+            if !Task.isCancelled { report(error, context: context) }
+            return fallback
+        }
+    }
+
     func report(_ error: Error, context: String) {
         errorMessage = error.displayMessage
-        log.error("Failed to \(context): \(error.localizedDescription)")
+        Log.store.error("Failed to \(context): \(error.displayMessage)")
     }
 }

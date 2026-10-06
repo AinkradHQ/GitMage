@@ -22,8 +22,15 @@ extension GitMageViewModel {
             totalCommits = nil
             return
         }
-        Task { @MainActor in
-            let total = try? await client.commitCount(in: path)
+        trackRead { [self] in
+            let total: Int?
+            do {
+                total = try await client.commitCount(in: path)
+            } catch {
+                // The header just shows no total; the page load reports real trouble.
+                Log.store.error("Failed to count commits: \(error.displayMessage)")
+                total = nil
+            }
             guard repositoryPath == path else { return }  // switched repos mid-load
             totalCommits = total
         }
@@ -37,8 +44,13 @@ extension GitMageViewModel {
         guard !path.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty else { return }
         let skip = commits.count
         isLoadingCommits = true
-        Task { @MainActor in
-            let page = (try? await client.loadLog(skip: skip, limit: commitPageSize, in: path)) ?? []
+        trackRead { [self] in
+            var page: [GitCommitSummary] = []
+            do {
+                page = try await client.loadLog(skip: skip, limit: commitPageSize, in: path)
+            } catch {
+                if repositoryPath == path { report(error, context: "load history") }
+            }
             // Guard against a concurrent refresh having reset the list.
             if commits.count == skip {
                 commits.append(contentsOf: page)
@@ -54,7 +66,7 @@ extension GitMageViewModel {
     func selectCommit(_ commit: GitCommitSummary) {
         selectedCommitID = commit.id
         let path = repositoryPath
-        Task { @MainActor in
+        trackRead { [self] in
             do {
                 var diff = try await client.loadCommitDiff(sha: commit.id, in: path)
                 guard repositoryPath == path else { return }  // switched repos mid-load
@@ -63,7 +75,7 @@ extension GitMageViewModel {
                 commitDiff = diff
             } catch {
                 guard repositoryPath == path else { return }
-                commitDiff = GitDiffSnapshot(title: commit.shortSHA, body: error.localizedDescription, isEmpty: true)
+                commitDiff = GitDiffSnapshot(title: commit.shortSHA, body: error.displayMessage, isEmpty: true)
             }
         }
     }

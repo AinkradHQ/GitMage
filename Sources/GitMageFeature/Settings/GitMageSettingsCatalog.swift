@@ -260,7 +260,7 @@ final class GitMageSettingsPageState {
             } catch let error as ForgeError {
                 githubStatus = error.errorDescription
             } catch {
-                githubStatus = error.localizedDescription
+                githubStatus = error.displayMessage
             }
         }
     }

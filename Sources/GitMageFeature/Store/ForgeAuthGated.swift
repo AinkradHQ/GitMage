@@ -15,11 +15,8 @@ extension ForgeAuthGated {
             authState = .missingToken
             return
         }
-        // SAFETY: the provider is immutable and only used here, on the main actor;
-        // the same exemption the view models' stored `provider` already carries.
-        nonisolated(unsafe) let forge = provider
         do {
-            _ = try await forge.verify()
+            _ = try await provider.verify()
             authState = .valid
         } catch let error as ForgeError {
             if error == .unauthorized {
@@ -28,11 +25,34 @@ extension ForgeAuthGated {
                 errorMessage = error.errorDescription
             }
         } catch {
-            errorMessage = error.localizedDescription
+            errorMessage = error.displayMessage
+        }
+    }
+
+    /// A secondary load: on failure it is logged, shown in the banner (unless
+    /// `showFailure` is false, for a failure that is routine) and the caller
+    /// gets `fallback`, so an empty list is never a hidden error.
+    func optionalLoad<T>(
+        _ what: String, fallback: T, showFailure: Bool = true, _ load: () async throws -> T
+    ) async -> T {
+        do {
+            return try await load()
+        } catch {
+            if Task.isCancelled { return fallback }
+            Log.forge.error("Failed to load \(what): \(error.displayMessage)")
+            if showFailure {
+                if let forgeError = error as? ForgeError {
+                    handleForgeError(forgeError)
+                } else {
+                    errorMessage = error.displayMessage
+                }
+            }
+            return fallback
         }
     }
 
     func handleForgeError(_ error: ForgeError) {
+        if Task.isCancelled { return }  // a superseded load, not a failure to show
         errorMessage = error.errorDescription
         if error == .unauthorized {
             authState = .invalid(error.errorDescription ?? "Invalid token.")
