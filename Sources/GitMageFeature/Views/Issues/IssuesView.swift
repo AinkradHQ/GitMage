@@ -105,11 +105,7 @@ struct LabelChipsRow: View {
     var body: some View {
         HStack(spacing: 4) {
             ForEach(names, id: \.self) { name in
-                Text(name)
-                    .font(AinkradFont.display(9, weight: .semibold))
-                    .foregroundStyle(tokens.foreground.opacity(0.7))
-                    .padding(.horizontal, 5).padding(.vertical, 1)
-                    .background(tokens.surfaceElevated.opacity(0.7), in: ChamferShape(cut: AinkradRadius.sm))
+                AinkradChip(label: name)
             }
         }
     }
@@ -121,10 +117,6 @@ struct ColoredLabelChip: View {
     let label: IssueLabel
 
     var body: some View {
-        Text(label.name)
-            .font(AinkradFont.display(9, weight: .semibold))
-            .foregroundStyle(Color.white.opacity(0.9))
-            .padding(.horizontal, 6).padding(.vertical, 2)
-            .background(Color(hex: label.color).opacity(0.85), in: ChamferShape(cut: AinkradRadius.sm))
+        AinkradSwatchChip(label: label.name, swatch: Color(hex: label.color))  // design-lint: allow hex-color GitHub label data
     }
 }

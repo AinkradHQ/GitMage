@@ -62,7 +62,7 @@ private struct PullRequestRow: View {
             title: pr.title, subtitle: "#\(pr.number) · \(pr.author)",
             trailing: {
                 if pr.isDraft {
-                    StatusPill(text: "Draft", kind: .neutral, tokens: tokens)
+                    AinkradBadge(text: "Draft")
                 }
             }
         )

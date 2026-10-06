@@ -61,11 +61,11 @@ struct PullRequestDetailView: View {
                     .foregroundStyle(tokens.accentSecondary)
                 Spacer()
                 if detail.isDraft {
-                    StatusPill(text: "Draft", kind: .neutral, tokens: tokens)
+                    AinkradBadge(text: "Draft")
                 }
-                StatusPill(
+                AinkradBadge(
                     text: detail.state.capitalized,
-                    kind: detail.state.lowercased() == "open" ? .open : .closedMerged, tokens: tokens)
+                    tint: GMColor.status(detail.state.lowercased() == "open" ? .open : .closedMerged, tokens))
             }
             HStack(spacing: 6) {
                 Image(systemName: "arrow.triangle.branch")

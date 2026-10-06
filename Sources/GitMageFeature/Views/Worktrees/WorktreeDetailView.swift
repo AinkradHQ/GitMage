@@ -62,11 +62,7 @@ struct WorktreeDetailView: View {
                         .font(AinkradFont.display(15, weight: .semibold))
                         .foregroundStyle(tokens.foreground)
                     if model.isCurrent(wt) {
-                        Text("CURRENT")
-                            .font(AinkradFont.mono(8, weight: .bold)).tracking(1)
-                            .foregroundStyle(tokens.accentPrimary)
-                            .padding(.horizontal, 5).padding(.vertical, 1)
-                            .background(Capsule().fill(tokens.accentPrimary.opacity(0.16)))
+                        AinkradBadge(text: "CURRENT", tint: tokens.accentPrimary)
                     }
                 }
                 HStack(spacing: 6) {

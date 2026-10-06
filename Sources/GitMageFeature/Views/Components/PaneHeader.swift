@@ -26,11 +26,7 @@ struct PaneHeader<Trailing: View>: View {
     var body: some View {
         HStack(spacing: skin.spacing.sm) {
             GMHeaderLabel(text: title, tokens: tokens)
-            Text(countText ?? "\(count)")
-                .font(AinkradFont.mono(skin.type.sizes.t9, weight: .medium))
-                .foregroundStyle(tokens.foreground.opacity(skin.opacity.o50))
-                .padding(.horizontal, skin.size.s5).padding(.vertical, skin.size.s1)
-                .background(Capsule().fill(tokens.surfaceElevated.opacity(skin.opacity.o60)))
+            AinkradBadge(text: countText ?? "\(count)")
             Spacer()
             trailing()
         }

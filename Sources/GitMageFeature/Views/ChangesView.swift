@@ -47,11 +47,7 @@ struct ChangesContextPane: View {
             LazyVStack(alignment: .leading, spacing: 5) {
                 HStack(spacing: 8) {
                     GMHeaderLabel(text: title, tokens: tokens)
-                    Text("\(changes.count)")
-                        .font(AinkradFont.mono(9, weight: .medium))
-                        .foregroundStyle(tokens.foreground.opacity(0.5))
-                        .padding(.horizontal, 5).padding(.vertical, 1)
-                        .background(Capsule().fill(tokens.surfaceElevated.opacity(0.6)))
+                    AinkradBadge(text: "\(changes.count)")
                     Spacer()
                     if staged {
                         AinkradIconButton(systemName: "minus", size: 20, tooltip: "Unstage all") {
@@ -175,11 +171,11 @@ struct CommitBox: View {
             HStack {
                 GMHeaderLabel(text: "COMMIT", tokens: tokens)
                 Spacer()
-                Text("\(stagedCount) staged")
-                    .font(AinkradFont.mono(9, weight: .medium))
-                    .foregroundStyle(stagedCount > 0 ? accent.opacity(0.9) : tokens.foreground.opacity(0.4))
-                    .padding(.horizontal, 6).padding(.vertical, 2)
-                    .background(Capsule().fill((stagedCount > 0 ? accent : tokens.foreground).opacity(0.12)))
+                if stagedCount > 0 {
+                    AinkradBadge(text: "\(stagedCount) staged", tint: accent)
+                } else {
+                    AinkradBadge(text: "\(stagedCount) staged")
+                }
             }
 
             ZStack(alignment: .topLeading) {

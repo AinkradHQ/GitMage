@@ -59,9 +59,9 @@ struct IssueDetailView: View {
                     .font(AinkradFont.mono(12))
                     .foregroundStyle(tokens.accentSecondary)
                 Spacer()
-                StatusPill(
+                AinkradBadge(
                     text: detail.state.lowercased() == "open" ? "Open" : "Closed",
-                    kind: detail.state.lowercased() == "open" ? .open : .closedMerged, tokens: tokens)
+                    tint: GMColor.status(detail.state.lowercased() == "open" ? .open : .closedMerged, tokens))
             }
             Text("opened by \(detail.author) · \(ForgeDate.short(detail.createdAt))")
                 .font(AinkradFont.mono(10))
