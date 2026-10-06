@@ -1,5 +1,5 @@
-import SwiftUI
 import AinkradAppKit
+import SwiftUI
 
 /// Semantic status categories used across Git Mage surfaces (PR/issue state,
 /// operation results, informational rows). Kept small and closed so every

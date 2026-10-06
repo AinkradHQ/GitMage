@@ -59,11 +59,15 @@ extension GitRepositoryClient {
 
     func operationState(in path: String) async throws -> GitOperationState {
         let root = try await repositoryRootURL(for: path)
-        let gitDir = try await runGit(["rev-parse", "--git-dir"], in: root).trimmingCharacters(in: .whitespacesAndNewlines)
+        let gitDir = try await runGit(["rev-parse", "--git-dir"], in: root).trimmingCharacters(
+            in: .whitespacesAndNewlines)
         let base = gitDir.hasPrefix("/") ? URL(fileURLWithPath: gitDir) : root.appendingPathComponent(gitDir)
         let fm = FileManager.default
         if fm.fileExists(atPath: base.appendingPathComponent("rebase-merge").path)
-            || fm.fileExists(atPath: base.appendingPathComponent("rebase-apply").path) { return .rebasing }
+            || fm.fileExists(atPath: base.appendingPathComponent("rebase-apply").path)
+        {
+            return .rebasing
+        }
         if fm.fileExists(atPath: base.appendingPathComponent("CHERRY_PICK_HEAD").path) { return .cherryPicking }
         if fm.fileExists(atPath: base.appendingPathComponent("REVERT_HEAD").path) { return .reverting }
         return .none
@@ -73,20 +77,20 @@ extension GitRepositoryClient {
         let root = try await repositoryRootURL(for: path)
         let env = ["GIT_EDITOR": "true"]
         switch try await operationState(in: path) {
-        case .rebasing:      _ = try await runGit(["rebase", "--continue"], in: root, environment: env)
+        case .rebasing: _ = try await runGit(["rebase", "--continue"], in: root, environment: env)
         case .cherryPicking: _ = try await runGit(["cherry-pick", "--continue"], in: root, environment: env)
-        case .reverting:     _ = try await runGit(["revert", "--continue"], in: root, environment: env)
-        case .none:          break
+        case .reverting: _ = try await runGit(["revert", "--continue"], in: root, environment: env)
+        case .none: break
         }
     }
 
     func abortOperation(in path: String) async throws {
         let root = try await repositoryRootURL(for: path)
         switch try await operationState(in: path) {
-        case .rebasing:      _ = try await runGit(["rebase", "--abort"], in: root)
+        case .rebasing: _ = try await runGit(["rebase", "--abort"], in: root)
         case .cherryPicking: _ = try await runGit(["cherry-pick", "--abort"], in: root)
-        case .reverting:     _ = try await runGit(["revert", "--abort"], in: root)
-        case .none:          break
+        case .reverting: _ = try await runGit(["revert", "--abort"], in: root)
+        case .none: break
         }
     }
 }

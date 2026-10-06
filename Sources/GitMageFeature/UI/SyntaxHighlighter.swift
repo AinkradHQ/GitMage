@@ -1,5 +1,5 @@
-import SwiftUI
 import AinkradAppKit
+import SwiftUI
 
 /// A lightweight, language-agnostic syntax highlighter for diff code lines.
 /// Not a full parser — it colors strings, comments, numbers, and a broad set
@@ -17,7 +17,7 @@ enum SyntaxHighlighter {
         "def", "function", "const", "int", "void", "new", "this", "null", "undefined", "typeof",
         "package", "type", "interface", "map", "range", "go", "chan", "select", "from", "with",
         "lambda", "yield", "None", "True", "False", "and", "or", "not", "elif", "print", "using",
-        "namespace", "template", "virtual", "operator", "unsigned", "signed", "bool", "double", "float", "long", "char"
+        "namespace", "template", "virtual", "operator", "unsigned", "signed", "bool", "double", "float", "long", "char",
     ]
 
     private static func color(_ kind: Kind, _ tokens: HostThemeTokens) -> Color {
@@ -49,7 +49,8 @@ enum SyntaxHighlighter {
             if (c == "/" && i + 1 < n && chars[i + 1] == "/")
                 || c == "#"
                 || (c == "-" && i + 1 < n && chars[i + 1] == "-")
-                || c == ";" {
+                || c == ";"
+            {
                 emit(String(chars[i...]), .comment)
                 break
             }
@@ -58,7 +59,10 @@ enum SyntaxHighlighter {
             if c == "\"" || c == "'" || c == "`" {
                 var j = i + 1
                 while j < n {
-                    if chars[j] == "\\" { j += 2; continue }
+                    if chars[j] == "\\" {
+                        j += 2
+                        continue
+                    }
                     if chars[j] == c { break }
                     j += 1
                 }
@@ -71,8 +75,10 @@ enum SyntaxHighlighter {
             // Numbers
             if c.isNumber {
                 var j = i
-                while j < n, chars[j].isNumber || chars[j] == "." || chars[j] == "_"
-                    || chars[j] == "x" || (chars[j].isHexDigit && j > i) {
+                while j < n,
+                    chars[j].isNumber || chars[j] == "." || chars[j] == "_"
+                        || chars[j] == "x" || (chars[j].isHexDigit && j > i)
+                {
                     j += 1
                 }
                 emit(String(chars[i..<j]), .number)

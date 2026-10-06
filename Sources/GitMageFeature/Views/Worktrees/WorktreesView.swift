@@ -1,5 +1,5 @@
-import SwiftUI
 import AinkradAppKit
+import SwiftUI
 
 /// Context pane (left rail) for the Worktrees area: header actions + worktree list.
 struct WorktreesContextPane: View {
@@ -32,9 +32,11 @@ struct WorktreesContextPane: View {
             EmptyStateView(icon: "rectangle.split.3x1", title: "Worktrees", message: errorMessage, tokens: tokens)
                 .frame(maxWidth: .infinity, maxHeight: .infinity)
         } else if model.worktrees.isEmpty {
-            EmptyStateView(icon: "rectangle.split.3x1", title: "No worktrees",
-                           message: "Add a linked worktree to work on multiple branches at once.", tokens: tokens)
-                .frame(maxWidth: .infinity, maxHeight: .infinity)
+            EmptyStateView(
+                icon: "rectangle.split.3x1", title: "No worktrees",
+                message: "Add a linked worktree to work on multiple branches at once.", tokens: tokens
+            )
+            .frame(maxWidth: .infinity, maxHeight: .infinity)
         } else {
             ScrollView {
                 LazyVStack(alignment: .leading, spacing: 3) {
@@ -97,8 +99,10 @@ private struct WorktreeRow: View {
         .padding(.horizontal, 9).padding(.vertical, 8)
         .background(
             ChamferShape(cut: AinkradRadius.md)
-                .fill(isSelected ? tokens.accentPrimary.opacity(0.13)
-                      : (hovering ? tokens.surfaceElevated.opacity(0.5) : .clear))
+                .fill(
+                    isSelected
+                        ? tokens.accentPrimary.opacity(0.13)
+                        : (hovering ? tokens.surfaceElevated.opacity(0.5) : .clear))
         )
         .overlay(alignment: .leading) {
             if isSelected {
@@ -139,14 +143,16 @@ private struct WorktreeRow: View {
     private var bottomLine: some View {
         Text(worktree.branch ?? "detached")
             .font(AinkradFont.display(10, weight: .medium))
-            .foregroundStyle(worktree.branch != nil ? tokens.accentPrimary.opacity(0.85) : tokens.foreground.opacity(0.5))
+            .foregroundStyle(
+                worktree.branch != nil ? tokens.accentPrimary.opacity(0.85) : tokens.foreground.opacity(0.5))
     }
 
     private var actionsRow: some View {
         HStack(spacing: 4) {
             AinkradIconButton(systemName: "arrow.up.forward.square", size: 20, tooltip: "Open", action: onOpen)
-            AinkradIconButton(systemName: worktree.isLocked ? "lock.open" : "lock",
-                              size: 20, tooltip: worktree.isLocked ? "Unlock" : "Lock", action: onToggleLock)
+            AinkradIconButton(
+                systemName: worktree.isLocked ? "lock.open" : "lock",
+                size: 20, tooltip: worktree.isLocked ? "Unlock" : "Lock", action: onToggleLock)
             AinkradIconButton(systemName: "trash", size: 20, tooltip: "Remove", action: onRemove)
             Spacer()
         }

@@ -1,12 +1,14 @@
-import XCTest
-import AppKit
 import AinkradAppKit
+import AppKit
+import XCTest
+
 @testable import GitMageFeature
 
 @MainActor
 final class GitMageSettingsCatalogTests: XCTestCase {
     private func page(_ store: GitMageSettingsStore, _ state: GitMageSettingsPageState = .init()) -> SettingsPage {
-        GitMageSettingsCatalog.page(store: store, state: state, host: FakeHostServices(context: RecordingContextRegistry()))
+        GitMageSettingsCatalog.page(
+            store: store, state: state, host: FakeHostServices(context: RecordingContextRegistry()))
     }
 
     /// Declared tabs, no custom rows; "Appearance" is the group the host
@@ -42,10 +44,11 @@ final class GitMageSettingsCatalogTests: XCTestCase {
     }
 
     func testChordFromAKeyEvent() throws {
-        let event = try XCTUnwrap(NSEvent.keyEvent(
-            with: .keyDown, location: .zero, modifierFlags: [.command, .shift], timestamp: 0,
-            windowNumber: 0, context: nil, characters: "P", charactersIgnoringModifiers: "p",
-            isARepeat: false, keyCode: 35))
+        let event = try XCTUnwrap(
+            NSEvent.keyEvent(
+                with: .keyDown, location: .zero, modifierFlags: [.command, .shift], timestamp: 0,
+                windowNumber: 0, context: nil, characters: "P", charactersIgnoringModifiers: "p",
+                isARepeat: false, keyCode: 35))
         XCTAssertEqual(KeyChord(event), KeyChord(key: "p", command: true, shift: true))
     }
 }

@@ -1,4 +1,5 @@
 import XCTest
+
 @testable import GitMageFeature
 
 final class GitRepositoryClientTests: XCTestCase {
@@ -262,7 +263,8 @@ final class GitRepositoryClientTests: XCTestCase {
         let (bareURL, _) = try makeBareRemoteWithCommit()
         let client = GitRepositoryClient()
 
-        let destinationParent = FileManager.default.temporaryDirectory.appendingPathComponent(UUID().uuidString, isDirectory: true)
+        let destinationParent = FileManager.default.temporaryDirectory.appendingPathComponent(
+            UUID().uuidString, isDirectory: true)
         try FileManager.default.createDirectory(at: destinationParent, withIntermediateDirectories: true)
 
         let clonedPath = try await client.clone(remoteURL: bareURL.path, into: destinationParent.path)
@@ -276,7 +278,8 @@ final class GitRepositoryClientTests: XCTestCase {
         let (bareURL, _) = try makeBareRemoteWithCommit()
         let client = GitRepositoryClient()
 
-        let destinationParent = FileManager.default.temporaryDirectory.appendingPathComponent(UUID().uuidString, isDirectory: true)
+        let destinationParent = FileManager.default.temporaryDirectory.appendingPathComponent(
+            UUID().uuidString, isDirectory: true)
         try FileManager.default.createDirectory(at: destinationParent, withIntermediateDirectories: true)
         let clonedPath = try await client.clone(remoteURL: bareURL.path, into: destinationParent.path)
         let clonedURL = URL(fileURLWithPath: clonedPath)
@@ -341,7 +344,7 @@ final class GitRepositoryClientTests: XCTestCase {
         try await client.stageAllChanges(in: repoURL.path)
         try await client.commit(message: "First commit", in: repoURL.path)
 
-        try await client.createBranch("scratch", in: repoURL.path)   // creates + checks out scratch
+        try await client.createBranch("scratch", in: repoURL.path)  // creates + checks out scratch
         // Return to the repo's default branch (main or master) before deleting scratch.
         let branches = try await client.loadBranches(at: repoURL.path)
         let base = try XCTUnwrap(branches.first(where: { $0.name != "scratch" })?.name)
@@ -368,7 +371,8 @@ final class GitRepositoryClientTests: XCTestCase {
         try runGit(["add", "-A"], in: work)
         try runGit(["commit", "-m", "Initial commit"], in: work)
 
-        let bare = FileManager.default.temporaryDirectory.appendingPathComponent("\(UUID().uuidString).git", isDirectory: true)
+        let bare = FileManager.default.temporaryDirectory.appendingPathComponent(
+            "\(UUID().uuidString).git", isDirectory: true)
         try runGit(["init", "--bare", bare.path], in: work)
         try runGit(["push", bare.path, "HEAD"], in: work)
         return (bare, work)

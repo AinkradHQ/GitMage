@@ -1,5 +1,5 @@
-import Foundation
 import AinkradAppKit
+import Foundation
 
 /// Thin adapter that maps a gated `gitmage.git_op` action to `GitRepositoryClient`
 /// calls (including its `+Advanced` extension). Local git only — reuses the
@@ -11,9 +11,10 @@ struct GitOpActionHandler {
 
     func run(_ json: String) async -> AgentActionResult {
         guard let data = json.data(using: .utf8),
-              let obj = try? JSONSerialization.jsonObject(with: data) as? [String: Any],
-              let operation = obj["operation"] as? String,
-              let repoPath = obj["repoPath"] as? String else {
+            let obj = try? JSONSerialization.jsonObject(with: data) as? [String: Any],
+            let operation = obj["operation"] as? String,
+            let repoPath = obj["repoPath"] as? String
+        else {
             return AgentActionResult(text: "git_op: malformed input", isError: true)
         }
         let args = obj["args"] as? [String: Any] ?? [:]
@@ -39,13 +40,27 @@ struct GitOpActionHandler {
                 guard let name = args["name"] as? String else { return bad("deleteBranch requires args.name") }
                 try await client.deleteBranch(name, in: repoPath)
                 return ok("deleted branch \(name)")
-            case "push":   try await client.push(in: repoPath);  return ok("pushed")
-            case "pull":   try await client.pull(in: repoPath);  return ok("pulled")
-            case "fetch":  try await client.fetch(in: repoPath); return ok("fetched")
-            case "stageAll":   try await client.stageAllChanges(in: repoPath);   return ok("staged all changes")
-            case "unstageAll": try await client.unstageAllChanges(in: repoPath); return ok("unstaged all changes")
-            case "stashPush":  try await client.stashPush(in: repoPath); return ok("stashed changes")
-            case "stashPop":   try await client.stashPop(in: repoPath);  return ok("popped stash")
+            case "push":
+                try await client.push(in: repoPath)
+                return ok("pushed")
+            case "pull":
+                try await client.pull(in: repoPath)
+                return ok("pulled")
+            case "fetch":
+                try await client.fetch(in: repoPath)
+                return ok("fetched")
+            case "stageAll":
+                try await client.stageAllChanges(in: repoPath)
+                return ok("staged all changes")
+            case "unstageAll":
+                try await client.unstageAllChanges(in: repoPath)
+                return ok("unstaged all changes")
+            case "stashPush":
+                try await client.stashPush(in: repoPath)
+                return ok("stashed changes")
+            case "stashPop":
+                try await client.stashPop(in: repoPath)
+                return ok("popped stash")
             case "log":
                 let limit = (args["limit"] as? Int) ?? 20
                 let commits = try await client.loadLog(limit: limit, in: repoPath)
@@ -67,12 +82,14 @@ struct GitOpActionHandler {
                 guard let mode = ResetMode(rawValue: (args["mode"] as? String) ?? "mixed") else {
                     return bad("reset args.mode must be soft, mixed, or hard")
                 }
-                try await client.reset(to: ref, mode: mode, autostash: (args["autostash"] as? Bool) ?? false, in: repoPath)
+                try await client.reset(
+                    to: ref, mode: mode, autostash: (args["autostash"] as? Bool) ?? false, in: repoPath)
                 return ok("reset (\(mode.rawValue)) to \(ref)")
             case "createTag":
                 guard let name = args["name"] as? String else { return bad("createTag requires args.name") }
-                try await client.createTag(name: name, message: args["message"] as? String,
-                                           at: args["ref"] as? String, in: repoPath)
+                try await client.createTag(
+                    name: name, message: args["message"] as? String,
+                    at: args["ref"] as? String, in: repoPath)
                 return ok("created tag \(name)")
             case "deleteTag":
                 guard let name = args["name"] as? String else { return bad("deleteTag requires args.name") }

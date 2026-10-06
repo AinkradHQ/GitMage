@@ -1,5 +1,5 @@
-import SwiftUI
 import AinkradAppKit
+import SwiftUI
 
 /// Context pane (left rail) for the Pull Requests area: filter + PR list,
 /// gated on having a GitHub remote and a valid token.
@@ -59,15 +59,20 @@ struct PullRequestsContextPane: View {
                 selection: Binding(
                     get: { model.filter },
                     set: { newValue in
-                        if model.filter != newValue { model.filter = newValue; Task { await model.load() } }
+                        if model.filter != newValue {
+                            model.filter = newValue
+                            Task { await model.load() }
+                        }
                     }
                 ),
                 label: { $0 == .open ? "Open" : "Closed" }
             )
             .padding(.horizontal, 12)
-            AinkradSearchField(text: $model.searchText, placeholder: "Search pull requests…",
-                               onSubmit: { Task { await model.load() } })
-                .padding(.horizontal, 12)
+            AinkradSearchField(
+                text: $model.searchText, placeholder: "Search pull requests…",
+                onSubmit: { Task { await model.load() } }
+            )
+            .padding(.horizontal, 12)
             if !model.availableLabels.isEmpty {
                 ScrollView(.horizontal, showsIndicators: false) {
                     HStack(spacing: 6) {
@@ -94,9 +99,11 @@ struct PullRequestsContextPane: View {
         } else if let errorMessage = model.errorMessage {
             gateMessage(errorMessage)
         } else if model.pullRequests.isEmpty {
-            EmptyStateView(icon: "arrow.triangle.pull", title: "No pull requests",
-                           message: "Nothing matches this filter.", tokens: tokens)
-                .frame(maxWidth: .infinity, maxHeight: .infinity)
+            EmptyStateView(
+                icon: "arrow.triangle.pull", title: "No pull requests",
+                message: "Nothing matches this filter.", tokens: tokens
+            )
+            .frame(maxWidth: .infinity, maxHeight: .infinity)
         } else {
             ScrollView {
                 LazyVStack(alignment: .leading, spacing: 3) {
@@ -112,8 +119,12 @@ struct PullRequestsContextPane: View {
                         }
                     }
                     if model.isLoadingMore {
-                        HStack { Spacer(); AinkradSpinner(size: 16); Spacer() }
-                            .padding(.vertical, 12)
+                        HStack {
+                            Spacer()
+                            AinkradSpinner(size: 16)
+                            Spacer()
+                        }
+                        .padding(.vertical, 12)
                     }
                 }
                 .padding(.horizontal, 12).padding(.bottom, 12)
@@ -161,8 +172,10 @@ private struct PullRequestRow: View {
         .padding(.horizontal, 9).padding(.vertical, 7)
         .background(
             ChamferShape(cut: AinkradRadius.md)
-                .fill(isSelected ? tokens.accentPrimary.opacity(0.13)
-                      : (hovering ? tokens.surfaceElevated.opacity(0.5) : .clear))
+                .fill(
+                    isSelected
+                        ? tokens.accentPrimary.opacity(0.13)
+                        : (hovering ? tokens.surfaceElevated.opacity(0.5) : .clear))
         )
         .overlay(alignment: .leading) {
             Capsule().fill(tokens.accentPrimary).frame(width: 3, height: 18)

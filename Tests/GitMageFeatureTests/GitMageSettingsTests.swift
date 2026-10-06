@@ -1,6 +1,7 @@
-import XCTest
-import SwiftUI
 import AinkradAppKit
+import SwiftUI
+import XCTest
+
 @testable import GitMageFeature
 
 @MainActor
@@ -8,7 +9,10 @@ final class GitMageSettingsTests: XCTestCase {
     func testStoreRoundTripsAndPersists() {
         let documents = MemoryDocumentStore()
         let store = GitMageSettingsStore(documents: documents)
-        store.update { $0.backgroundOpacity = 0.5; $0.followThemeAccent = false }
+        store.update {
+            $0.backgroundOpacity = 0.5
+            $0.followThemeAccent = false
+        }
 
         let reloaded = GitMageSettingsStore(documents: documents)
         XCTAssertEqual(reloaded.settings.backgroundOpacity, 0.5)
@@ -22,7 +26,7 @@ final class GitMageSettingsTests: XCTestCase {
 
         let store = GitMageSettingsStore(documents: documents)
         XCTAssertEqual(store.settings.backgroundOpacity, 0.7)
-        XCTAssertTrue(store.settings.followThemeAccent)   // default preserved
+        XCTAssertTrue(store.settings.followThemeAccent)  // default preserved
         XCTAssertEqual(store.settings.diffFontSize, 12)
     }
 
@@ -35,9 +39,11 @@ final class GitMageSettingsTests: XCTestCase {
         XCTAssertEqual(low.backgroundOpacity, 0.2)
         let high = GitMageAppearanceResolver.resolve(settings: GitMageSettings(backgroundOpacity: 2.0), tokens: tokens)
         XCTAssertEqual(high.backgroundOpacity, 1.0)
-        let themed = GitMageAppearanceResolver.resolve(settings: GitMageSettings(followThemeAccent: true), tokens: tokens)
+        let themed = GitMageAppearanceResolver.resolve(
+            settings: GitMageSettings(followThemeAccent: true), tokens: tokens)
         XCTAssertEqual(themed.accent, Color.blue)
-        let custom = GitMageAppearanceResolver.resolve(settings: GitMageSettings(followThemeAccent: false), tokens: tokens)
+        let custom = GitMageAppearanceResolver.resolve(
+            settings: GitMageSettings(followThemeAccent: false), tokens: tokens)
         XCTAssertEqual(custom.accent, Color.purple)
     }
 

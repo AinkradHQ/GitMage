@@ -1,4 +1,5 @@
 import XCTest
+
 @testable import GitMageFeature
 
 /// Wave 1-B. Two release blockers met here:
@@ -17,7 +18,7 @@ final class GitSafetyTests: XCTestCase {
     /// it. The timeout is what turns "hangs forever" into a normal red test.
     func testLargeDiffDoesNotDeadlock() async throws {
         let repoURL = try makeTemporaryRepository()
-        let big = String(repeating: "abcdefghij\n", count: 200_000)   // ~2.2 MB
+        let big = String(repeating: "abcdefghij\n", count: 200_000)  // ~2.2 MB
         try big.write(to: repoURL.appendingPathComponent("big.txt"), atomically: true, encoding: .utf8)
 
         let client = GitRepositoryClient()
@@ -88,10 +89,12 @@ final class GitSafetyTests: XCTestCase {
 
     /// The audit's exact payload: `mode` reads "soft" but `ref` is `--hard`.
     func testRejectsRefThatIsReallyAFlag() {
-        XCTAssertEqual(GitArgumentGuard.rejectedArgument(in: ["reset", "--soft", "--hard"]), nil,
-                       "--hard is a legitimate literal this module passes; the tool boundary rejects it as a *value*")
-        XCTAssertEqual(GitArgumentGuard.rejectedArgument(in: ["checkout", "--upload-pack=x"]),
-                       "--upload-pack=x")
+        XCTAssertEqual(
+            GitArgumentGuard.rejectedArgument(in: ["reset", "--soft", "--hard"]), nil,
+            "--hard is a legitimate literal this module passes; the tool boundary rejects it as a *value*")
+        XCTAssertEqual(
+            GitArgumentGuard.rejectedArgument(in: ["checkout", "--upload-pack=x"]),
+            "--upload-pack=x")
     }
 
     func testAllowsEveryOptionTheModuleActuallyUses() {
@@ -156,14 +159,16 @@ final class GitSafetyTests: XCTestCase {
     }
 
     func testAllowsRealCloneTransports() {
-        for url in ["https://github.com/a/b.git",
-                    "http://internal.example/a.git",
-                    "ssh://git@host:22/a/b.git",
-                    "git://host/a.git",
-                    "file:///Users/me/repo",
-                    "git@github.com:a/b.git",     // scp-style, no scheme
-                    "/Users/me/local/repo",       // bare local path
-                    "../sibling-repo"] {
+        for url in [
+            "https://github.com/a/b.git",
+            "http://internal.example/a.git",
+            "ssh://git@host:22/a/b.git",
+            "git://host/a.git",
+            "file:///Users/me/repo",
+            "git@github.com:a/b.git",  // scp-style, no scheme
+            "/Users/me/local/repo",  // bare local path
+            "../sibling-repo",
+        ] {
             XCTAssertNil(GitArgumentGuard.rejectedCloneURL(url), "rejected \(url)")
         }
     }
@@ -238,9 +243,12 @@ final class GitSafetyTests: XCTestCase {
         let errData = errPipe.fileHandleForReading.readDataToEndOfFile()
         process.waitUntilExit()
         guard process.terminationStatus == 0 else {
-            throw NSError(domain: "GitSafetyTests", code: Int(process.terminationStatus),
-                          userInfo: [NSLocalizedDescriptionKey:
-                            "git \(arguments.joined(separator: " ")): \(String(decoding: errData, as: UTF8.self))"])
+            throw NSError(
+                domain: "GitSafetyTests", code: Int(process.terminationStatus),
+                userInfo: [
+                    NSLocalizedDescriptionKey:
+                        "git \(arguments.joined(separator: " ")): \(String(decoding: errData, as: UTF8.self))"
+                ])
         }
     }
 }

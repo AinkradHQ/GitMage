@@ -1,6 +1,6 @@
-import SwiftUI
-import AppKit
 import AinkradAppKit
+import AppKit
+import SwiftUI
 
 /// Detail pane for the selected worktree, plus the Add-worktree sheet.
 struct WorktreeDetailView: View {
@@ -27,8 +27,9 @@ struct WorktreeDetailView: View {
     }
 
     private var emptyState: some View {
-        EmptyStateView(icon: "rectangle.split.3x1", title: "Worktrees",
-                       message: "Select a worktree to browse its commit graph.", tokens: tokens)
+        EmptyStateView(
+            icon: "rectangle.split.3x1", title: "Worktrees",
+            message: "Select a worktree to browse its commit graph.", tokens: tokens)
     }
 
     // MARK: - Graph view
@@ -42,9 +43,11 @@ struct WorktreeDetailView: View {
                 AinkradSpinner(size: 22)
                     .frame(maxWidth: .infinity, maxHeight: .infinity)
             } else if model.graphRows.isEmpty {
-                EmptyStateView(icon: "point.3.connected.trianglepath.dotted", title: "No history",
-                               message: "This worktree has no commits yet.", tokens: tokens)
-                    .frame(maxWidth: .infinity, maxHeight: .infinity)
+                EmptyStateView(
+                    icon: "point.3.connected.trianglepath.dotted", title: "No history",
+                    message: "This worktree has no commits yet.", tokens: tokens
+                )
+                .frame(maxWidth: .infinity, maxHeight: .infinity)
             } else {
                 graphAndDiff
             }
@@ -68,10 +71,12 @@ struct WorktreeDetailView: View {
                     }
                 }
                 HStack(spacing: 6) {
-                    Image(systemName: "arrow.triangle.branch").font(.system(size: 9)).foregroundStyle(tokens.foreground.opacity(0.5))
+                    Image(systemName: "arrow.triangle.branch").font(.system(size: 9)).foregroundStyle(
+                        tokens.foreground.opacity(0.5))
                     Text(wt.branch ?? "detached")
                         .font(AinkradFont.mono(11))
-                        .foregroundStyle(wt.branch != nil ? tokens.accentPrimary.opacity(0.85) : tokens.foreground.opacity(0.55))
+                        .foregroundStyle(
+                            wt.branch != nil ? tokens.accentPrimary.opacity(0.85) : tokens.foreground.opacity(0.55))
                 }
             }
             Spacer()
@@ -103,9 +108,11 @@ struct WorktreeDetailView: View {
 
             if let diff = model.selectedCommitDiff {
                 GlowRule(tokens: tokens)
-                FileDiffList(files: DiffFileSplitter.split(diff.body), tokens: tokens,
-                            fontSize: fontSize, fallbackTitle: diff.title)
-                    .frame(height: 300)
+                FileDiffList(
+                    files: DiffFileSplitter.split(diff.body), tokens: tokens,
+                    fontSize: fontSize, fallbackTitle: diff.title
+                )
+                .frame(height: 300)
             }
         }
     }

@@ -1,5 +1,6 @@
-import XCTest
 import AinkradAppKit
+import XCTest
+
 @testable import GitMageFeature
 
 final class GitMageWorkspaceStoreTests: XCTestCase {
@@ -16,7 +17,8 @@ final class GitMageWorkspaceStoreTests: XCTestCase {
     func testRoundTripsLibraryState() {
         let documents = MemoryDocumentStore()
         let store = GitMageWorkspaceStore(documents: documents)
-        let repo = GitMageRepoConfig(id: "abc", path: "/tmp/repo", name: "repo", draftCommitMessage: "WIP", lastBranch: "main")
+        let repo = GitMageRepoConfig(
+            id: "abc", path: "/tmp/repo", name: "repo", draftCommitMessage: "WIP", lastBranch: "main")
         let library = GitMageLibraryState(repos: [repo], activeRepoID: "abc")
 
         store.saveLibrary(library)
@@ -79,4 +81,3 @@ final class GitMageWorkspaceStoreTests: XCTestCase {
             "the only copy of the user's data was overwritten")
     }
 }
-

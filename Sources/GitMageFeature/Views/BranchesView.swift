@@ -1,5 +1,5 @@
-import SwiftUI
 import AinkradAppKit
+import SwiftUI
 
 struct BranchesContextPane: View {
     @ObservedObject var model: GitMageViewModel
@@ -34,7 +34,10 @@ struct BranchesContextPane: View {
                                 isSelected: model.selectedBranchName == branch.name,
                                 tokens: tokens,
                                 onSelect: { model.selectedBranchName = branch.name },
-                                onCheckout: { model.selectedBranchName = branch.name; model.checkoutSelectedBranch() },
+                                onCheckout: {
+                                    model.selectedBranchName = branch.name
+                                    model.checkoutSelectedBranch()
+                                },
                                 onDelete: { model.deleteBranch(branch.name) }
                             )
                         }
@@ -58,8 +61,9 @@ struct BranchesContextPane: View {
             }
             .padding(.horizontal, 10).padding(.vertical, 7)
             .background(ChamferShape(cut: AinkradRadius.sm).fill(tokens.surfaceElevated.opacity(0.5)))
-            .overlay(ChamferShape(cut: AinkradRadius.sm)
-                .strokeBorder(tokens.accentPrimary.opacity(creating ? 0.5 : 0.18)))
+            .overlay(
+                ChamferShape(cut: AinkradRadius.sm)
+                    .strokeBorder(tokens.accentPrimary.opacity(creating ? 0.5 : 0.18)))
 
             AinkradIconButton(systemName: "arrow.branch", size: 22, tooltip: "Create branch", action: create)
                 .opacity(canCreate ? 1 : 0.4)
@@ -122,8 +126,10 @@ private struct BranchPaneRow: View {
         .padding(.horizontal, 9).padding(.vertical, 7)
         .background(
             ChamferShape(cut: AinkradRadius.md)
-                .fill(isSelected ? tokens.accentPrimary.opacity(0.13)
-                      : (hovering ? tokens.surfaceElevated.opacity(0.5) : .clear))
+                .fill(
+                    isSelected
+                        ? tokens.accentPrimary.opacity(0.13)
+                        : (hovering ? tokens.surfaceElevated.opacity(0.5) : .clear))
         )
         .overlay(alignment: .leading) {
             Capsule().fill(tokens.accentPrimary)

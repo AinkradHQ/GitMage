@@ -135,7 +135,7 @@ struct GHLabel: Codable {
     }
 }
 
-struct GHPullRequestMarker: Codable {}   // presence indicates the "issue" is actually a PR
+struct GHPullRequestMarker: Codable {}  // presence indicates the "issue" is actually a PR
 
 /// Envelope returned by `GET /search/issues` (total_count → totalCount).
 struct GHSearchEnvelope: Codable {
@@ -153,27 +153,30 @@ struct GHIssue: Codable {
     let assignees: [GHUser]
     let comments: Int
     let createdAt: String?
-    let draft: Bool?                        // present on PR items from the search API
-    let pullRequest: GHPullRequestMarker?   // JSON "pull_request" via convertFromSnakeCase
+    let draft: Bool?  // present on PR items from the search API
+    let pullRequest: GHPullRequestMarker?  // JSON "pull_request" via convertFromSnakeCase
 
     var isPullRequest: Bool { pullRequest != nil }
 
     func toSummary() -> IssueSummary {
-        IssueSummary(id: number, number: number, title: title, author: user.login,
-                     state: state, labelNames: labels.map { $0.name }, commentCount: comments)
+        IssueSummary(
+            id: number, number: number, title: title, author: user.login,
+            state: state, labelNames: labels.map { $0.name }, commentCount: comments)
     }
 
     /// Maps a search-API PR item to a list summary. Head/base branches are not
     /// returned by search — the detail fetch on select fills them in.
     func toPRSummary() -> PullRequestSummary {
-        PullRequestSummary(id: number, number: number, title: title, author: user.login,
-                           state: state, isDraft: draft ?? false, headBranch: "", baseBranch: "")
+        PullRequestSummary(
+            id: number, number: number, title: title, author: user.login,
+            state: state, isDraft: draft ?? false, headBranch: "", baseBranch: "")
     }
 
     func toDetail() -> IssueDetail {
-        IssueDetail(number: number, title: title, body: body ?? "", state: state,
-                    author: user.login, createdAt: createdAt ?? "",
-                    labels: labels.map { $0.toModel() },
-                    assignees: assignees.map { $0.login })
+        IssueDetail(
+            number: number, title: title, body: body ?? "", state: state,
+            author: user.login, createdAt: createdAt ?? "",
+            labels: labels.map { $0.toModel() },
+            assignees: assignees.map { $0.login })
     }
 }

@@ -1,5 +1,5 @@
-import SwiftUI
 import AinkradAppKit
+import SwiftUI
 
 /// Sheet for composing a new issue: title, body, and optional labels/assignees.
 struct NewIssueSheet: View {

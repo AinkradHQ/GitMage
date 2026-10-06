@@ -1,5 +1,5 @@
-import SwiftUI
 import AinkradAppKit
+import SwiftUI
 
 // MARK: - Chips that open the management overlays
 
@@ -116,20 +116,26 @@ private struct HUDButtonSurface: ViewModifier {
         switch kind {
         case .primary:
             LinearGradient(
-                colors: [tokens.accentPrimary.opacity(hovering ? 1 : 0.92),
-                         tokens.accentPrimary.opacity(hovering ? 0.9 : 0.72)],
+                colors: [
+                    tokens.accentPrimary.opacity(hovering ? 1 : 0.92),
+                    tokens.accentPrimary.opacity(hovering ? 0.9 : 0.72),
+                ],
                 startPoint: .top, endPoint: .bottom
             )
         case .destructive:
             LinearGradient(
-                colors: [tokens.accentTertiary.opacity(hovering ? 0.28 : 0.16),
-                         tokens.accentTertiary.opacity(hovering ? 0.18 : 0.10)],
+                colors: [
+                    tokens.accentTertiary.opacity(hovering ? 0.28 : 0.16),
+                    tokens.accentTertiary.opacity(hovering ? 0.18 : 0.10),
+                ],
                 startPoint: .top, endPoint: .bottom
             )
         case .secondary, .chip:
             LinearGradient(
-                colors: [tokens.surfaceElevated.opacity(hovering ? 0.85 : 0.5),
-                         tokens.surfaceElevated.opacity(hovering ? 0.55 : 0.28)],
+                colors: [
+                    tokens.surfaceElevated.opacity(hovering ? 0.85 : 0.5),
+                    tokens.surfaceElevated.opacity(hovering ? 0.55 : 0.28),
+                ],
                 startPoint: .top, endPoint: .bottom
             )
         }
@@ -196,8 +202,10 @@ struct NavRailItem: View {
                                 ChamferShape(cut: AinkradRadius.md)
                                     .strokeBorder(
                                         LinearGradient(
-                                            colors: [tokens.accentSecondary.opacity(0.6),
-                                                     tokens.accentPrimary.opacity(0.25)],
+                                            colors: [
+                                                tokens.accentSecondary.opacity(0.6),
+                                                tokens.accentPrimary.opacity(0.25),
+                                            ],
                                             startPoint: .topLeading, endPoint: .bottomTrailing
                                         ),
                                         lineWidth: 1
@@ -212,8 +220,11 @@ struct NavRailItem: View {
 
                     Image(systemName: area.icon)
                         .font(.system(size: 15, weight: isActive ? .semibold : .regular))
-                        .foregroundStyle(isActive ? tokens.accentPrimary
-                                         : tokens.foreground.opacity(hovering ? 0.9 : 0.6))
+                        .foregroundStyle(
+                            isActive
+                                ? tokens.accentPrimary
+                                : tokens.foreground.opacity(hovering ? 0.9 : 0.6)
+                        )
                         .shadow(color: isActive ? tokens.accentPrimary.opacity(0.7) : .clear, radius: 5)
                 }
                 .frame(width: 40, height: 36)
@@ -241,8 +252,9 @@ struct ShortcutLayer: View {
         ZStack {
             ForEach(GitMageCommand.allCases) { command in
                 if let chord = shortcuts[command.rawValue],
-                   chord.hasModifier,
-                   let equivalent = chord.keyEquivalent {
+                    chord.hasModifier,
+                    let equivalent = chord.keyEquivalent
+                {
                     Button(action: { perform(command) }) { Color.clear.frame(width: 0, height: 0) }
                         .buttonStyle(.plain)
                         .frame(width: 0, height: 0)
@@ -256,4 +268,3 @@ struct ShortcutLayer: View {
         .allowsHitTesting(false)
     }
 }
-

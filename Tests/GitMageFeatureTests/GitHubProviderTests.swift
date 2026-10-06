@@ -1,4 +1,5 @@
 import XCTest
+
 @testable import GitMageFeature
 
 final class GitHubProviderTests: XCTestCase {
@@ -13,10 +14,12 @@ final class GitHubProviderTests: XCTestCase {
     private let repo = RepoRef(host: "github.com", owner: "o", name: "r")
 
     func testListPullRequestsParses() async throws {
-        let p = makeProvider(status: 200, body: """
-        [{"id":1,"number":7,"title":"Fix","state":"open","draft":false,
-          "user":{"login":"alice"},"head":{"ref":"feat"},"base":{"ref":"main"}}]
-        """)
+        let p = makeProvider(
+            status: 200,
+            body: """
+                [{"id":1,"number":7,"title":"Fix","state":"open","draft":false,
+                  "user":{"login":"alice"},"head":{"ref":"feat"},"base":{"ref":"main"}}]
+                """)
         let prs = try await p.listPullRequests(repo, state: .open)
         XCTAssertEqual(prs.count, 1)
         XCTAssertEqual(prs.first?.number, 7)
@@ -26,21 +29,25 @@ final class GitHubProviderTests: XCTestCase {
 
     func testUnauthorizedMapsToForgeError() async {
         let p = makeProvider(status: 401, body: "{\"message\":\"Bad credentials\"}")
-        do { _ = try await p.verify(); XCTFail("expected throw") }
-        catch let e as ForgeError { XCTAssertEqual(e, .unauthorized) }
-        catch { XCTFail("wrong error") }
+        do {
+            _ = try await p.verify()
+            XCTFail("expected throw")
+        } catch let e as ForgeError { XCTAssertEqual(e, .unauthorized) } catch { XCTFail("wrong error") }
     }
 
     /// A 422 must carry GitHub's reason: "server 422" gives the caller nothing
     /// to act on and invites an identical retry.
     func testValidationFailureCarriesGitHubsReason() async {
-        let p = makeProvider(status: 422, body: """
-        {"message":"Validation Failed","errors":[{"resource":"PullRequest","field":"base",
-         "code":"invalid","message":"No commits between main and feat"}]}
-        """)
+        let p = makeProvider(
+            status: 422,
+            body: """
+                {"message":"Validation Failed","errors":[{"resource":"PullRequest","field":"base",
+                 "code":"invalid","message":"No commits between main and feat"}]}
+                """)
         do {
-            _ = try await p.createPullRequest(repo, title: "t", body: "b",
-                                              head: "feat", base: "main", draft: false)
+            _ = try await p.createPullRequest(
+                repo, title: "t", body: "b",
+                head: "feat", base: "main", draft: false)
             XCTFail("expected throw")
         } catch let e as ForgeError {
             XCTAssertEqual(e, .invalidRequest("Validation Failed — No commits between main and feat"))
@@ -53,8 +60,9 @@ final class GitHubProviderTests: XCTestCase {
     func testValidationFailureWithoutErrorDetailsUsesTheTopLevelMessage() async {
         let p = makeProvider(status: 422, body: "{\"message\":\"A pull request already exists for o:feat.\"}")
         do {
-            _ = try await p.createPullRequest(repo, title: "t", body: "b",
-                                              head: "feat", base: "main", draft: false)
+            _ = try await p.createPullRequest(
+                repo, title: "t", body: "b",
+                head: "feat", base: "main", draft: false)
             XCTFail("expected throw")
         } catch let e as ForgeError {
             XCTAssertEqual(e, .invalidRequest("A pull request already exists for o:feat."))
@@ -94,12 +102,20 @@ final class StubURLProtocol: URLProtocol {
     override class func canonicalRequest(for request: URLRequest) -> URLRequest { request }
     override func startLoading() {
         Self.lastRequest = request
-        Self.lastBody = request.httpBody ?? request.httpBodyStream.map { stream in
-            stream.open(); defer { stream.close() }
-            var data = Data(); var buf = [UInt8](repeating: 0, count: 4096)
-            while stream.hasBytesAvailable { let n = stream.read(&buf, maxLength: buf.count); if n <= 0 { break }; data.append(buf, count: n) }
-            return data
-        }
+        Self.lastBody =
+            request.httpBody
+            ?? request.httpBodyStream.map { stream in
+                stream.open()
+                defer { stream.close() }
+                var data = Data()
+                var buf = [UInt8](repeating: 0, count: 4096)
+                while stream.hasBytesAvailable {
+                    let n = stream.read(&buf, maxLength: buf.count)
+                    if n <= 0 { break }
+                    data.append(buf, count: n)
+                }
+                return data
+            }
         let resp = HTTPURLResponse(url: request.url!, statusCode: Self.status, httpVersion: nil, headerFields: nil)!
         client?.urlProtocol(self, didReceive: resp, cacheStoragePolicy: .notAllowed)
         client?.urlProtocol(self, didLoad: Self.body)

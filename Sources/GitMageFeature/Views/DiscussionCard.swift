@@ -1,5 +1,5 @@
-import SwiftUI
 import AinkradAppKit
+import SwiftUI
 
 /// A discussion entry — a PR/issue description or a comment — rendered like the
 /// GitHub web timeline: an author avatar-initial + name + date header strip

@@ -48,21 +48,25 @@ enum GitMageCommand: String, CaseIterable, Identifiable {
     /// Actions first (in bar order), then areas (in rail order).
     static var actions: [GitMageCommand] { [.openRepos, .openBranches, .fetch, .pull, .push] }
     static var areaCommands: [GitMageCommand] {
-        [.areaChanges, .areaHistory, .areaStashes,
-         .areaPullRequests, .areaWorktrees, .areaIssues, .areaAdvanced]
+        [
+            .areaChanges, .areaHistory, .areaStashes,
+            .areaPullRequests, .areaWorktrees, .areaIssues, .areaAdvanced,
+        ]
     }
 }
 
 /// A key + modifier combination, persisted and rendered on demand.
 struct KeyChord: Codable, Equatable, Hashable {
-    var key: String        // single, lowercased base character ("f", "1")
+    var key: String  // single, lowercased base character ("f", "1")
     var command: Bool
     var option: Bool
     var control: Bool
     var shift: Bool
 
-    init(key: String, command: Bool = false, option: Bool = false,
-         control: Bool = false, shift: Bool = false) {
+    init(
+        key: String, command: Bool = false, option: Bool = false,
+        control: Bool = false, shift: Bool = false
+    ) {
         self.key = key.lowercased()
         self.command = command
         self.option = option

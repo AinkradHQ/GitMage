@@ -1,5 +1,5 @@
-import SwiftUI
 import AinkradAppKit
+import SwiftUI
 
 /// Detail pane for the Pull Requests area: header + Conversation/Files switch.
 struct PullRequestDetailView: View {
@@ -40,9 +40,11 @@ struct PullRequestDetailView: View {
                     filesTab
                 }
             } else {
-                EmptyStateView(icon: "arrow.triangle.pull", title: "No pull request",
-                               message: "Select a pull request to see its conversation and files.", tokens: tokens)
-                    .frame(maxWidth: .infinity, maxHeight: .infinity)
+                EmptyStateView(
+                    icon: "arrow.triangle.pull", title: "No pull request",
+                    message: "Select a pull request to see its conversation and files.", tokens: tokens
+                )
+                .frame(maxWidth: .infinity, maxHeight: .infinity)
             }
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity)
@@ -61,8 +63,9 @@ struct PullRequestDetailView: View {
                 if detail.isDraft {
                     StatusPill(text: "Draft", kind: .neutral, tokens: tokens)
                 }
-                StatusPill(text: detail.state.capitalized,
-                           kind: detail.state.lowercased() == "open" ? .open : .closedMerged, tokens: tokens)
+                StatusPill(
+                    text: detail.state.capitalized,
+                    kind: detail.state.lowercased() == "open" ? .open : .closedMerged, tokens: tokens)
             }
             HStack(spacing: 6) {
                 Image(systemName: "arrow.triangle.branch")
@@ -85,7 +88,10 @@ struct PullRequestDetailView: View {
         case false: mergeability = "Not mergeable (\(detail.mergeableState))"
         case nil: mergeability = "Checking mergeability…"
         }
-        let checksText = model.checks.isEmpty ? "no checks" : "\(model.checks.filter { $0.conclusion == "success" }.count)/\(model.checks.count) checks passing"
+        let checksText =
+            model.checks.isEmpty
+            ? "no checks"
+            : "\(model.checks.filter { $0.conclusion == "success" }.count)/\(model.checks.count) checks passing"
         return "\(mergeability) · \(checksText) · +\(detail.additions) −\(detail.deletions)"
     }
 
@@ -105,11 +111,13 @@ struct PullRequestDetailView: View {
         VStack(spacing: 0) {
             ScrollView {
                 VStack(alignment: .leading, spacing: 12) {
-                    DiscussionCard(author: detail.author, timestamp: detail.createdAt,
-                                   text: detail.body, isPrimary: true, tokens: tokens)
+                    DiscussionCard(
+                        author: detail.author, timestamp: detail.createdAt,
+                        text: detail.body, isPrimary: true, tokens: tokens)
                     ForEach(model.comments) { comment in
-                        DiscussionCard(author: comment.author, timestamp: comment.createdAt,
-                                       text: comment.body, isPrimary: false, tokens: tokens)
+                        DiscussionCard(
+                            author: comment.author, timestamp: comment.createdAt,
+                            text: comment.body, isPrimary: false, tokens: tokens)
                     }
                 }
                 .padding(16)
@@ -124,9 +132,11 @@ struct PullRequestDetailView: View {
         ScrollView {
             VStack(alignment: .leading, spacing: 3) {
                 if model.commits.isEmpty {
-                    EmptyStateView(icon: "clock.arrow.circlepath", title: "No commits",
-                                   message: "This pull request has no commits.", tokens: tokens)
-                        .frame(maxWidth: .infinity, minHeight: 160)
+                    EmptyStateView(
+                        icon: "clock.arrow.circlepath", title: "No commits",
+                        message: "This pull request has no commits.", tokens: tokens
+                    )
+                    .frame(maxWidth: .infinity, minHeight: 160)
                 } else {
                     ForEach(model.commits) { commit in
                         PRCommitRow(commit: commit, tokens: tokens)
@@ -140,23 +150,37 @@ struct PullRequestDetailView: View {
     private var composer: some View {
         VStack(alignment: .leading, spacing: 10) {
             GlowRule(tokens: tokens)
-            AinkradTextArea(text: $composerText, placeholder: "Leave a comment…", minHeight: 34, maxHeight: 80,
-                            onSubmit: {
-                                guard !model.isLoading,
-                                      !composerText.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty else { return }
-                                Task { await model.comment(composerText); composerText = "" }
-                            })
+            AinkradTextArea(
+                text: $composerText, placeholder: "Leave a comment…", minHeight: 34, maxHeight: 80,
+                onSubmit: {
+                    guard !model.isLoading,
+                        !composerText.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
+                    else { return }
+                    Task {
+                        await model.comment(composerText)
+                        composerText = ""
+                    }
+                })
             HStack(spacing: 8) {
                 AinkradButton(title: "Comment", style: .secondary, icon: "text.bubble") {
-                    Task { await model.comment(composerText); composerText = "" }
+                    Task {
+                        await model.comment(composerText)
+                        composerText = ""
+                    }
                 }
                 .disabled(model.isLoading)
                 AinkradButton(title: "Approve", style: .secondary, icon: "checkmark.seal") {
-                    Task { await model.review(.approve, body: composerText); composerText = "" }
+                    Task {
+                        await model.review(.approve, body: composerText)
+                        composerText = ""
+                    }
                 }
                 .disabled(model.isLoading)
                 AinkradButton(title: "Request changes", style: .danger, icon: "exclamationmark.bubble") {
-                    Task { await model.review(.requestChanges, body: composerText); composerText = "" }
+                    Task {
+                        await model.review(.requestChanges, body: composerText)
+                        composerText = ""
+                    }
                 }
                 .disabled(model.isLoading)
                 Spacer()
@@ -186,7 +210,9 @@ struct PullRequestDetailView: View {
 
     private var filesTab: some View {
         FileDiffList(
-            files: model.files.map { DiffFile(id: $0.filename, filename: $0.filename, status: $0.status, patch: $0.patch) },
+            files: model.files.map {
+                DiffFile(id: $0.filename, filename: $0.filename, status: $0.status, patch: $0.patch)
+            },
             tokens: tokens,
             fontSize: fontSize
         )
@@ -225,11 +251,12 @@ private struct PRCommitRow: View {
             Spacer()
         }
         .padding(.horizontal, 9).padding(.vertical, 7)
-        .background(ChamferShape(cut: AinkradRadius.md)
-            .fill(hovering ? tokens.surfaceElevated.opacity(0.5) : .clear))
+        .background(
+            ChamferShape(cut: AinkradRadius.md)
+                .fill(hovering ? tokens.surfaceElevated.opacity(0.5) : .clear)
+        )
         .contentShape(Rectangle())
         .onHover { hovering = $0 }
         .animation(reduceMotion ? nil : .easeOut(duration: 0.12), value: hovering)
     }
 }
-

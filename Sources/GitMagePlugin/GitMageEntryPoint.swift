@@ -1,5 +1,5 @@
-import Foundation
 import AinkradAppKit
+import Foundation
 import GitMageFeature
 
 @objc(GitMageEntryPoint)
@@ -8,4 +8,3 @@ final class GitMageEntryPoint: NSObject, AinkradPluginEntryPoint {
         GitMageApp.self
     }
 }
-

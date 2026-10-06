@@ -1,5 +1,5 @@
-import SwiftUI
 import AinkradAppKit
+import SwiftUI
 
 struct StashesContextPane: View {
     @ObservedObject var model: GitMageViewModel
@@ -37,7 +37,10 @@ struct StashesContextPane: View {
                                 stash: stash,
                                 isSelected: selectedStashID == stash.id,
                                 tokens: tokens,
-                                onSelect: { selectedStashID = stash.id; model.selectStash(stash) },
+                                onSelect: {
+                                    selectedStashID = stash.id
+                                    model.selectStash(stash)
+                                },
                                 onApply: { model.applyStash(stash) },
                                 onDrop: { model.dropStash(stash) }
                             )
@@ -88,8 +91,10 @@ private struct StashRow: View {
         .padding(.horizontal, 9).padding(.vertical, 8)
         .background(
             ChamferShape(cut: AinkradRadius.md)
-                .fill(isSelected ? tokens.accentPrimary.opacity(0.13)
-                      : (hovering ? tokens.surfaceElevated.opacity(0.5) : .clear))
+                .fill(
+                    isSelected
+                        ? tokens.accentPrimary.opacity(0.13)
+                        : (hovering ? tokens.surfaceElevated.opacity(0.5) : .clear))
         )
         .overlay(alignment: .leading) {
             Capsule().fill(tokens.accentPrimary)

@@ -1,5 +1,5 @@
-import SwiftUI
 import AinkradAppKit
+import SwiftUI
 
 struct GitMageSettingsView: View {
     let settingsStore: GitMageSettingsStore
@@ -44,9 +44,10 @@ struct GitMageSettingsView: View {
     private var surfaceSection: some View {
         VStack(alignment: .leading, spacing: 12) {
             AinkradSectionHeader(title: "SURFACE")
-            AinkradSurfaceSettings(appName: "Git Mage",
-                                   presentation: host.presentation,
-                                   mode: host.mode)
+            AinkradSurfaceSettings(
+                appName: "Git Mage",
+                presentation: host.presentation,
+                mode: host.mode)
         }
     }
 
@@ -137,12 +138,16 @@ struct GitMageSettingsView: View {
                     .foregroundStyle(tokens.foreground.opacity(0.45))
             }
 
-            fontPicker(title: "Display font", selection: settings.displayFontName,
-                       options: AinkradFont.displayFamilies) { name in
+            fontPicker(
+                title: "Display font", selection: settings.displayFontName,
+                options: AinkradFont.displayFamilies
+            ) { name in
                 settingsStore.update { $0.displayFontName = name }
             }
-            fontPicker(title: "Mono font", selection: settings.monoFontName,
-                       options: AinkradFont.monoFamilies) { name in
+            fontPicker(
+                title: "Mono font", selection: settings.monoFontName,
+                options: AinkradFont.monoFamilies
+            ) { name in
                 settingsStore.update { $0.monoFontName = name }
             }
 
@@ -161,8 +166,10 @@ struct GitMageSettingsView: View {
         }
     }
 
-    private func fontPicker(title: String, selection: String, options: [String],
-                            onSelect: @escaping (String) -> Void) -> some View {
+    private func fontPicker(
+        title: String, selection: String, options: [String],
+        onSelect: @escaping (String) -> Void
+    ) -> some View {
         HStack {
             Text(title)
                 .font(AinkradFont.fixedDisplay(12, weight: .medium))
@@ -189,9 +196,11 @@ struct GitMageSettingsView: View {
                     .foregroundStyle(tokens.accentPrimary.opacity(0.9))
             }
 
-            Text("Click a shortcut to record a new combination, or × to unbind. A combination in use elsewhere moves here and unbinds the other command.")
-                .font(AinkradFont.fixedDisplay(11))
-                .foregroundStyle(tokens.foreground.opacity(0.45))
+            Text(
+                "Click a shortcut to record a new combination, or × to unbind. A combination in use elsewhere moves here and unbinds the other command."
+            )
+            .font(AinkradFont.fixedDisplay(11))
+            .foregroundStyle(tokens.foreground.opacity(0.45))
 
             if let reassignNote {
                 Text(reassignNote)
@@ -217,7 +226,10 @@ struct GitMageSettingsView: View {
                     chord: settings.shortcuts[command.rawValue],
                     isRecording: recordingCommand == command,
                     tokens: tokens,
-                    onStart: { recordingCommand = command; reassignNote = nil },
+                    onStart: {
+                        recordingCommand = command
+                        reassignNote = nil
+                    },
                     onCapture: { record($0, for: command) },
                     onCancel: { recordingCommand = nil },
                     onClear: { clearShortcut(command) }
@@ -315,9 +327,11 @@ struct GitMageSettingsView: View {
                         .foregroundStyle(tokens.foreground.opacity(0.6))
                 }
 
-                Text("Create a token with the `repo` scope at github.com → Settings → Developer settings → Personal access tokens.")
-                    .font(AinkradFont.fixedDisplay(11))
-                    .foregroundStyle(tokens.foreground.opacity(0.45))
+                Text(
+                    "Create a token with the `repo` scope at github.com → Settings → Developer settings → Personal access tokens."
+                )
+                .font(AinkradFont.fixedDisplay(11))
+                .foregroundStyle(tokens.foreground.opacity(0.45))
             }
         }
     }
@@ -401,14 +415,18 @@ private struct ShortcutRecorderRow: View {
                 .padding(.vertical, 5)
                 .background(
                     ChamferShape(cut: AinkradRadius.sm)
-                        .fill(isRecording ? tokens.accentSecondary.opacity(0.14)
-                              : tokens.surfaceElevated.opacity(0.5))
+                        .fill(
+                            isRecording
+                                ? tokens.accentSecondary.opacity(0.14)
+                                : tokens.surfaceElevated.opacity(0.5))
                 )
                 .overlay(
                     ChamferShape(cut: AinkradRadius.sm)
-                        .strokeBorder(isRecording ? tokens.accentSecondary.opacity(0.8)
-                                      : tokens.accentPrimary.opacity(0.2),
-                                      lineWidth: 1)
+                        .strokeBorder(
+                            isRecording
+                                ? tokens.accentSecondary.opacity(0.8)
+                                : tokens.accentPrimary.opacity(0.2),
+                            lineWidth: 1)
                 )
         }
         .buttonStyle(.plain)
@@ -417,7 +435,10 @@ private struct ShortcutRecorderRow: View {
         .onChange(of: isRecording) { _, recording in focused = recording }
         .onKeyPress(phases: .down) { press in
             guard isRecording else { return .ignored }
-            if press.key == .escape { onCancel(); return .handled }
+            if press.key == .escape {
+                onCancel()
+                return .handled
+            }
             if let newChord = KeyChord(press), newChord.hasModifier {
                 onCapture(newChord)
             }

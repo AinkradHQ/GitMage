@@ -32,7 +32,8 @@ enum RemoteInfoParser {
 }
 
 enum GitStatusParser {
-    static func parse(statusOutput: String, repositoryRoot: String, lastCommitSummary: String?) -> GitRepositorySnapshot {
+    static func parse(statusOutput: String, repositoryRoot: String, lastCommitSummary: String?) -> GitRepositorySnapshot
+    {
         let lines = statusOutput.split(separator: "\n", omittingEmptySubsequences: false).map(String.init)
         let header = lines.first ?? ""
         let branchInfo = parseHeader(header)
@@ -48,7 +49,9 @@ enum GitStatusParser {
         )
     }
 
-    private static func parseHeader(_ header: String) -> (branchName: String, upstream: String?, aheadCount: Int, behindCount: Int) {
+    private static func parseHeader(_ header: String) -> (
+        branchName: String, upstream: String?, aheadCount: Int, behindCount: Int
+    ) {
         guard header.hasPrefix("## ") else {
             return ("detached HEAD", nil, 0, 0)
         }
@@ -113,26 +116,43 @@ enum GitStatusParser {
         var i = 0
         while i < body.count {
             guard body[i] == UInt8(ascii: "\\"), i + 1 < body.count else {
-                bytes.append(body[i]); i += 1; continue
+                bytes.append(body[i])
+                i += 1
+                continue
             }
             let next = body[i + 1]
             switch next {
-            case UInt8(ascii: "n"): bytes.append(0x0A); i += 2
-            case UInt8(ascii: "t"): bytes.append(0x09); i += 2
-            case UInt8(ascii: "r"): bytes.append(0x0D); i += 2
-            case UInt8(ascii: "\""): bytes.append(0x22); i += 2
-            case UInt8(ascii: "\\"): bytes.append(0x5C); i += 2
+            case UInt8(ascii: "n"):
+                bytes.append(0x0A)
+                i += 2
+            case UInt8(ascii: "t"):
+                bytes.append(0x09)
+                i += 2
+            case UInt8(ascii: "r"):
+                bytes.append(0x0D)
+                i += 2
+            case UInt8(ascii: "\""):
+                bytes.append(0x22)
+                i += 2
+            case UInt8(ascii: "\\"):
+                bytes.append(0x5C)
+                i += 2
             case UInt8(ascii: "0")...UInt8(ascii: "7"):
                 // Exactly three octal digits, per git's quoting.
                 let digits = body[(i + 1)..<min(i + 4, body.count)]
                 guard digits.count == 3,
-                      let value = UInt16(String(decoding: digits, as: UTF8.self), radix: 8),
-                      value <= 0xFF else {
-                    bytes.append(body[i]); i += 1; continue
+                    let value = UInt16(String(decoding: digits, as: UTF8.self), radix: 8),
+                    value <= 0xFF
+                else {
+                    bytes.append(body[i])
+                    i += 1
+                    continue
                 }
-                bytes.append(UInt8(value)); i += 4
+                bytes.append(UInt8(value))
+                i += 4
             default:
-                bytes.append(body[i]); i += 1
+                bytes.append(body[i])
+                i += 1
             }
         }
         return String(decoding: bytes, as: UTF8.self)
@@ -147,9 +167,21 @@ enum GitStatusParser {
         var index = remainder.startIndex
         while index < remainder.endIndex {
             let ch = remainder[index]
-            if escaped { escaped = false; index = remainder.index(after: index); continue }
-            if ch == "\\" && inQuotes { escaped = true; index = remainder.index(after: index); continue }
-            if ch == "\"" { inQuotes.toggle(); index = remainder.index(after: index); continue }
+            if escaped {
+                escaped = false
+                index = remainder.index(after: index)
+                continue
+            }
+            if ch == "\\" && inQuotes {
+                escaped = true
+                index = remainder.index(after: index)
+                continue
+            }
+            if ch == "\"" {
+                inQuotes.toggle()
+                index = remainder.index(after: index)
+                continue
+            }
             if !inQuotes, remainder[index...].hasPrefix(" -> ") {
                 return index..<remainder.index(index, offsetBy: 4)
             }
@@ -285,19 +317,30 @@ enum GitWorktreeParser {
             let path = String(wtLine.dropFirst("worktree ".count))
             var head = ""
             var branch: String?
-            var isBare = false, isDetached = false, isLocked = false, isPrunable = false
+            var isBare = false
+            var isDetached = false
+            var isLocked = false
+            var isPrunable = false
             for line in lines {
-                if line.hasPrefix("HEAD ") { head = String(line.dropFirst(5)) }
-                else if line.hasPrefix("branch ") {
+                if line.hasPrefix("HEAD ") {
+                    head = String(line.dropFirst(5))
+                } else if line.hasPrefix("branch ") {
                     let ref = String(line.dropFirst("branch ".count))
                     branch = ref.hasPrefix("refs/heads/") ? String(ref.dropFirst("refs/heads/".count)) : ref
+                } else if line == "bare" {
+                    isBare = true
+                } else if line == "detached" {
+                    isDetached = true
+                } else if line == "locked" || line.hasPrefix("locked ") {
+                    isLocked = true
+                } else if line == "prunable" || line.hasPrefix("prunable ") {
+                    isPrunable = true
                 }
-                else if line == "bare" { isBare = true }
-                else if line == "detached" { isDetached = true }
-                else if line == "locked" || line.hasPrefix("locked ") { isLocked = true }
-                else if line == "prunable" || line.hasPrefix("prunable ") { isPrunable = true }
             }
-            result.append(GitWorktree(path: path, head: head, branch: branch, isBare: isBare, isDetached: isDetached, isLocked: isLocked, isPrunable: isPrunable))
+            result.append(
+                GitWorktree(
+                    path: path, head: head, branch: branch, isBare: isBare, isDetached: isDetached, isLocked: isLocked,
+                    isPrunable: isPrunable))
         }
         return result
     }

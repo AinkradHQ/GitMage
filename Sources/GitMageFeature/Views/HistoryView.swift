@@ -1,5 +1,5 @@
-import SwiftUI
 import AinkradAppKit
+import SwiftUI
 
 struct HistoryContextPane: View {
     @ObservedObject var model: GitMageViewModel
@@ -13,8 +13,9 @@ struct HistoryContextPane: View {
 
     var body: some View {
         VStack(spacing: 0) {
-            PaneHeader(title: "HISTORY", count: model.commits.count,
-                       countText: historyCountText, tokens: tokens)
+            PaneHeader(
+                title: "HISTORY", count: model.commits.count,
+                countText: historyCountText, tokens: tokens)
 
             if model.commits.isEmpty {
                 EmptyStateView(
@@ -113,8 +114,11 @@ private struct CommitRow: View {
         .padding(.horizontal, 9)
         .background(
             ChamferShape(cut: AinkradRadius.md)
-                .fill(isSelected ? tokens.accentPrimary.opacity(0.13)
-                      : (hovering ? tokens.surfaceElevated.opacity(0.5) : .clear))
+                .fill(
+                    isSelected
+                        ? tokens.accentPrimary.opacity(0.13)
+                        : (hovering ? tokens.surfaceElevated.opacity(0.5) : .clear)
+                )
                 .padding(.vertical, 2)
         )
         .contentShape(Rectangle())

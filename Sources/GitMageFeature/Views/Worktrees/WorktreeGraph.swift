@@ -1,5 +1,5 @@
-import SwiftUI
 import AinkradAppKit
+import SwiftUI
 
 /// Lane colors for the commit graph — theme accents first, then a few fixed
 /// hues for deeper branch nesting (data viz, like label colors).
@@ -9,7 +9,7 @@ enum GraphPalette {
             tokens.accentPrimary, tokens.accentSecondary, tokens.accentTertiary,
             Color(red: 0.38, green: 0.80, blue: 0.52),
             Color(red: 0.92, green: 0.62, blue: 0.32),
-            Color(red: 0.60, green: 0.52, blue: 0.92)
+            Color(red: 0.60, green: 0.52, blue: 0.92),
         ]
         return base[((index % base.count) + base.count) % base.count]
     }
@@ -40,9 +40,10 @@ struct GraphGutter: View {
                     p.addLine(to: to)
                 } else {
                     let midY = (from.y + to.y) / 2
-                    p.addCurve(to: to,
-                               control1: CGPoint(x: from.x, y: midY),
-                               control2: CGPoint(x: to.x, y: midY))
+                    p.addCurve(
+                        to: to,
+                        control1: CGPoint(x: from.x, y: midY),
+                        control2: CGPoint(x: to.x, y: midY))
                 }
                 return p
             }
@@ -51,20 +52,23 @@ struct GraphGutter: View {
             for (c, entry) in row.before.enumerated() {
                 guard let entry else { continue }
                 if entry == sha {
-                    ctx.stroke(connector(CGPoint(x: x(c), y: 0), CGPoint(x: x(row.col), y: center)),
-                               with: .color(GraphPalette.color(c, tokens)), lineWidth: 2)
+                    ctx.stroke(
+                        connector(CGPoint(x: x(c), y: 0), CGPoint(x: x(row.col), y: center)),
+                        with: .color(GraphPalette.color(c, tokens)), lineWidth: 2)
                 } else {
                     let bcol = row.after.firstIndex(of: entry) ?? c
-                    ctx.stroke(connector(CGPoint(x: x(c), y: 0), CGPoint(x: x(bcol), y: h)),
-                               with: .color(GraphPalette.color(bcol, tokens)), lineWidth: 2)
+                    ctx.stroke(
+                        connector(CGPoint(x: x(c), y: 0), CGPoint(x: x(bcol), y: h)),
+                        with: .color(GraphPalette.color(bcol, tokens)), lineWidth: 2)
                 }
             }
 
             // Node → each parent (first parent stays in this lane; merges fan out).
             for parent in row.commit.parents {
                 let bcol = row.after.firstIndex(of: parent) ?? row.col
-                ctx.stroke(connector(CGPoint(x: x(row.col), y: center), CGPoint(x: x(bcol), y: h)),
-                           with: .color(GraphPalette.color(bcol, tokens)), lineWidth: 2)
+                ctx.stroke(
+                    connector(CGPoint(x: x(row.col), y: center), CGPoint(x: x(bcol), y: h)),
+                    with: .color(GraphPalette.color(bcol, tokens)), lineWidth: 2)
             }
 
             // The commit node.
@@ -73,8 +77,9 @@ struct GraphGutter: View {
             let dot = CGRect(x: x(row.col) - r, y: center - r, width: 2 * r, height: 2 * r)
             ctx.fill(Path(ellipseIn: dot), with: .color(nodeColor))
             if isSelected {
-                ctx.stroke(Path(ellipseIn: dot.insetBy(dx: -2.5, dy: -2.5)),
-                           with: .color(tokens.accentPrimary.opacity(0.5)), lineWidth: 1.5)
+                ctx.stroke(
+                    Path(ellipseIn: dot.insetBy(dx: -2.5, dy: -2.5)),
+                    with: .color(tokens.accentPrimary.opacity(0.5)), lineWidth: 1.5)
             }
         }
     }
@@ -103,17 +108,23 @@ struct GraphCommitRow: View {
                     .foregroundStyle(tokens.foreground.opacity(isSelected ? 1 : 0.9))
                     .lineLimit(1)
                 HStack(spacing: 8) {
-                    Text(row.commit.shortSHA).font(AinkradFont.mono(9, weight: .medium)).foregroundStyle(tokens.accentSecondary)
-                    Text(row.commit.author).font(AinkradFont.display(9)).foregroundStyle(tokens.foreground.opacity(0.5)).lineLimit(1)
-                    Text(row.commit.relativeDate).font(AinkradFont.display(9)).foregroundStyle(tokens.foreground.opacity(0.4))
+                    Text(row.commit.shortSHA).font(AinkradFont.mono(9, weight: .medium)).foregroundStyle(
+                        tokens.accentSecondary)
+                    Text(row.commit.author).font(AinkradFont.display(9)).foregroundStyle(tokens.foreground.opacity(0.5))
+                        .lineLimit(1)
+                    Text(row.commit.relativeDate).font(AinkradFont.display(9)).foregroundStyle(
+                        tokens.foreground.opacity(0.4))
                 }
             }
             Spacer(minLength: 4)
         }
         .padding(.trailing, 10)
         .frame(height: rowHeight)
-        .background(isSelected ? tokens.accentPrimary.opacity(0.13)
-                    : (hovering ? tokens.surfaceElevated.opacity(0.45) : .clear))
+        .background(
+            isSelected
+                ? tokens.accentPrimary.opacity(0.13)
+                : (hovering ? tokens.surfaceElevated.opacity(0.45) : .clear)
+        )
         .contentShape(Rectangle())
         .onTapGesture(perform: onSelect)
         .onHover { hovering = $0 }

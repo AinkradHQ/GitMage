@@ -1,11 +1,11 @@
-import SwiftUI
 import AinkradAppKit
+import SwiftUI
 
 /// One file's slice of a unified diff.
 struct DiffFile: Identifiable {
     let id: String
     let filename: String
-    let status: String        // added / removed / renamed / modified
+    let status: String  // added / removed / renamed / modified
     let patch: String?
 }
 
@@ -21,8 +21,10 @@ enum DiffFileSplitter {
         func flush() {
             guard !current.isEmpty else { return }
             let (name, status) = parseHeader(current)
-            files.append(DiffFile(id: "\(files.count)-\(name)", filename: name,
-                                  status: status, patch: current.joined(separator: "\n")))
+            files.append(
+                DiffFile(
+                    id: "\(files.count)-\(name)", filename: name,
+                    status: status, patch: current.joined(separator: "\n")))
             current = []
         }
 
@@ -54,10 +56,13 @@ enum DiffFileSplitter {
             }
         }
         for line in lines {
-            if line.hasPrefix("new file") { status = "added" }
-            else if line.hasPrefix("deleted file") { status = "removed" }
-            else if line.hasPrefix("rename ") { status = "renamed" }
-            else if line.hasPrefix("+++ ") {
+            if line.hasPrefix("new file") {
+                status = "added"
+            } else if line.hasPrefix("deleted file") {
+                status = "removed"
+            } else if line.hasPrefix("rename ") {
+                status = "renamed"
+            } else if line.hasPrefix("+++ ") {
                 var p = String(line.dropFirst(4))
                 if p.hasPrefix("b/") { p.removeFirst(2) }
                 if p != "/dev/null", !p.isEmpty { name = p }
@@ -80,9 +85,11 @@ struct FileDiffList: View {
         ScrollView {
             LazyVStack(alignment: .leading, spacing: 6) {
                 if files.isEmpty {
-                    EmptyStateView(icon: "doc.text", title: "No changes",
-                                   message: "This diff has no files to show.", tokens: tokens)
-                        .frame(maxWidth: .infinity, minHeight: 160)
+                    EmptyStateView(
+                        icon: "doc.text", title: "No changes",
+                        message: "This diff has no files to show.", tokens: tokens
+                    )
+                    .frame(maxWidth: .infinity, minHeight: 160)
                 } else {
                     ForEach(files) { file in
                         FileDisclosureRow(
@@ -94,8 +101,11 @@ struct FileDiffList: View {
                             tokens: tokens,
                             fontSize: fontSize,
                             onToggle: {
-                                if expanded.contains(file.id) { expanded.remove(file.id) }
-                                else { expanded.insert(file.id) }
+                                if expanded.contains(file.id) {
+                                    expanded.remove(file.id)
+                                } else {
+                                    expanded.insert(file.id)
+                                }
                             }
                         )
                     }

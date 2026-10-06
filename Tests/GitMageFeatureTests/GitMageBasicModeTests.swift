@@ -1,7 +1,8 @@
-import Testing
+import AinkradAppKit
 import Foundation
 import SwiftUI
-import AinkradAppKit
+import Testing
+
 @testable import GitMageFeature
 
 /// Git Mage's basic mode — the app where the milestone's latency criterion
@@ -40,8 +41,9 @@ struct GitMageBasicModeTests {
 
         #expect(model.branches.contains { $0.name == "feature/x" })
         #expect(model.branches.first { $0.isCurrent }?.name == "feature/x")
-        #expect(model.selectedBranchName == "feature/x",
-                "the switcher needs the current branch selected without a status call")
+        #expect(
+            model.selectedBranchName == "feature/x",
+            "the switcher needs the current branch selected without a status call")
     }
 
     @Test("The basic load does NOT read the working tree, stashes or a diff")
@@ -109,16 +111,21 @@ struct GitMageBasicModeTests {
 
     private func makeModel(at path: String) -> GitMageViewModel {
         let model = GitMageViewModel(host: makeHost())
-        model.repos = [GitMageRepoConfig(id: path, path: path, name: "temp",
-                                         draftCommitMessage: "", lastBranch: "")]
+        model.repos = [
+            GitMageRepoConfig(
+                id: path, path: path, name: "temp",
+                draftCommitMessage: "", lastBranch: "")
+        ]
         model.activeRepoID = path
         return model
     }
 
     /// Polls rather than sleeping a fixed interval: the model's loads are
     /// `Task { @MainActor }`, so a fixed wait is either flaky or slow.
-    private func settle(until condition: @MainActor () -> Bool,
-                        timeout: TimeInterval = 10) async throws {
+    private func settle(
+        until condition: @MainActor () -> Bool,
+        timeout: TimeInterval = 10
+    ) async throws {
         let deadline = Date().addingTimeInterval(timeout)
         while Date() < deadline {
             if condition() { return }

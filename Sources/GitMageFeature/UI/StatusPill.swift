@@ -1,5 +1,5 @@
-import SwiftUI
 import AinkradAppKit
+import SwiftUI
 
 /// A small capsule badge for status text (PR/issue state, op result). Uses
 /// the same tinted-fill / full-color-text pattern across all status kinds so

@@ -111,7 +111,8 @@ final class AdvancedViewModel: ObservableObject {
             perform: { [weak self] in
                 guard let self else { return }
                 await self.runMutation {
-                    try await self.client.reset(to: target, mode: self.resetMode, autostash: self.autostash, in: self.repositoryPath)
+                    try await self.client.reset(
+                        to: target, mode: self.resetMode, autostash: self.autostash, in: self.repositoryPath)
                 }
             }
         )
@@ -145,7 +146,7 @@ final class AdvancedViewModel: ObservableObject {
         guard !repositoryPath.isEmpty else { return }
         let name = newTagName
         let message = newTagMessage.isEmpty ? nil : newTagMessage
-        let target = selectedCommit   // tag the selected commit, else HEAD
+        let target = selectedCommit  // tag the selected commit, else HEAD
         await runMutation { [self] in
             try await client.createTag(name: name, message: message, at: target, in: repositoryPath)
         }

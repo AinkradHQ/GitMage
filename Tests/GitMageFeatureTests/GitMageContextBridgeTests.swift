@@ -1,5 +1,6 @@
-import XCTest
 import AinkradAppKit
+import XCTest
+
 @testable import GitMageFeature
 
 /// A test double for the active-repo surface the bridge reads. Lets the bridge
@@ -16,12 +17,15 @@ final class FakeGitContextSource: GitContextSource {
     func agentRepositoryName() -> String? { repoName }
 }
 
-private func snap(root: String = "/Users/x/proj", branch: String = "main",
-                  upstream: String? = nil, ahead: Int = 0, behind: Int = 0,
-                  lastCommit: String? = "init", changes: [GitChange] = []) -> GitRepositorySnapshot {
-    GitRepositorySnapshot(rootPath: root, branchName: branch, upstream: upstream,
-                          aheadCount: ahead, behindCount: behind,
-                          lastCommitSummary: lastCommit, changes: changes)
+private func snap(
+    root: String = "/Users/x/proj", branch: String = "main",
+    upstream: String? = nil, ahead: Int = 0, behind: Int = 0,
+    lastCommit: String? = "init", changes: [GitChange] = []
+) -> GitRepositorySnapshot {
+    GitRepositorySnapshot(
+        rootPath: root, branchName: branch, upstream: upstream,
+        aheadCount: ahead, behindCount: behind,
+        lastCommitSummary: lastCommit, changes: changes)
 }
 
 @MainActor

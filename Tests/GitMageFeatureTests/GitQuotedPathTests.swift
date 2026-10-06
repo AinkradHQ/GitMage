@@ -1,4 +1,5 @@
 import XCTest
+
 @testable import GitMageFeature
 
 /// Wave 1-B: `git status --short` C-quotes any path containing non-ASCII bytes,
@@ -58,6 +59,7 @@ final class GitQuotedPathTests: XCTestCase {
         GitStatusParser.parse(
             statusOutput: "## main\n" + statusLine,
             repositoryRoot: "/tmp/repo",
-            lastCommitSummary: nil).changes.first
+            lastCommitSummary: nil
+        ).changes.first
     }
 }

@@ -1,6 +1,7 @@
-import Testing
-import Foundation
 import AinkradAppKit
+import Foundation
+import Testing
+
 @testable import GitMageFeature
 
 // MARK: - doubles
@@ -46,9 +47,13 @@ private final class StubForgeProvider: GitForgeProvider {
 
     func verify() async throws -> ForgeUser { ForgeUser(login: "alice") }
     func listPullRequests(_ repo: RepoRef, state: PRState) async throws -> [PullRequestSummary] {
-        listCalls.append(state); try failIfNeeded(); return summaries
+        listCalls.append(state)
+        try failIfNeeded()
+        return summaries
     }
-    func searchPullRequests(_ repo: RepoRef, state: PRState, query: String, labels: [String], page: Int) async throws -> ForgePage<PullRequestSummary> {
+    func searchPullRequests(_ repo: RepoRef, state: PRState, query: String, labels: [String], page: Int) async throws
+        -> ForgePage<PullRequestSummary>
+    {
         ForgePage(items: summaries, totalCount: summaries.count)
     }
     func pullRequest(_ repo: RepoRef, number: Int) async throws -> PullRequestDetail {
@@ -57,35 +62,59 @@ private final class StubForgeProvider: GitForgeProvider {
         guard let detail else { throw ForgeError.notFound }
         return detail
     }
-    func files(_ repo: RepoRef, number: Int) async throws -> [PRFile] { filesCalls.append(number); return [] }
-    func pullRequestCommits(_ repo: RepoRef, number: Int) async throws -> [PRCommit] { commitsCalls.append(number); return [] }
-    func comments(_ repo: RepoRef, number: Int) async throws -> [ForgeComment] { commentsCalls.append(number); return [] }
-    func checks(_ repo: RepoRef, ref: String) async throws -> [CheckRun] { checksCalls.append(ref); return checkRuns }
+    func files(_ repo: RepoRef, number: Int) async throws -> [PRFile] {
+        filesCalls.append(number)
+        return []
+    }
+    func pullRequestCommits(_ repo: RepoRef, number: Int) async throws -> [PRCommit] {
+        commitsCalls.append(number)
+        return []
+    }
+    func comments(_ repo: RepoRef, number: Int) async throws -> [ForgeComment] {
+        commentsCalls.append(number)
+        return []
+    }
+    func checks(_ repo: RepoRef, ref: String) async throws -> [CheckRun] {
+        checksCalls.append(ref)
+        return checkRuns
+    }
     func addComment(_ repo: RepoRef, number: Int, body: String) async throws {
-        addCommentCalls.append((number, body)); try failIfNeeded()
+        addCommentCalls.append((number, body))
+        try failIfNeeded()
     }
     func submitReview(_ repo: RepoRef, number: Int, event: ReviewEvent, body: String) async throws {
-        submitReviewCalls.append((number, event, body)); try failIfNeeded()
+        submitReviewCalls.append((number, event, body))
+        try failIfNeeded()
     }
     func merge(_ repo: RepoRef, number: Int, method: MergeMethod) async throws {
-        mergeCalls.append((number, method)); try failIfNeeded()
+        mergeCalls.append((number, method))
+        try failIfNeeded()
     }
-    func createPullRequest(_ repo: RepoRef, title: String, body: String, head: String, base: String, draft: Bool) async throws -> Int {
-        createCalls.append((title, body, head, base, draft)); try failIfNeeded(); return createdNumber
+    func createPullRequest(_ repo: RepoRef, title: String, body: String, head: String, base: String, draft: Bool)
+        async throws -> Int
+    {
+        createCalls.append((title, body, head, base, draft))
+        try failIfNeeded()
+        return createdNumber
     }
     func setPullRequestState(_ repo: RepoRef, number: Int, state: PRState) async throws {
-        setStateCalls.append((number, state)); try failIfNeeded()
+        setStateCalls.append((number, state))
+        try failIfNeeded()
     }
 
     func listIssues(_ repo: RepoRef, state: IssueState) async throws -> [IssueSummary] { [] }
-    func searchIssues(_ repo: RepoRef, state: IssueState, query: String, labels: [String], page: Int) async throws -> ForgePage<IssueSummary> {
+    func searchIssues(_ repo: RepoRef, state: IssueState, query: String, labels: [String], page: Int) async throws
+        -> ForgePage<IssueSummary>
+    {
         ForgePage(items: [], totalCount: 0)
     }
     func issue(_ repo: RepoRef, number: Int) async throws -> IssueDetail { throw ForgeError.notFound }
     func issueComments(_ repo: RepoRef, number: Int) async throws -> [ForgeComment] { [] }
     func repoLabels(_ repo: RepoRef) async throws -> [IssueLabel] { [] }
     func assignableUsers(_ repo: RepoRef) async throws -> [ForgeUser] { [] }
-    func createIssue(_ repo: RepoRef, title: String, body: String, labels: [String], assignees: [String]) async throws -> Int { 0 }
+    func createIssue(_ repo: RepoRef, title: String, body: String, labels: [String], assignees: [String]) async throws
+        -> Int
+    { 0 }
     func addIssueComment(_ repo: RepoRef, number: Int, body: String) async throws {}
     func setIssueState(_ repo: RepoRef, number: Int, state: IssueState) async throws {}
     func setLabels(_ repo: RepoRef, number: Int, labels: [String]) async throws {}
@@ -98,23 +127,27 @@ private final class StubForgeProvider: GitForgeProvider {
 private func listedTools(_ server: MCPAppServer) async -> [[String: Any]] {
     let reply = await server.handle(#"{"jsonrpc":"2.0","id":1,"method":"tools/list"}"#)
     guard let data = reply.data(using: .utf8),
-          let root = (try? JSONSerialization.jsonObject(with: data)) as? [String: Any],
-          let result = root["result"] as? [String: Any],
-          let tools = result["tools"] as? [[String: Any]] else { return [] }
+        let root = (try? JSONSerialization.jsonObject(with: data)) as? [String: Any],
+        let result = root["result"] as? [String: Any],
+        let tools = result["tools"] as? [[String: Any]]
+    else { return [] }
     return tools
 }
 
 @MainActor
-private func call(_ server: MCPAppServer, _ name: String,
-                  arguments: [String: Any]) async -> (text: String, isError: Bool) {
+private func call(
+    _ server: MCPAppServer, _ name: String,
+    arguments: [String: Any]
+) async -> (text: String, isError: Bool) {
     let params: [String: Any] = ["name": name, "arguments": arguments]
     let request: [String: Any] = ["jsonrpc": "2.0", "id": 7, "method": "tools/call", "params": params]
     let data = try! JSONSerialization.data(withJSONObject: request)
     let reply = await server.handle(String(decoding: data, as: UTF8.self))
     guard let replyData = reply.data(using: .utf8),
-          let root = (try? JSONSerialization.jsonObject(with: replyData)) as? [String: Any],
-          let result = root["result"] as? [String: Any],
-          let content = result["content"] as? [[String: Any]] else {
+        let root = (try? JSONSerialization.jsonObject(with: replyData)) as? [String: Any],
+        let result = root["result"] as? [String: Any],
+        let content = result["content"] as? [[String: Any]]
+    else {
         return ("<no result>", true)
     }
     return (content.first?["text"] as? String ?? "", result["isError"] as? Bool ?? false)
@@ -174,18 +207,22 @@ struct GitMagePROpTests {
     private let repo = RepoRef(host: "github.com", owner: "o", name: "r")
 
     private func makeDetail(number: Int = 7) -> PullRequestDetail {
-        PullRequestDetail(number: number, title: "Fix", body: "body", state: "open", isDraft: false,
-                          author: "alice", createdAt: "2026-07-01T00:00:00Z", mergeable: true,
-                          mergeableState: "clean", additions: 1, deletions: 0,
-                          headBranch: "feat", baseBranch: "main")
+        PullRequestDetail(
+            number: number, title: "Fix", body: "body", state: "open", isDraft: false,
+            author: "alice", createdAt: "2026-07-01T00:00:00Z", mergeable: true,
+            mergeableState: "clean", additions: 1, deletions: 0,
+            headBranch: "feat", baseBranch: "main")
     }
 
     /// Builds the real server with BOTH forwarders, where the PR one is the real
     /// `PrOpActionHandler` wired to an in-memory provider and a fixed repo — so
     /// a call exercises tool → handler → provider without any git or network.
-    private func makeServer(_ provider: StubForgeProvider,
-                            gitRecorder: RecordingForwarder = RecordingForwarder())
-        -> (MCPAppServer, [String]) {
+    private func makeServer(
+        _ provider: StubForgeProvider,
+        gitRecorder: RecordingForwarder = RecordingForwarder()
+    )
+        -> (MCPAppServer, [String])
+    {
         let handler = PrOpActionHandler(
             resolveRepo: { _ in self.repo },
             makeProvider: { provider }
@@ -204,8 +241,10 @@ struct GitMagePROpTests {
         #expect(failures.isEmpty, "addTool rejected: \(failures)")
 
         let listed = Set(await listedTools(server).compactMap { $0["name"] as? String })
-        let expected: Set<String> = ["pr_list", "pr_view", "pr_checks", "pr_create",
-                                     "pr_comment", "pr_review", "pr_approve", "pr_merge", "pr_close"]
+        let expected: Set<String> = [
+            "pr_list", "pr_view", "pr_checks", "pr_create",
+            "pr_comment", "pr_review", "pr_approve", "pr_merge", "pr_close",
+        ]
         #expect(expected.isSubset(of: listed), "missing: \(expected.subtracting(listed))")
         // The git tools are still published alongside them.
         #expect(listed.contains("status"))
@@ -226,7 +265,8 @@ struct GitMagePROpTests {
         ]
         for (name, flag) in expected {
             guard let entry = listed.first(where: { $0["name"] as? String == name }) else {
-                Issue.record("tool \(name) was not listed"); continue
+                Issue.record("tool \(name) was not listed")
+                continue
             }
             #expect(destructiveHint(entry) == flag, "wrong destructiveHint for \(name)")
         }
@@ -302,10 +342,12 @@ struct GitMagePROpTests {
     @Test func prCreateForwardsTitleBodyHeadBaseAndDraft() async {
         let provider = StubForgeProvider()
         let (server, _) = makeServer(provider)
-        let outcome = await call(server, "pr_create", arguments: [
-            "repoPath": "/r",
-            "args": ["title": "T", "body": "B", "head": "feat", "base": "main", "draft": true],
-        ])
+        let outcome = await call(
+            server, "pr_create",
+            arguments: [
+                "repoPath": "/r",
+                "args": ["title": "T", "body": "B", "head": "feat", "base": "main", "draft": true],
+            ])
         #expect(outcome.isError == false)
         #expect(provider.createCalls.count == 1)
         #expect(provider.createCalls.first?.title == "T")
@@ -326,8 +368,9 @@ struct GitMagePROpTests {
     @Test func prCommentForwardsNumberAndBody() async {
         let provider = StubForgeProvider()
         let (server, _) = makeServer(provider)
-        _ = await call(server, "pr_comment",
-                       arguments: ["repoPath": "/r", "args": ["number": 7, "body": "nice"]])
+        _ = await call(
+            server, "pr_comment",
+            arguments: ["repoPath": "/r", "args": ["number": 7, "body": "nice"]])
         #expect(provider.addCommentCalls.count == 1)
         #expect(provider.addCommentCalls.first?.number == 7)
         #expect(provider.addCommentCalls.first?.body == "nice")
@@ -336,9 +379,12 @@ struct GitMagePROpTests {
     @Test func prReviewForwardsTheEventAndBody() async {
         let provider = StubForgeProvider()
         let (server, _) = makeServer(provider)
-        _ = await call(server, "pr_review",
-                       arguments: ["repoPath": "/r",
-                                   "args": ["number": 7, "event": "requestChanges", "body": "needs work"]])
+        _ = await call(
+            server, "pr_review",
+            arguments: [
+                "repoPath": "/r",
+                "args": ["number": 7, "event": "requestChanges", "body": "needs work"],
+            ])
         #expect(provider.submitReviewCalls.count == 1)
         #expect(provider.submitReviewCalls.first?.number == 7)
         #expect(provider.submitReviewCalls.first?.event == .requestChanges)
@@ -362,10 +408,12 @@ struct GitMagePROpTests {
     func prReviewNeverApprovesHoweverTheEventIsSpelled(evasion: PREvasion) async {
         let provider = StubForgeProvider()
         let (server, _) = makeServer(provider)
-        _ = await call(server, "pr_review",
-                       arguments: ["repoPath": "/r", "args": ["number": 7, "event": evasion.value()]])
-        #expect(approved(provider) == false,
-                "pr_review reached an approval via \(evasion.label)")
+        _ = await call(
+            server, "pr_review",
+            arguments: ["repoPath": "/r", "args": ["number": 7, "event": evasion.value()]])
+        #expect(
+            approved(provider) == false,
+            "pr_review reached an approval via \(evasion.label)")
     }
 
     @Test func prReviewIgnoresANestedOrDifferentlyCasedEventKey() async {
@@ -373,14 +421,16 @@ struct GitMagePROpTests {
         let (server, _) = makeServer(provider)
 
         // A nested `args.args.event` — neither the guard nor the sink reads it.
-        _ = await call(server, "pr_review",
-                       arguments: ["repoPath": "/r", "args": ["number": 7, "args": ["event": "approve"]]])
+        _ = await call(
+            server, "pr_review",
+            arguments: ["repoPath": "/r", "args": ["number": 7, "args": ["event": "approve"]]])
         #expect(approved(provider) == false, "a nested args.event reached the sink")
 
         // An `"Event"` key: missed by the guard, and equally missed by the sink,
         // which reads `args["event"]` exactly.
-        _ = await call(server, "pr_review",
-                       arguments: ["repoPath": "/r", "args": ["number": 7, "Event": "approve"]])
+        _ = await call(
+            server, "pr_review",
+            arguments: ["repoPath": "/r", "args": ["number": 7, "Event": "approve"]])
         #expect(approved(provider) == false, "a differently-cased Event key reached the sink")
     }
 
@@ -388,8 +438,9 @@ struct GitMagePROpTests {
         let provider = StubForgeProvider()
         let (server, _) = makeServer(provider)
         for (raw, expected) in [("comment", ReviewEvent.comment), ("requestChanges", .requestChanges)] {
-            let outcome = await call(server, "pr_review",
-                                     arguments: ["repoPath": "/r", "args": ["number": 7, "event": raw]])
+            let outcome = await call(
+                server, "pr_review",
+                arguments: ["repoPath": "/r", "args": ["number": 7, "event": raw]])
             #expect(outcome.isError == false, "pr_review refused \(raw)")
             #expect(provider.submitReviewCalls.last?.event == expected)
         }
@@ -400,13 +451,15 @@ struct GitMagePROpTests {
         let (server, _) = makeServer(provider)
 
         guard let entry = await listedTools(server).first(where: { $0["name"] as? String == "pr_approve" }) else {
-            Issue.record("pr_approve was not published"); return
+            Issue.record("pr_approve was not published")
+            return
         }
         #expect(destructiveHint(entry))
 
         // No `event` passed at all — the tool supplies it.
-        let outcome = await call(server, "pr_approve",
-                                 arguments: ["repoPath": "/r", "args": ["number": 7, "body": "LGTM"]])
+        let outcome = await call(
+            server, "pr_approve",
+            arguments: ["repoPath": "/r", "args": ["number": 7, "body": "LGTM"]])
         #expect(outcome.isError == false)
         #expect(provider.submitReviewCalls.count == 1)
         #expect(provider.submitReviewCalls.first?.event == .approve)
@@ -420,23 +473,27 @@ struct GitMagePROpTests {
     /// parser rather than a mirror of it.
     @Test func theGuardAndTheSinkShareOneApprovalParser() async {
         for spelling in ["approve", "Approve", "APPROVE", "approved", "APPROVED"] {
-            #expect(PrOpActionHandler.reviewEvent(spelling) == .approve,
-                    "the sink no longer reads \"\(spelling)\" as an approval")
-            #expect(GitMageMCPServer.ArgumentValue.approvingReviewEvent.matches(spelling),
-                    "the guard misses \"\(spelling)\" that the sink accepts as an approval")
+            #expect(
+                PrOpActionHandler.reviewEvent(spelling) == .approve,
+                "the sink no longer reads \"\(spelling)\" as an approval")
+            #expect(
+                GitMageMCPServer.ArgumentValue.approvingReviewEvent.matches(spelling),
+                "the guard misses \"\(spelling)\" that the sink accepts as an approval")
         }
         // A non-approving event must NOT be caught, or pr_review is unusable.
         for spelling in ["comment", "requestChanges", "request_changes"] {
-            #expect(GitMageMCPServer.ArgumentValue.approvingReviewEvent.matches(spelling) == false,
-                    "the guard over-rejects \"\(spelling)\"")
+            #expect(
+                GitMageMCPServer.ArgumentValue.approvingReviewEvent.matches(spelling) == false,
+                "the guard over-rejects \"\(spelling)\"")
         }
     }
 
     @Test func prReviewRejectsAnUnknownEvent() async {
         let provider = StubForgeProvider()
         let (server, _) = makeServer(provider)
-        let outcome = await call(server, "pr_review",
-                                 arguments: ["repoPath": "/r", "args": ["number": 7, "event": "yolo"]])
+        let outcome = await call(
+            server, "pr_review",
+            arguments: ["repoPath": "/r", "args": ["number": 7, "event": "yolo"]])
         #expect(outcome.isError)
         #expect(provider.submitReviewCalls.isEmpty)
     }
@@ -444,8 +501,9 @@ struct GitMagePROpTests {
     @Test func prMergeForwardsTheMergeMethodAndDefaultsToMerge() async {
         let provider = StubForgeProvider()
         let (server, _) = makeServer(provider)
-        _ = await call(server, "pr_merge",
-                       arguments: ["repoPath": "/r", "args": ["number": 7, "method": "squash"]])
+        _ = await call(
+            server, "pr_merge",
+            arguments: ["repoPath": "/r", "args": ["number": 7, "method": "squash"]])
         #expect(provider.mergeCalls.first?.number == 7)
         #expect(provider.mergeCalls.first?.method == .squash)
 
@@ -466,9 +524,10 @@ struct GitMagePROpTests {
 
     @Test func aMissingTokenIsAClearErrorAndNeverReachesTheProvider() async {
         let handler = PrOpActionHandler(resolveRepo: { _ in self.repo }, makeProvider: { nil })
-        let (server, _) = GitMageMCPServer.make(appID: "gitmage",
-                                                forward: { _ in AgentActionResult(text: "", isError: false) },
-                                                forwardPR: { await handler.run($0) })
+        let (server, _) = GitMageMCPServer.make(
+            appID: "gitmage",
+            forward: { _ in AgentActionResult(text: "", isError: false) },
+            forwardPR: { await handler.run($0) })
         let outcome = await call(server, "pr_list", arguments: ["repoPath": "/r"])
         #expect(outcome.isError)
         #expect(outcome.text.lowercased().contains("token"))
@@ -477,9 +536,10 @@ struct GitMagePROpTests {
     @Test func anUnrecognizedRemoteIsAClearError() async {
         let provider = StubForgeProvider()
         let handler = PrOpActionHandler(resolveRepo: { _ in nil }, makeProvider: { provider })
-        let (server, _) = GitMageMCPServer.make(appID: "gitmage",
-                                                forward: { _ in AgentActionResult(text: "", isError: false) },
-                                                forwardPR: { await handler.run($0) })
+        let (server, _) = GitMageMCPServer.make(
+            appID: "gitmage",
+            forward: { _ in AgentActionResult(text: "", isError: false) },
+            forwardPR: { await handler.run($0) })
         let outcome = await call(server, "pr_list", arguments: ["repoPath": "/r"])
         #expect(outcome.isError)
         #expect(provider.listCalls.isEmpty)

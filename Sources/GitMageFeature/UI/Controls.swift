@@ -1,5 +1,5 @@
-import SwiftUI
 import AinkradAppKit
+import SwiftUI
 
 /// A neon capsule toggle in place of the stock macOS switch: the track
 /// lights with the accent when on, the knob carries a soft glow. Shared

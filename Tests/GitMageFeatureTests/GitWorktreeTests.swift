@@ -1,27 +1,28 @@
 import XCTest
+
 @testable import GitMageFeature
 
 final class GitWorktreeParserTests: XCTestCase {
     func testParsesMainAndLinkedWorktrees() {
         let out = """
-        worktree /repo
-        HEAD 1111111111111111111111111111111111111111
-        branch refs/heads/main
+            worktree /repo
+            HEAD 1111111111111111111111111111111111111111
+            branch refs/heads/main
 
-        worktree /repo-feature
-        HEAD 2222222222222222222222222222222222222222
-        branch refs/heads/feature
+            worktree /repo-feature
+            HEAD 2222222222222222222222222222222222222222
+            branch refs/heads/feature
 
-        worktree /repo-detached
-        HEAD 3333333333333333333333333333333333333333
-        detached
+            worktree /repo-detached
+            HEAD 3333333333333333333333333333333333333333
+            detached
 
-        worktree /repo-locked
-        HEAD 4444444444444444444444444444444444444444
-        branch refs/heads/wip
-        locked needs review
+            worktree /repo-locked
+            HEAD 4444444444444444444444444444444444444444
+            branch refs/heads/wip
+            locked needs review
 
-        """
+            """
         let wts = GitWorktreeParser.parse(porcelain: out)
         XCTAssertEqual(wts.count, 4)
         XCTAssertEqual(wts[0].branch, "main")
@@ -33,15 +34,15 @@ final class GitWorktreeParserTests: XCTestCase {
 
     func testParsesBareAndPrunable() {
         let out = """
-        worktree /bare
-        bare
+            worktree /bare
+            bare
 
-        worktree /gone
-        HEAD 5555555555555555555555555555555555555555
-        branch refs/heads/gone
-        prunable gitdir file points to non-existent location
+            worktree /gone
+            HEAD 5555555555555555555555555555555555555555
+            branch refs/heads/gone
+            prunable gitdir file points to non-existent location
 
-        """
+            """
         let wts = GitWorktreeParser.parse(porcelain: out)
         XCTAssertEqual(wts.count, 2)
         XCTAssertTrue(wts[0].isBare)

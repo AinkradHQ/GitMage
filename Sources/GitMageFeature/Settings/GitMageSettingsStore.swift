@@ -1,6 +1,6 @@
-import Observation
-import Foundation
 import AinkradAppKit
+import Foundation
+import Observation
 
 /// Observable owner of `GitMageSettings`, backed by app-scoped `documents`.
 /// Editing persists immediately and publishes to observers so the settings UI,
