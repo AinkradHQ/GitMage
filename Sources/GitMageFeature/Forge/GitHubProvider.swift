@@ -73,11 +73,6 @@ final class GitHubProvider: GitForgeProvider {
     }
 
     // MARK: - Issues
-    func listIssues(_ repo: RepoRef, state: IssueState) async throws -> [IssueSummary] {
-        let items = try await get(
-            "/repos/\(repo.owner)/\(repo.name)/issues?state=\(state.rawValue)&per_page=50", as: [GHIssue].self)
-        return items.filter { !$0.isPullRequest }.map { $0.toSummary() }
-    }
     func searchIssues(_ repo: RepoRef, state: IssueState, query: String, labels: [String], page: Int) async throws
         -> ForgePage<IssueSummary>
     {

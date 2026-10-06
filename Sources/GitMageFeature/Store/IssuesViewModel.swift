@@ -54,8 +54,8 @@ final class IssuesViewModel: ObservableObject {
             return
         }
         do {
-            let user = try await provider.verify()
-            authState = .valid(user.login)
+            _ = try await provider.verify()
+            authState = .valid
         } catch let error as ForgeError {
             if error == .unauthorized {
                 authState = .invalid(error.errorDescription ?? "Invalid token.")

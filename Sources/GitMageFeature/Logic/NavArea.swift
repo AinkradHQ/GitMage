@@ -1,7 +1,7 @@
 import Foundation
 
 enum NavArea: String, CaseIterable, Identifiable {
-    case changes, history, branches, stashes
+    case changes, history, stashes
     case pullRequests, issues, worktrees, advanced
 
     var id: String { rawValue }
@@ -10,7 +10,6 @@ enum NavArea: String, CaseIterable, Identifiable {
         switch self {
         case .changes: return "Changes"
         case .history: return "History"
-        case .branches: return "Branches"
         case .stashes: return "Stashes"
         case .pullRequests: return "Pull Requests"
         case .issues: return "Issues"
@@ -24,7 +23,6 @@ enum NavArea: String, CaseIterable, Identifiable {
         switch self {
         case .changes: return "square.and.pencil"
         case .history: return "clock.arrow.circlepath"
-        case .branches: return "arrow.triangle.branch"
         case .stashes: return "tray.and.arrow.down"
         case .pullRequests: return "arrow.triangle.pull"
         case .issues: return "smallcircle.filled.circle"
@@ -33,7 +31,6 @@ enum NavArea: String, CaseIterable, Identifiable {
         }
     }
 
-    /// Branches has no rail entry — branch management lives in the top-bar
-    /// overlay; this slot is reserved for a future graph view.
+    /// The rail order, which differs from declaration order.
     static var built: [NavArea] { [.changes, .history, .stashes, .pullRequests, .worktrees, .issues, .advanced] }
 }

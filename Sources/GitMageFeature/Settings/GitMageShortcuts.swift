@@ -40,8 +40,6 @@ enum GitMageCommand: String, CaseIterable, Identifiable {
         }
     }
 
-    var isAction: Bool { area == nil }
-
     /// Whether the command needs an active repository to run.
     var requiresRepo: Bool { self != .openRepos }
 

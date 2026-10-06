@@ -52,7 +52,10 @@ final class AdvancedViewModelTests: XCTestCase {
         var log = try await client.loadLog(limit: 10, in: repo.path)
         XCTAssertEqual(log.count, 2)
 
-        await vm.confirmPending()
+        // Confirm exactly as the view does: capture, consume, then perform.
+        let action = try XCTUnwrap(vm.pendingConfirm)
+        vm.cancelPending()
+        await action.perform()
         XCTAssertNil(vm.pendingConfirm)
         log = try await client.loadLog(limit: 10, in: repo.path)
         XCTAssertEqual(log.count, 1)

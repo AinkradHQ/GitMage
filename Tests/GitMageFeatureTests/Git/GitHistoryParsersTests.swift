@@ -47,7 +47,7 @@ struct GitLogAndStashParserTests {
     @Test("A stash line splits into its ref and message")
     func stashLine() {
         let parsed = GitStashParser.parse(output: "stash@{0}\tWIP on main: abc1234 hello")
-        #expect(parsed == [GitStashEntry(id: "stash@{0}", index: 0, message: "WIP on main: abc1234 hello")])
+        #expect(parsed == [GitStashEntry(id: "stash@{0}", message: "WIP on main: abc1234 hello")])
     }
 
     @Test("A stash line with no tab uses its ref as the message")
@@ -60,11 +60,10 @@ struct GitLogAndStashParserTests {
         #expect(GitStashParser.parse(output: "stash@{0}\ta\tb").first?.message == "a\tb")
     }
 
-    @Test("Index counts every non-blank line, including one dropped for an empty ref")
-    func stashIndexSkipsDroppedLines() {
+    @Test("A stash line with an empty ref is dropped")
+    func stashSkipsDroppedLines() {
         let parsed = GitStashParser.parse(output: "stash@{0}\tone\n\tno ref\nstash@{2}\tthree")
         #expect(parsed.map(\.id) == ["stash@{0}", "stash@{2}"])
-        #expect(parsed.map(\.index) == [0, 2])
     }
 
     @Test("An empty stash list parses to nothing")

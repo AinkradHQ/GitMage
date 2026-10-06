@@ -6,7 +6,6 @@ extension GitMageShell {
         switch model.selectedArea {
         case .changes: ChangesContextPane(model: model, tokens: tokens, accent: appearance.accent)
         case .history: HistoryContextPane(model: model, tokens: tokens)
-        case .branches: BranchesContextPane(model: model, tokens: tokens)
         case .stashes: StashesContextPane(model: model, tokens: tokens)
         case .pullRequests:
             if let prModel {
@@ -49,13 +48,6 @@ extension GitMageShell {
                     icon: "clock.arrow.circlepath", title: "History",
                     message: "Select a commit to inspect its changed files.", tokens: tokens)
             }
-        case .branches:
-            EmptyStateView(
-                icon: "arrow.triangle.branch",
-                title: model.selectedBranchName.isEmpty ? "Branches" : model.selectedBranchName,
-                message: "Select a branch to check out from the list.",
-                tokens: tokens
-            )
         case .stashes:
             if let selectedStashDiff = model.selectedStashDiff {
                 FileDiffList(

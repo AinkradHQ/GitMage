@@ -5,26 +5,6 @@ import Foundation
 /// are confirm-gated via `pendingConfirm`; cherry-pick/revert/tags run directly.
 @MainActor
 final class AdvancedViewModel: ObservableObject {
-    enum AdvancedOp: CaseIterable, Identifiable {
-        case rebase
-        case cherryPick
-        case revert
-        case reset
-        case tags
-
-        var id: Self { self }
-
-        var title: String {
-            switch self {
-            case .rebase: return "Rebase"
-            case .cherryPick: return "Cherry-pick"
-            case .revert: return "Revert"
-            case .reset: return "Reset"
-            case .tags: return "Tags"
-            }
-        }
-    }
-
     struct PendingAction: Identifiable {
         let id = UUID()
         let title: String
@@ -35,7 +15,6 @@ final class AdvancedViewModel: ObservableObject {
     @Published var commits: [GitCommitSummary] = []
     @Published var tags: [GitTag] = []
     @Published var operationState: GitOperationState = .none
-    @Published var selectedOp: AdvancedOp = .rebase
     @Published var rebaseBase: String?
     @Published var selectedCommit: String?
     @Published var resetMode: ResetMode = .mixed
@@ -116,12 +95,6 @@ final class AdvancedViewModel: ObservableObject {
                 }
             }
         )
-    }
-
-    func confirmPending() async {
-        guard let action = pendingConfirm else { return }
-        await action.perform()
-        pendingConfirm = nil
     }
 
     func cancelPending() {

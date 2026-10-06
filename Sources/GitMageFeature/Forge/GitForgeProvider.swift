@@ -54,7 +54,6 @@ protocol GitForgeProvider {
     /// Reopens or closes an existing pull request. `.all` is not a settable state.
     func setPullRequestState(_ repo: RepoRef, number: Int, state: PRState) async throws
 
-    func listIssues(_ repo: RepoRef, state: IssueState) async throws -> [IssueSummary]
     /// Paginated issue search (text + labels) via the forge search API.
     func searchIssues(_ repo: RepoRef, state: IssueState, query: String, labels: [String], page: Int) async throws
         -> ForgePage<IssueSummary>

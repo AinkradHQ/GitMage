@@ -42,21 +42,3 @@ struct ErrorBanner: View {
         )
     }
 }
-
-/// A lightweight loading placeholder row (spinner + label) for in-progress
-/// list states.
-struct LoadingRow: View {
-    let text: String
-    let tokens: HostThemeTokens
-
-    var body: some View {
-        HStack(spacing: 8) {
-            AinkradSpinner(size: 14)
-            Text(text)
-                .font(AinkradFont.display(11))
-                .foregroundStyle(tokens.foreground.opacity(0.6))
-        }
-        .padding(.horizontal, 10)
-        .padding(.vertical, 8)
-    }
-}

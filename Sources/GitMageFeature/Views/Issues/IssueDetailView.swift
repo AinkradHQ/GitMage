@@ -71,7 +71,7 @@ struct IssueDetailView: View {
 
     private func editors(_ detail: IssueDetail) -> some View {
         VStack(alignment: .leading, spacing: 8) {
-            LabelsEditor(model: model, detail: detail, tokens: tokens)
+            LabelsEditor(model: model, detail: detail)
             AssigneesEditor(model: model, detail: detail, tokens: tokens)
         }
     }
@@ -121,7 +121,6 @@ struct IssueDetailView: View {
 private struct LabelsEditor: View {
     @ObservedObject var model: IssuesViewModel
     let detail: IssueDetail
-    let tokens: HostThemeTokens
 
     var body: some View {
         HStack(spacing: 6) {

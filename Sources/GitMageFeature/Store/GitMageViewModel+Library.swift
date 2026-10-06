@@ -117,11 +117,6 @@ extension GitMageViewModel {
         refresh()
     }
 
-    func removeActiveRepository() {
-        guard let activeRepoID else { return }
-        removeRepository(activeRepoID)
-    }
-
     func removeRepository(_ id: String) {
         repos.removeAll { $0.id == id }
         if activeRepoID == id {
