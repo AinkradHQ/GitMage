@@ -143,8 +143,11 @@ final class GitHubProvider: GitForgeProvider {
     }
 
     // MARK: - Transport
-    private func makeRequest(_ method: String, _ path: String) -> URLRequest {
-        var req = URLRequest(url: URL(string: path, relativeTo: base)!)
+    private func makeRequest(_ method: String, _ path: String) throws -> URLRequest {
+        guard let url = URL(string: path, relativeTo: base) else {
+            throw ForgeError.invalidRequest("Invalid path: \(path)")
+        }
+        var req = URLRequest(url: url)
         req.httpMethod = method
         req.setValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
         req.setValue("application/vnd.github+json", forHTTPHeaderField: "Accept")
@@ -162,14 +165,14 @@ final class GitHubProvider: GitForgeProvider {
         do { return try decoder().decode(T.self, from: data) } catch { throw ForgeError.decoding }
     }
     private func send(_ method: String, _ path: String, json: [String: Any]) async throws {
-        var req = makeRequest(method, path)
+        var req = try makeRequest(method, path)
         req.httpBody = try JSONSerialization.data(withJSONObject: json)
         req.setValue("application/json", forHTTPHeaderField: "Content-Type")
         let (data, resp) = try await run(req)
         try Self.check(resp, data)
     }
     private func sendReturning<T: Decodable>(_ method: String, _ path: String, json: [String: Any]) async throws -> T {
-        var req = makeRequest(method, path)
+        var req = try makeRequest(method, path)
         req.httpBody = try JSONSerialization.data(withJSONObject: json)
         req.setValue("application/json", forHTTPHeaderField: "Content-Type")
         let (data, resp) = try await run(req)

@@ -187,11 +187,18 @@ actor GitRepositoryClient {
             .trimmingCharacters(in: .whitespacesAndNewlines)
         guard branch != "HEAD", !branch.isEmpty else { throw GitRepositoryError.detachedHead }
 
-        let hasUpstream =
-            (try? await runGit(
+        // Only git's own "no upstream configured" means push with -u. Any
+        // other failure (a broken upstream ref, a lock, a bad config) must
+        // surface rather than silently re-point the branch.
+        let hasUpstream: Bool
+        do {
+            _ = try await runGit(
                 ["rev-parse", "--abbrev-ref", "--symbolic-full-name", "@{u}"],
-                in: rootURL
-            )) != nil
+                in: rootURL)
+            hasUpstream = true
+        } catch GitRepositoryError.commandFailed(let message) where message.contains("no upstream configured") {
+            hasUpstream = false
+        }
 
         if hasUpstream {
             _ = try await runGit(["push"], in: rootURL)

@@ -319,7 +319,7 @@ final class GitRepositoryClientTests: XCTestCase {
             try await client.push(in: clonedPath)
             XCTFail("expected the broken upstream to surface")
         } catch let GitRepositoryError.commandFailed(message) {
-            XCTAssertTrue(message.contains("remote-tracking"), message)
+            XCTAssertFalse(message.contains("no upstream configured"), message)
         }
         let pushed = (try? runGit(["rev-parse", "--verify", "refs/heads/feature/broken"], in: bareURL)) != nil
         XCTAssertFalse(pushed, "the branch must not have been pushed with -u")

@@ -1,7 +1,6 @@
 import AinkradAppKit
 import Foundation
 import Testing
-import XCTest
 
 @testable import GitMageFeature
 
@@ -15,7 +14,10 @@ struct GitMageSafetyTests {
     @Test("A commit count that lands after a repo switch is dropped")
     func staleCommitTotal() async throws {
         let (a, b) = try twoRepos()
-        defer { a.cleanUp(); b.cleanUp() }
+        defer {
+            a.cleanUp()
+            b.cleanUp()
+        }
         let model = makeModel(a, b)
 
         model.loadCommits()
@@ -28,12 +30,16 @@ struct GitMageSafetyTests {
     @Test("A commit diff that lands after a repo switch is dropped")
     func staleCommitDiff() async throws {
         let (a, b) = try twoRepos()
-        defer { a.cleanUp(); b.cleanUp() }
+        defer {
+            a.cleanUp()
+            b.cleanUp()
+        }
         let model = makeModel(a, b)
         let sha = try a.run("git", "rev-parse", "HEAD").trimmingCharacters(in: .whitespacesAndNewlines)
 
         model.selectCommit(
-            GitCommitSummary(id: sha, shortSHA: String(sha.prefix(7)), summary: "initial", author: "T", relativeDate: ""))
+            GitCommitSummary(
+                id: sha, shortSHA: String(sha.prefix(7)), summary: "initial", author: "T", relativeDate: ""))
         model.activeRepoID = b.path
         try await Task.sleep(nanoseconds: 1_500_000_000)
 
@@ -43,7 +49,10 @@ struct GitMageSafetyTests {
     @Test("A stash diff that lands after a repo switch is dropped")
     func staleStashDiff() async throws {
         let (a, b) = try twoRepos()
-        defer { a.cleanUp(); b.cleanUp() }
+        defer {
+            a.cleanUp()
+            b.cleanUp()
+        }
         try a.write("README.md", "changed")
         try a.run("git", "stash", "push")
         let model = makeModel(a, b)
@@ -58,7 +67,10 @@ struct GitMageSafetyTests {
     @Test("A working-tree diff that lands after a repo switch is dropped")
     func staleWorkingDiff() async throws {
         let (a, b) = try twoRepos()
-        defer { a.cleanUp(); b.cleanUp() }
+        defer {
+            a.cleanUp()
+            b.cleanUp()
+        }
         try a.write("README.md", "changed")
         let model = makeModel(a, b)
         let change = GitChange(
