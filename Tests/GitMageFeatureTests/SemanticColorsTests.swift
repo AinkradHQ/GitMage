@@ -1,6 +1,7 @@
-import XCTest
-import SwiftUI
 import AinkradAppKit
+import SwiftUI
+import XCTest
+
 @testable import GitMageFeature
 
 final class SemanticColorsTests: XCTestCase {

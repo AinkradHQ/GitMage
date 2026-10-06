@@ -1,5 +1,5 @@
-import SwiftUI
 import AinkradAppKit
+import SwiftUI
 
 /// A parsed diff plus everything the view needs to derive from it, computed
 /// ONCE per diff instead of four times per render.
@@ -78,9 +78,11 @@ struct DiffView: View {
             }
             .frame(maxWidth: .infinity, maxHeight: embedded ? nil : .infinity, alignment: .topLeading)
         } else if !embedded {
-            EmptyStateView(icon: "doc.text.magnifyingglass", title: "No file selected",
-                           message: "Select a file, commit, or stash to inspect its diff.", tokens: tokens)
-                .frame(maxWidth: .infinity, maxHeight: .infinity)
+            EmptyStateView(
+                icon: "doc.text.magnifyingglass", title: "No file selected",
+                message: "Select a file, commit, or stash to inspect its diff.", tokens: tokens
+            )
+            .frame(maxWidth: .infinity, maxHeight: .infinity)
         }
     }
 
@@ -93,10 +95,12 @@ struct DiffView: View {
                 .lineLimit(1).truncationMode(.middle)
             Spacer(minLength: 8)
             if parsed.additions > 0 {
-                Text("+\(parsed.additions)").font(AinkradFont.mono(10, weight: .semibold)).foregroundStyle(GMColor.diffAdd(tokens))
+                Text("+\(parsed.additions)").font(AinkradFont.mono(10, weight: .semibold)).foregroundStyle(
+                    GMColor.diffAdd(tokens))
             }
             if parsed.deletions > 0 {
-                Text("−\(parsed.deletions)").font(AinkradFont.mono(10, weight: .semibold)).foregroundStyle(GMColor.diffRemove(tokens))
+                Text("−\(parsed.deletions)").font(AinkradFont.mono(10, weight: .semibold)).foregroundStyle(
+                    GMColor.diffRemove(tokens))
             }
         }
         .padding(.horizontal, 14).padding(.vertical, 9)
@@ -123,9 +127,11 @@ struct DiffView: View {
                 ScrollView([.vertical, .horizontal]) { stack }
             }
         } else if !embedded {
-            EmptyStateView(icon: "doc.text", title: "No textual changes",
-                           message: "This change has no line-level diff to show.", tokens: tokens)
-                .frame(maxWidth: .infinity, maxHeight: .infinity)
+            EmptyStateView(
+                icon: "doc.text", title: "No textual changes",
+                message: "This change has no line-level diff to show.", tokens: tokens
+            )
+            .frame(maxWidth: .infinity, maxHeight: .infinity)
         } else {
             Text("No textual changes.")
                 .font(AinkradFont.mono(10)).foregroundStyle(tokens.foreground.opacity(0.4)).padding(8)

@@ -1,5 +1,6 @@
-import XCTest
 import AinkradAppKit
+import XCTest
+
 @testable import GitMageFeature
 
 @MainActor
@@ -7,11 +8,16 @@ final class PullRequestsViewModelTests: XCTestCase {
     private let repo = RepoRef(host: "github.com", owner: "o", name: "r")
 
     private func makeSummary(number: Int = 7) -> PullRequestSummary {
-        PullRequestSummary(id: 1, number: number, title: "Fix", author: "alice", state: "open", isDraft: false, headBranch: "feat", baseBranch: "main")
+        PullRequestSummary(
+            id: 1, number: number, title: "Fix", author: "alice", state: "open", isDraft: false, headBranch: "feat",
+            baseBranch: "main")
     }
 
     private func makeDetail(number: Int = 7) -> PullRequestDetail {
-        PullRequestDetail(number: number, title: "Fix", body: "body", state: "open", isDraft: false, author: "alice", createdAt: "2026-07-01T00:00:00Z", mergeable: true, mergeableState: "clean", additions: 1, deletions: 0, headBranch: "feat", baseBranch: "main")
+        PullRequestDetail(
+            number: number, title: "Fix", body: "body", state: "open", isDraft: false, author: "alice",
+            createdAt: "2026-07-01T00:00:00Z", mergeable: true, mergeableState: "clean", additions: 1, deletions: 0,
+            headBranch: "feat", baseBranch: "main")
     }
 
     func testLoadPopulatesPullRequestsFromProvider() async {
@@ -132,7 +138,9 @@ private final class StubForgeProvider: GitForgeProvider {
         return summaries
     }
 
-    func searchPullRequests(_ repo: RepoRef, state: PRState, query: String, labels: [String], page: Int) async throws -> ForgePage<PullRequestSummary> {
+    func searchPullRequests(_ repo: RepoRef, state: PRState, query: String, labels: [String], page: Int) async throws
+        -> ForgePage<PullRequestSummary>
+    {
         if let listPullRequestsError { throw listPullRequestsError }
         return ForgePage(items: summaries, totalCount: summaries.count)
     }
@@ -170,18 +178,24 @@ private final class StubForgeProvider: GitForgeProvider {
         mergeCalls.append(method)
     }
 
-    func createPullRequest(_ repo: RepoRef, title: String, body: String, head: String, base: String, draft: Bool) async throws -> Int { 0 }
+    func createPullRequest(_ repo: RepoRef, title: String, body: String, head: String, base: String, draft: Bool)
+        async throws -> Int
+    { 0 }
     func setPullRequestState(_ repo: RepoRef, number: Int, state: PRState) async throws {}
 
     func listIssues(_ repo: RepoRef, state: IssueState) async throws -> [IssueSummary] { [] }
-    func searchIssues(_ repo: RepoRef, state: IssueState, query: String, labels: [String], page: Int) async throws -> ForgePage<IssueSummary> {
+    func searchIssues(_ repo: RepoRef, state: IssueState, query: String, labels: [String], page: Int) async throws
+        -> ForgePage<IssueSummary>
+    {
         ForgePage(items: [], totalCount: 0)
     }
     func issue(_ repo: RepoRef, number: Int) async throws -> IssueDetail { throw ForgeError.notFound }
     func issueComments(_ repo: RepoRef, number: Int) async throws -> [ForgeComment] { [] }
     func repoLabels(_ repo: RepoRef) async throws -> [IssueLabel] { [] }
     func assignableUsers(_ repo: RepoRef) async throws -> [ForgeUser] { [] }
-    func createIssue(_ repo: RepoRef, title: String, body: String, labels: [String], assignees: [String]) async throws -> Int { 0 }
+    func createIssue(_ repo: RepoRef, title: String, body: String, labels: [String], assignees: [String]) async throws
+        -> Int
+    { 0 }
     func addIssueComment(_ repo: RepoRef, number: Int, body: String) async throws {}
     func setIssueState(_ repo: RepoRef, number: Int, state: IssueState) async throws {}
     func setLabels(_ repo: RepoRef, number: Int, labels: [String]) async throws {}

@@ -1,5 +1,5 @@
-import SwiftUI
 import AinkradAppKit
+import SwiftUI
 
 /// Git Mage's **basic** mode: which repo, which branch, Fetch, Pull.
 ///
@@ -21,9 +21,11 @@ struct GitMageBasicView: View {
     private var tokens: HostThemeTokens { host.theme.tokens }
 
     var body: some View {
-        AinkradBasicShell(icon: "wand.and.stars",
-                          title: model.activeRepo?.name ?? "Git Mage",
-                          subtitle: subtitle) {
+        AinkradBasicShell(
+            icon: "wand.and.stars",
+            title: model.activeRepo?.name ?? "Git Mage",
+            subtitle: subtitle
+        ) {
             // Switching repo belongs in basic mode: "which repo" is half of
             // what Fetch and Pull even mean, and sending someone to advanced to
             // answer it defeats the point of the mode. The kit's grouped select
@@ -31,12 +33,15 @@ struct GitMageBasicView: View {
             // repos, and the design system forbids rolling one here.
             if model.repos.count > 1 {
                 AinkradGroupedSelect(
-                    sections: [AinkradGroupedSection(
-                        header: "Repositories",
-                        rows: model.repos.map {
-                            AinkradGroupedRow(value: $0.id, title: $0.name,
-                                              detail: $0.path, icon: "wand.and.stars")
-                        })],
+                    sections: [
+                        AinkradGroupedSection(
+                            header: "Repositories",
+                            rows: model.repos.map {
+                                AinkradGroupedRow(
+                                    value: $0.id, title: $0.name,
+                                    detail: $0.path, icon: "wand.and.stars")
+                            })
+                    ],
                     selection: Binding(
                         get: { model.activeRepoID ?? "" },
                         // `selectRepository` owns the whole switch — persisting
@@ -45,7 +50,8 @@ struct GitMageBasicView: View {
                         // branches-only one, so switching stays cheap.
                         set: { model.selectRepository($0) }),
                     triggerLabel: model.activeRepo?.name ?? "Repository",
-                    searchPlaceholder: "Search repositories")
+                    searchPlaceholder: "Search repositories"
+                )
                 .frame(maxWidth: 220)
             }
             AinkradButton(title: "Fetch", style: .secondary, icon: "arrow.down") {
@@ -60,9 +66,10 @@ struct GitMageBasicView: View {
             if model.hasActiveRepo {
                 branchList
             } else {
-                AinkradEmptyState(icon: "wand.and.stars",
-                                  title: "No repository",
-                                  message: "Add one in advanced mode.")
+                AinkradEmptyState(
+                    icon: "wand.and.stars",
+                    title: "No repository",
+                    message: "Add one in advanced mode.")
             }
         }
         // Scope the load BEFORE bootstrap: `bootstrapIfNeeded` calls `refresh`,
@@ -97,13 +104,17 @@ struct GitMageBasicView: View {
                     AinkradListRow(
                         isSelected: branch.isCurrent,
                         leading: {
-                            Image(systemName: branch.isCurrent
-                                  ? "arrow.triangle.branch" : "circle")
-                                .font(.system(size: 10, weight: .semibold))
-                                .foregroundStyle(branch.isCurrent
-                                                 ? tokens.accentPrimary
-                                                 : tokens.foreground.opacity(0.35))
-                                .frame(width: 20)
+                            Image(
+                                systemName: branch.isCurrent
+                                    ? "arrow.triangle.branch" : "circle"
+                            )
+                            .font(.system(size: 10, weight: .semibold))
+                            .foregroundStyle(
+                                branch.isCurrent
+                                    ? tokens.accentPrimary
+                                    : tokens.foreground.opacity(0.35)
+                            )
+                            .frame(width: 20)
                         },
                         title: branch.name,
                         subtitle: branch.subtitle,

@@ -1,5 +1,5 @@
-import Foundation
 import AinkradAppKit
+import Foundation
 
 /// Bridges Git Mage's static `AinkradApp` entry points to one shared, observable
 /// `GitMageSettingsStore` per plugin instance — so the root view, the settings

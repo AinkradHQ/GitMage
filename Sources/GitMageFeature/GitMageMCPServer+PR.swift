@@ -54,44 +54,53 @@ import Foundation
 @MainActor
 extension GitMageMCPServer {
     static let prTools: [Tool] = [
-        Tool("pr_list", "listPRs", "List the repository's pull requests.",
-             route: .pullRequest, readOnly: true,
-             argsHint: "{\"state\": \"open\"|\"closed\"|\"all\"} (default \"open\")"),
-        Tool("pr_view", "viewPR",
-             "Read a pull request: description, commits, changed files and comments.",
-             route: .pullRequest, readOnly: true,
-             argsHint: "{\"number\": number} (required)"),
-        Tool("pr_checks", "ciStatus", "Report the CI check runs for a pull request's head branch.",
-             route: .pullRequest, readOnly: true,
-             argsHint: "{\"number\": number} (required)"),
-        Tool("pr_create", "createPR", "Open a pull request.",
-             route: .pullRequest,
-             argsHint: "{\"title\": string (required), \"head\": string (required), "
-             + "\"base\": string (required), \"body\": string, \"draft\": bool}"),
-        Tool("pr_comment", "commentPR", "Post a comment on a pull request.",
-             route: .pullRequest,
-             argsHint: "{\"number\": number (required), \"body\": string (required)}"),
-        Tool("pr_review", "reviewPR",
-             "Submit a non-approving review on a pull request (comment or requestChanges). "
-             + "Use pr_approve to approve — an approval can trigger auto-merge.",
-             route: .pullRequest,
-             argsHint: "{\"number\": number (required), "
-             + "\"event\": \"requestChanges\"|\"comment\" (required), \"body\": string}. "
-             + "\"approve\" is refused here — call pr_approve to approve a pull request.",
-             rejects: [GuardRule("event", .approvingReviewEvent)]),
-        Tool("pr_approve", "reviewPR",
-             "Approve a pull request. On a repository with auto-merge enabled this can "
-             + "merge it immediately, which cannot be undone.",
-             route: .pullRequest, destructive: true,
-             argsHint: "{\"number\": number (required), \"body\": string} — "
-             + "event is always \"approve\".",
-             injects: [GuardRule("event", .approvingReviewEvent)]),
-        Tool("pr_merge", "mergePR", "Merge a pull request. This rewrites the base branch.",
-             route: .pullRequest, destructive: true,
-             argsHint: "{\"number\": number (required), "
-             + "\"method\": \"merge\"|\"squash\"|\"rebase\" (default \"merge\")}"),
-        Tool("pr_close", "closePR", "Close a pull request without merging it.",
-             route: .pullRequest, destructive: true,
-             argsHint: "{\"number\": number} (required)"),
+        Tool(
+            "pr_list", "listPRs", "List the repository's pull requests.",
+            route: .pullRequest, readOnly: true,
+            argsHint: "{\"state\": \"open\"|\"closed\"|\"all\"} (default \"open\")"),
+        Tool(
+            "pr_view", "viewPR",
+            "Read a pull request: description, commits, changed files and comments.",
+            route: .pullRequest, readOnly: true,
+            argsHint: "{\"number\": number} (required)"),
+        Tool(
+            "pr_checks", "ciStatus", "Report the CI check runs for a pull request's head branch.",
+            route: .pullRequest, readOnly: true,
+            argsHint: "{\"number\": number} (required)"),
+        Tool(
+            "pr_create", "createPR", "Open a pull request.",
+            route: .pullRequest,
+            argsHint: "{\"title\": string (required), \"head\": string (required), "
+                + "\"base\": string (required), \"body\": string, \"draft\": bool}"),
+        Tool(
+            "pr_comment", "commentPR", "Post a comment on a pull request.",
+            route: .pullRequest,
+            argsHint: "{\"number\": number (required), \"body\": string (required)}"),
+        Tool(
+            "pr_review", "reviewPR",
+            "Submit a non-approving review on a pull request (comment or requestChanges). "
+                + "Use pr_approve to approve — an approval can trigger auto-merge.",
+            route: .pullRequest,
+            argsHint: "{\"number\": number (required), "
+                + "\"event\": \"requestChanges\"|\"comment\" (required), \"body\": string}. "
+                + "\"approve\" is refused here — call pr_approve to approve a pull request.",
+            rejects: [GuardRule("event", .approvingReviewEvent)]),
+        Tool(
+            "pr_approve", "reviewPR",
+            "Approve a pull request. On a repository with auto-merge enabled this can "
+                + "merge it immediately, which cannot be undone.",
+            route: .pullRequest, destructive: true,
+            argsHint: "{\"number\": number (required), \"body\": string} — "
+                + "event is always \"approve\".",
+            injects: [GuardRule("event", .approvingReviewEvent)]),
+        Tool(
+            "pr_merge", "mergePR", "Merge a pull request. This rewrites the base branch.",
+            route: .pullRequest, destructive: true,
+            argsHint: "{\"number\": number (required), "
+                + "\"method\": \"merge\"|\"squash\"|\"rebase\" (default \"merge\")}"),
+        Tool(
+            "pr_close", "closePR", "Close a pull request without merging it.",
+            route: .pullRequest, destructive: true,
+            argsHint: "{\"number\": number} (required)"),
     ]
 }

@@ -1,5 +1,5 @@
-import SwiftUI
 import AinkradAppKit
+import SwiftUI
 
 /// Context pane (left rail) for the Issues area: filter + issue list + New
 /// Issue entry point, gated on having a GitHub remote and a valid token.
@@ -64,15 +64,20 @@ struct IssuesContextPane: View {
                 selection: Binding(
                     get: { model.filter },
                     set: { newValue in
-                        if model.filter != newValue { model.filter = newValue; Task { await model.load() } }
+                        if model.filter != newValue {
+                            model.filter = newValue
+                            Task { await model.load() }
+                        }
                     }
                 ),
                 label: { $0 == .open ? "Open" : "Closed" }
             )
             .padding(.horizontal, 12)
-            AinkradSearchField(text: $model.searchText, placeholder: "Search issues…",
-                               onSubmit: { Task { await model.load() } })
-                .padding(.horizontal, 12)
+            AinkradSearchField(
+                text: $model.searchText, placeholder: "Search issues…",
+                onSubmit: { Task { await model.load() } }
+            )
+            .padding(.horizontal, 12)
             if !model.repoLabels.isEmpty {
                 ScrollView(.horizontal, showsIndicators: false) {
                     HStack(spacing: 6) {
@@ -99,9 +104,11 @@ struct IssuesContextPane: View {
         } else if let errorMessage = model.errorMessage {
             gateMessage(errorMessage)
         } else if model.issues.isEmpty {
-            EmptyStateView(icon: "smallcircle.filled.circle", title: "No issues",
-                           message: "Nothing matches this filter.", tokens: tokens)
-                .frame(maxWidth: .infinity, maxHeight: .infinity)
+            EmptyStateView(
+                icon: "smallcircle.filled.circle", title: "No issues",
+                message: "Nothing matches this filter.", tokens: tokens
+            )
+            .frame(maxWidth: .infinity, maxHeight: .infinity)
         } else {
             ScrollView {
                 LazyVStack(alignment: .leading, spacing: 3) {
@@ -117,8 +124,12 @@ struct IssuesContextPane: View {
                         }
                     }
                     if model.isLoadingMore {
-                        HStack { Spacer(); AinkradSpinner(size: 16); Spacer() }
-                            .padding(.vertical, 12)
+                        HStack {
+                            Spacer()
+                            AinkradSpinner(size: 16)
+                            Spacer()
+                        }
+                        .padding(.vertical, 12)
                     }
                 }
                 .padding(.horizontal, 12).padding(.bottom, 12)
@@ -170,8 +181,10 @@ private struct IssueRow: View {
         .padding(.horizontal, 9).padding(.vertical, 7)
         .background(
             ChamferShape(cut: AinkradRadius.md)
-                .fill(isSelected ? tokens.accentPrimary.opacity(0.13)
-                      : (hovering ? tokens.surfaceElevated.opacity(0.5) : .clear))
+                .fill(
+                    isSelected
+                        ? tokens.accentPrimary.opacity(0.13)
+                        : (hovering ? tokens.surfaceElevated.opacity(0.5) : .clear))
         )
         .overlay(alignment: .leading) {
             Capsule().fill(tokens.accentPrimary).frame(width: 3, height: 18)

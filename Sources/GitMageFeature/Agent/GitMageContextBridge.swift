@@ -1,5 +1,5 @@
-import Foundation
 import AinkradAppKit
+import Foundation
 
 /// The minimal read-only surface `GitMageContextBridge` needs from the active
 /// GitMage view model. A protocol (not the concrete VM) so the bridge is

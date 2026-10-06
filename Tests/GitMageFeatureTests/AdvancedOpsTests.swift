@@ -1,4 +1,5 @@
 import XCTest
+
 @testable import GitMageFeature
 
 final class GitTagParserTests: XCTestCase {
@@ -38,7 +39,7 @@ final class AdvancedOpsClientTests: XCTestCase {
         let log = try await client.loadLog(limit: 10, in: repo.path)
         XCTAssertEqual(log.count, 1)
         let snap = try await client.loadSnapshot(at: repo.path)
-        XCTAssertTrue(snap.changes.isEmpty)   // hard reset discarded the dirty change
+        XCTAssertTrue(snap.changes.isEmpty)  // hard reset discarded the dirty change
     }
 
     func testResetHardAutostashPreservesChange() async throws {
@@ -49,7 +50,7 @@ final class AdvancedOpsClientTests: XCTestCase {
         let head = try XCTUnwrap(headLog.first?.id)
         try await client.reset(to: head, mode: .hard, autostash: true, in: repo.path)
         let stashes = try await client.loadStashes(in: repo.path)
-        XCTAssertEqual(stashes.count, 1)   // change preserved as a stash
+        XCTAssertEqual(stashes.count, 1)  // change preserved as a stash
     }
 
     func testCherryPickConflictSetsStateThenAbortClears() async throws {
@@ -98,7 +99,9 @@ final class AdvancedOpsClientTests: XCTestCase {
         return root
     }
 
-    private func writeCommit(_ repo: URL, file: String, contents: String, msg: String, client: GitRepositoryClient) throws {
+    private func writeCommit(_ repo: URL, file: String, contents: String, msg: String, client: GitRepositoryClient)
+        throws
+    {
         try contents.write(to: repo.appendingPathComponent(file), atomically: true, encoding: .utf8)
         try runGit(["add", "-A"], in: repo)
         try runGit(["commit", "-m", msg], in: repo)

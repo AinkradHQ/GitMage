@@ -1,5 +1,5 @@
-import SwiftUI
 import AinkradAppKit
+import SwiftUI
 
 public struct GitMageApp: AinkradApp {
     public static let id = "gitmage"
@@ -11,16 +11,18 @@ public struct GitMageApp: AinkradApp {
     }
 
     public static func settingsCatalog(host: HostServices) -> SettingsPage? {
-        GitMageSettingsCatalog.page(store: GitMageRuntime.settingsStore(for: host),
-                                    state: GitMageRuntime.settingsPageState(for: host), host: host)
+        GitMageSettingsCatalog.page(
+            store: GitMageRuntime.settingsStore(for: host),
+            state: GitMageRuntime.settingsPageState(for: host), host: host)
     }
 
     public static func makeSettingsView(host: HostServices) -> AnyView {
-        AnyView(GitMageSettingsView(
-            settingsStore: GitMageRuntime.settingsStore(for: host),
-            theme: host.theme,
-            host: host
-        ))
+        AnyView(
+            GitMageSettingsView(
+                settingsStore: GitMageRuntime.settingsStore(for: host),
+                theme: host.theme,
+                host: host
+            ))
     }
 
     /// The window surface: the theme surface at the configured opacity so the

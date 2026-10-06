@@ -1,5 +1,5 @@
-import SwiftUI
 import AinkradAppKit
+import SwiftUI
 
 /// Which management surface the full-screen overlay is showing.
 enum GitMageManagementKind: Identifiable {
@@ -29,10 +29,11 @@ struct GitMageManagementOverlay: View {
                 panel
                     .frame(width: min(max(620, geo.size.width * 0.5), 760))
                     .offset(y: -40)
-                    .transition(.asymmetric(
-                        insertion: .scale(scale: 0.98).combined(with: .opacity),
-                        removal: .opacity
-                    ))
+                    .transition(
+                        .asymmetric(
+                            insertion: .scale(scale: 0.98).combined(with: .opacity),
+                            removal: .opacity
+                        ))
             }
         }
     }
@@ -49,10 +50,10 @@ struct GitMageManagementOverlay: View {
 
 // MARK: - Shared HUD chrome (mirrors host OverlayChrome)
 
-private extension View {
+extension View {
     /// Tinted background, rounded clip, top→bottom gradient border, glow +
     /// contact shadow — the same finish as the host's summonable overlays.
-    func hudPanelChrome(_ tokens: HostThemeTokens) -> some View {
+    fileprivate func hudPanelChrome(_ tokens: HostThemeTokens) -> some View {
         self
             // Translucent + blurred, matching the host's summonable overlays
             // (was a near-opaque 0.94 fill). VisualEffectBlur is the kit's
@@ -68,8 +69,10 @@ private extension View {
                 ChamferShape(cut: AinkradRadius.panel)
                     .strokeBorder(
                         LinearGradient(
-                            colors: [tokens.accentSecondary.opacity(0.55),
-                                     tokens.accentPrimary.opacity(0.25)],
+                            colors: [
+                                tokens.accentSecondary.opacity(0.55),
+                                tokens.accentPrimary.opacity(0.25),
+                            ],
                             startPoint: .top, endPoint: .bottom
                         ),
                         lineWidth: 1
@@ -84,7 +87,8 @@ private extension View {
 private struct GMChevronMark: Shape {
     func path(in rect: CGRect) -> Path {
         var p = Path()
-        let w = rect.width, h = rect.height
+        let w = rect.width
+        let h = rect.height
         p.move(to: CGPoint(x: w * 0.5, y: 0))
         p.addLine(to: CGPoint(x: w, y: h))
         p.addLine(to: CGPoint(x: w * 0.68, y: h))
@@ -140,10 +144,22 @@ private struct OverlaySearchField: View {
                 .foregroundStyle(tokens.foreground)
                 .tint(tokens.accentSecondary)
                 .focused(focus)
-                .onKeyPress(.escape) { onEscape(); return .handled }
-                .onKeyPress(.downArrow) { onMove(1); return .handled }
-                .onKeyPress(.upArrow) { onMove(-1); return .handled }
-                .onKeyPress(.return) { onActivate(); return .handled }
+                .onKeyPress(.escape) {
+                    onEscape()
+                    return .handled
+                }
+                .onKeyPress(.downArrow) {
+                    onMove(1)
+                    return .handled
+                }
+                .onKeyPress(.upArrow) {
+                    onMove(-1)
+                    return .handled
+                }
+                .onKeyPress(.return) {
+                    onActivate()
+                    return .handled
+                }
         }
         .padding(.horizontal, 18)
         .frame(height: 56)
@@ -208,7 +224,10 @@ private struct RepoManagerPanel: View {
                                 isActive: repo.id == model.activeRepoID,
                                 isSelected: index == selected,
                                 tokens: tokens,
-                                onSelect: { selected = index; activate(results) },
+                                onSelect: {
+                                    selected = index
+                                    activate(results)
+                                },
                                 onRemove: { model.removeRepository(repo.id) }
                             )
                         }
@@ -222,10 +241,12 @@ private struct RepoManagerPanel: View {
             GlowRule(tokens: tokens)
             HStack(spacing: 10) {
                 AinkradButton(title: "Add Local", style: .primary, icon: "plus") {
-                    dismiss(); model.addRepositoryFolder()
+                    dismiss()
+                    model.addRepositoryFolder()
                 }
                 AinkradButton(title: "Clone", style: .secondary, icon: "arrow.down.doc") {
-                    dismiss(); model.startClone()
+                    dismiss()
+                    model.startClone()
                 }
                 Spacer()
                 Text("↑↓ navigate   ↩ open   esc close")
@@ -309,14 +330,18 @@ private struct RepoCard: View {
         .frame(maxWidth: .infinity)
         .background(
             ChamferShape(cut: AinkradRadius.md)
-                .fill(isActive ? tokens.accentPrimary.opacity(0.10)
-                      : tokens.surfaceElevated.opacity(hovering || isSelected ? 0.7 : 0.4))
+                .fill(
+                    isActive
+                        ? tokens.accentPrimary.opacity(0.10)
+                        : tokens.surfaceElevated.opacity(hovering || isSelected ? 0.7 : 0.4))
         )
         .overlay(
             ChamferShape(cut: AinkradRadius.md)
-                .strokeBorder(isActive ? tokens.accentPrimary.opacity(0.55)
-                              : tokens.foreground.opacity(hovering ? 0.14 : 0.06),
-                              lineWidth: isActive ? 1.2 : 1)
+                .strokeBorder(
+                    isActive
+                        ? tokens.accentPrimary.opacity(0.55)
+                        : tokens.foreground.opacity(hovering ? 0.14 : 0.06),
+                    lineWidth: isActive ? 1.2 : 1)
         )
         .overlay(
             GMTargetingBrackets()
@@ -377,7 +402,10 @@ private struct BranchManagerPanel: View {
                                 branch: branch,
                                 isSelected: index == selected,
                                 tokens: tokens,
-                                onCheckout: { selected = index; activate(results) },
+                                onCheckout: {
+                                    selected = index
+                                    activate(results)
+                                },
                                 onDelete: { model.deleteBranch(branch.name) }
                             )
                         }
@@ -390,8 +418,10 @@ private struct BranchManagerPanel: View {
 
             GlowRule(tokens: tokens)
             HStack(spacing: 10) {
-                AinkradButton(title: canCreate ? "Create \"\(createName)\"" : "Create Branch",
-                              style: .primary, icon: "arrow.branch") {
+                AinkradButton(
+                    title: canCreate ? "Create \"\(createName)\"" : "Create Branch",
+                    style: .primary, icon: "arrow.branch"
+                ) {
                     create()
                 }
                 .disabled(!canCreate)
@@ -428,7 +458,10 @@ private struct BranchManagerPanel: View {
     /// Return key: if the query matches branches, checkout the selected one;
     /// otherwise treat the query as a new branch name.
     private func activate(_ results: [GitBranchSummary]) {
-        if results.isEmpty && canCreate { create(); return }
+        if results.isEmpty && canCreate {
+            create()
+            return
+        }
         guard results.indices.contains(selected) else { return }
         let branch = results[selected]
         guard !branch.isCurrent else { return }
@@ -494,8 +527,10 @@ private struct BranchRow: View {
         .frame(height: 46)
         .background(
             ChamferShape(cut: AinkradRadius.sm)
-                .fill(branch.isCurrent ? tokens.accentPrimary.opacity(0.09)
-                      : ((hovering || isSelected) ? tokens.accentPrimary.opacity(0.10) : .clear))
+                .fill(
+                    branch.isCurrent
+                        ? tokens.accentPrimary.opacity(0.09)
+                        : ((hovering || isSelected) ? tokens.accentPrimary.opacity(0.10) : .clear))
         )
         .overlay(
             GMTargetingBrackets()

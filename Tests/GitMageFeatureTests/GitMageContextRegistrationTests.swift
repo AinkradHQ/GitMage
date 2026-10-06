@@ -1,7 +1,8 @@
-import XCTest
+import AinkradAppKit
 import Foundation
 import SwiftUI
-import AinkradAppKit
+import XCTest
+
 @testable import GitMageFeature
 
 // MARK: - Minimal HostServices double
@@ -40,22 +41,32 @@ private final class FakeLogger: PluginLogger {
     func reset() { current = .pane }
 }
 private func testTokens() -> HostThemeTokens {
-    HostThemeTokens(themeID: "test", background: .black, surface: .black, surfaceElevated: .black,
-                    accentPrimary: .black, accentSecondary: .black, accentTertiary: .black, foreground: .black)
+    HostThemeTokens(
+        themeID: "test", background: .black, surface: .black, surfaceElevated: .black,
+        accentPrimary: .black, accentSecondary: .black, accentTertiary: .black, foreground: .black)
 }
 
 @MainActor
 final class RecordingActionRegistry: AgentActionProvider {
     private(set) var handlers: [AgentActionToken: (String) async -> AgentActionResult] = [:]
     private(set) var ids: [AgentActionToken: String] = [:]
-    func register(actionID: String,
-                  handler: @escaping @MainActor (String) async -> AgentActionResult) -> AgentActionToken {
-        let token = AgentActionToken(); handlers[token] = handler; ids[token] = actionID; return token
+    func register(
+        actionID: String,
+        handler: @escaping @MainActor (String) async -> AgentActionResult
+    ) -> AgentActionToken {
+        let token = AgentActionToken()
+        handlers[token] = handler
+        ids[token] = actionID
+        return token
     }
-    func remove(_ token: AgentActionToken) { handlers[token] = nil; ids[token] = nil }
+    func remove(_ token: AgentActionToken) {
+        handlers[token] = nil
+        ids[token] = nil
+    }
     func invoke(actionID: String, input: String) async -> AgentActionResult? {
         guard let token = ids.first(where: { $0.value == actionID })?.key,
-              let handler = handlers[token] else { return nil }
+            let handler = handlers[token]
+        else { return nil }
         return await handler(input)
     }
 }
@@ -99,7 +110,10 @@ final class FakeHostServices: HostServices {
 private final class FakeSource: GitContextSource {
     var repo: GitRepositorySnapshot?
     var name: String?
-    init(repo: GitRepositorySnapshot?, name: String?) { self.repo = repo; self.name = name }
+    init(repo: GitRepositorySnapshot?, name: String?) {
+        self.repo = repo
+        self.name = name
+    }
     func agentRepositorySnapshot() -> GitRepositorySnapshot? { repo }
     func agentRepositoryName() -> String? { name }
 }
@@ -124,10 +138,11 @@ final class GitMageContextRegistrationTests: XCTestCase {
         let host = FakeHostServices(context: registry)
         let bridge = GitMageRuntime.contextBridge(for: host)
 
-        XCTAssertTrue(registry.snapshots().isEmpty)   // no active source yet → nil
+        XCTAssertTrue(registry.snapshots().isEmpty)  // no active source yet → nil
         let source = FakeSource(
-            repo: GitRepositorySnapshot(rootPath: "/r", branchName: "main", upstream: nil,
-                                        aheadCount: 0, behindCount: 0, lastCommitSummary: "c", changes: []),
+            repo: GitRepositorySnapshot(
+                rootPath: "/r", branchName: "main", upstream: nil,
+                aheadCount: 0, behindCount: 0, lastCommitSummary: "c", changes: []),
             name: "r")
         bridge.setActiveSource(source)
         let snaps = registry.snapshots()
@@ -137,8 +152,10 @@ final class GitMageContextRegistrationTests: XCTestCase {
     }
 
     func testDifferentHostsDifferentBridges() {
-        let r1 = RecordingContextRegistry(); let h1 = FakeHostServices(context: r1)
-        let r2 = RecordingContextRegistry(); let h2 = FakeHostServices(context: r2)
+        let r1 = RecordingContextRegistry()
+        let h1 = FakeHostServices(context: r1)
+        let r2 = RecordingContextRegistry()
+        let h2 = FakeHostServices(context: r2)
         XCTAssertFalse(GitMageRuntime.contextBridge(for: h1) === GitMageRuntime.contextBridge(for: h2))
         XCTAssertEqual(r1.sources.count, 1)
         XCTAssertEqual(r2.sources.count, 1)

@@ -1,5 +1,5 @@
-import Foundation
 import AinkradAppKit
+import Foundation
 
 final class GitHubProvider: GitForgeProvider {
     private let token: String
@@ -15,54 +15,74 @@ final class GitHubProvider: GitForgeProvider {
         try await get("/user", as: GHUser.self).toModel()
     }
     func listPullRequests(_ repo: RepoRef, state: PRState) async throws -> [PullRequestSummary] {
-        try await get("/repos/\(repo.owner)/\(repo.name)/pulls?state=\(state.rawValue)&per_page=50", as: [GHPull].self).map { $0.toSummary() }
+        try await get("/repos/\(repo.owner)/\(repo.name)/pulls?state=\(state.rawValue)&per_page=50", as: [GHPull].self)
+            .map { $0.toSummary() }
     }
-    func searchPullRequests(_ repo: RepoRef, state: PRState, query: String, labels: [String], page: Int) async throws -> ForgePage<PullRequestSummary> {
-        let env = try await searchIssuesRaw(repo, isPR: true, state: state.rawValue, query: query, labels: labels, page: page)
+    func searchPullRequests(_ repo: RepoRef, state: PRState, query: String, labels: [String], page: Int) async throws
+        -> ForgePage<PullRequestSummary>
+    {
+        let env = try await searchIssuesRaw(
+            repo, isPR: true, state: state.rawValue, query: query, labels: labels, page: page)
         return ForgePage(items: env.items.map { $0.toPRSummary() }, totalCount: env.totalCount)
     }
     func pullRequest(_ repo: RepoRef, number: Int) async throws -> PullRequestDetail {
         try await get("/repos/\(repo.owner)/\(repo.name)/pulls/\(number)", as: GHPull.self).toDetail()
     }
     func files(_ repo: RepoRef, number: Int) async throws -> [PRFile] {
-        try await get("/repos/\(repo.owner)/\(repo.name)/pulls/\(number)/files?per_page=100", as: [GHFile].self).map { $0.toModel() }
+        try await get("/repos/\(repo.owner)/\(repo.name)/pulls/\(number)/files?per_page=100", as: [GHFile].self).map {
+            $0.toModel()
+        }
     }
     func pullRequestCommits(_ repo: RepoRef, number: Int) async throws -> [PRCommit] {
-        try await get("/repos/\(repo.owner)/\(repo.name)/pulls/\(number)/commits?per_page=100", as: [GHPRCommit].self).map { $0.toModel() }
+        try await get("/repos/\(repo.owner)/\(repo.name)/pulls/\(number)/commits?per_page=100", as: [GHPRCommit].self)
+            .map { $0.toModel() }
     }
     func comments(_ repo: RepoRef, number: Int) async throws -> [ForgeComment] {
-        try await get("/repos/\(repo.owner)/\(repo.name)/issues/\(number)/comments?per_page=50", as: [GHComment].self).map { $0.toModel() }
+        try await get("/repos/\(repo.owner)/\(repo.name)/issues/\(number)/comments?per_page=50", as: [GHComment].self)
+            .map { $0.toModel() }
     }
     func checks(_ repo: RepoRef, ref: String) async throws -> [CheckRun] {
-        try await get("/repos/\(repo.owner)/\(repo.name)/commits/\(ref)/check-runs", as: GHCheckRunsEnvelope.self).checkRuns.map { $0.toModel() }
+        try await get("/repos/\(repo.owner)/\(repo.name)/commits/\(ref)/check-runs", as: GHCheckRunsEnvelope.self)
+            .checkRuns.map { $0.toModel() }
     }
     func addComment(_ repo: RepoRef, number: Int, body: String) async throws {
         try await send("POST", "/repos/\(repo.owner)/\(repo.name)/issues/\(number)/comments", json: ["body": body])
     }
     func submitReview(_ repo: RepoRef, number: Int, event: ReviewEvent, body: String) async throws {
-        try await send("POST", "/repos/\(repo.owner)/\(repo.name)/pulls/\(number)/reviews", json: ["event": event.rawValue, "body": body])
+        try await send(
+            "POST", "/repos/\(repo.owner)/\(repo.name)/pulls/\(number)/reviews",
+            json: ["event": event.rawValue, "body": body])
     }
     func merge(_ repo: RepoRef, number: Int, method: MergeMethod) async throws {
-        try await send("PUT", "/repos/\(repo.owner)/\(repo.name)/pulls/\(number)/merge", json: ["merge_method": method.rawValue])
+        try await send(
+            "PUT", "/repos/\(repo.owner)/\(repo.name)/pulls/\(number)/merge", json: ["merge_method": method.rawValue])
     }
-    func createPullRequest(_ repo: RepoRef, title: String, body: String,
-                           head: String, base: String, draft: Bool) async throws -> Int {
-        let created: GHPull = try await sendReturning("POST", "/repos/\(repo.owner)/\(repo.name)/pulls",
+    func createPullRequest(
+        _ repo: RepoRef, title: String, body: String,
+        head: String, base: String, draft: Bool
+    ) async throws -> Int {
+        let created: GHPull = try await sendReturning(
+            "POST", "/repos/\(repo.owner)/\(repo.name)/pulls",
             json: ["title": title, "body": body, "head": head, "base": base, "draft": draft])
         return created.number
     }
     func setPullRequestState(_ repo: RepoRef, number: Int, state: PRState) async throws {
-        try await send("PATCH", "/repos/\(repo.owner)/\(repo.name)/pulls/\(number)",
-                       json: ["state": state.rawValue])
+        try await send(
+            "PATCH", "/repos/\(repo.owner)/\(repo.name)/pulls/\(number)",
+            json: ["state": state.rawValue])
     }
 
     // MARK: - Issues
     func listIssues(_ repo: RepoRef, state: IssueState) async throws -> [IssueSummary] {
-        let items = try await get("/repos/\(repo.owner)/\(repo.name)/issues?state=\(state.rawValue)&per_page=50", as: [GHIssue].self)
+        let items = try await get(
+            "/repos/\(repo.owner)/\(repo.name)/issues?state=\(state.rawValue)&per_page=50", as: [GHIssue].self)
         return items.filter { !$0.isPullRequest }.map { $0.toSummary() }
     }
-    func searchIssues(_ repo: RepoRef, state: IssueState, query: String, labels: [String], page: Int) async throws -> ForgePage<IssueSummary> {
-        let env = try await searchIssuesRaw(repo, isPR: false, state: state.rawValue, query: query, labels: labels, page: page)
+    func searchIssues(_ repo: RepoRef, state: IssueState, query: String, labels: [String], page: Int) async throws
+        -> ForgePage<IssueSummary>
+    {
+        let env = try await searchIssuesRaw(
+            repo, isPR: false, state: state.rawValue, query: query, labels: labels, page: page)
         return ForgePage(items: env.items.map { $0.toSummary() }, totalCount: env.totalCount)
     }
 
@@ -70,8 +90,10 @@ final class GitHubProvider: GitForgeProvider {
     static let searchPageSize = 30
     private static let searchQueryAllowed = CharacterSet.alphanumerics.union(CharacterSet(charactersIn: "-._~"))
 
-    private func searchIssuesRaw(_ repo: RepoRef, isPR: Bool, state: String,
-                                 query: String, labels: [String], page: Int) async throws -> GHSearchEnvelope {
+    private func searchIssuesRaw(
+        _ repo: RepoRef, isPR: Bool, state: String,
+        query: String, labels: [String], page: Int
+    ) async throws -> GHSearchEnvelope {
         var qualifiers = ["repo:\(repo.owner)/\(repo.name)", isPR ? "is:pr" : "is:issue"]
         if state == "open" || state == "closed" { qualifiers.append("state:\(state)") }
         for label in labels where !label.isEmpty { qualifiers.append("label:\"\(label)\"") }
@@ -80,23 +102,30 @@ final class GitHubProvider: GitForgeProvider {
 
         let q = qualifiers.joined(separator: " ")
         let encoded = q.addingPercentEncoding(withAllowedCharacters: Self.searchQueryAllowed) ?? q
-        let path = "/search/issues?q=\(encoded)&per_page=\(Self.searchPageSize)&page=\(max(1, page))&sort=created&order=desc"
+        let path =
+            "/search/issues?q=\(encoded)&per_page=\(Self.searchPageSize)&page=\(max(1, page))&sort=created&order=desc"
         return try await get(path, as: GHSearchEnvelope.self)
     }
     func issue(_ repo: RepoRef, number: Int) async throws -> IssueDetail {
         try await get("/repos/\(repo.owner)/\(repo.name)/issues/\(number)", as: GHIssue.self).toDetail()
     }
     func issueComments(_ repo: RepoRef, number: Int) async throws -> [ForgeComment] {
-        try await get("/repos/\(repo.owner)/\(repo.name)/issues/\(number)/comments?per_page=100", as: [GHComment].self).map { $0.toModel() }
+        try await get("/repos/\(repo.owner)/\(repo.name)/issues/\(number)/comments?per_page=100", as: [GHComment].self)
+            .map { $0.toModel() }
     }
     func repoLabels(_ repo: RepoRef) async throws -> [IssueLabel] {
         try await get("/repos/\(repo.owner)/\(repo.name)/labels?per_page=100", as: [GHLabel].self).map { $0.toModel() }
     }
     func assignableUsers(_ repo: RepoRef) async throws -> [ForgeUser] {
-        try await get("/repos/\(repo.owner)/\(repo.name)/assignees?per_page=100", as: [GHUser].self).map { $0.toModel() }
+        try await get("/repos/\(repo.owner)/\(repo.name)/assignees?per_page=100", as: [GHUser].self).map {
+            $0.toModel()
+        }
     }
-    func createIssue(_ repo: RepoRef, title: String, body: String, labels: [String], assignees: [String]) async throws -> Int {
-        let created: GHIssue = try await sendReturning("POST", "/repos/\(repo.owner)/\(repo.name)/issues",
+    func createIssue(_ repo: RepoRef, title: String, body: String, labels: [String], assignees: [String]) async throws
+        -> Int
+    {
+        let created: GHIssue = try await sendReturning(
+            "POST", "/repos/\(repo.owner)/\(repo.name)/issues",
             json: ["title": title, "body": body, "labels": labels, "assignees": assignees])
         return created.number
     }
@@ -123,7 +152,9 @@ final class GitHubProvider: GitForgeProvider {
         return req
     }
     private func decoder() -> JSONDecoder {
-        let d = JSONDecoder(); d.keyDecodingStrategy = .convertFromSnakeCase; return d
+        let d = JSONDecoder()
+        d.keyDecodingStrategy = .convertFromSnakeCase
+        return d
     }
     private func get<T: Decodable>(_ path: String, as: T.Type) async throws -> T {
         let (data, resp) = try await run(makeRequest("GET", path))
@@ -146,8 +177,7 @@ final class GitHubProvider: GitForgeProvider {
         do { return try decoder().decode(T.self, from: data) } catch { throw ForgeError.decoding }
     }
     private func run(_ req: URLRequest) async throws -> (Data, URLResponse) {
-        do { return try await session.data(for: req) }
-        catch { throw ForgeError.transport(error.localizedDescription) }
+        do { return try await session.data(for: req) } catch { throw ForgeError.transport(error.localizedDescription) }
     }
     private static func check(_ resp: URLResponse, _ data: Data) throws {
         guard let http = resp as? HTTPURLResponse else { throw ForgeError.decoding }

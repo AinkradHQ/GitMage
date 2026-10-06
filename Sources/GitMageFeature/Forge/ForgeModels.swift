@@ -81,7 +81,7 @@ struct PullRequestDetail: Equatable {
 struct PRCommit: Identifiable, Equatable {
     let sha: String
     let shortSHA: String
-    let message: String   // first line of the commit message
+    let message: String  // first line of the commit message
     let author: String
     let date: String
     var id: String { sha }

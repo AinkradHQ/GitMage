@@ -1,5 +1,5 @@
-import SwiftUI
 import AinkradAppKit
+import SwiftUI
 
 /// Centered placeholder shown when a list/pane has no content — e.g. no
 /// worktrees, no open PRs. Shared across areas to keep empty-state chrome

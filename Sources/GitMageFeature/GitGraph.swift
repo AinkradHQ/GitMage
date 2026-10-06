@@ -27,11 +27,11 @@ struct GraphRow: Identifiable {
 /// git-graph layout. Commits must be newest-first (as `git log` returns them).
 enum GitGraphBuilder {
     static func build(_ commits: [GraphCommit]) -> [GraphRow] {
-        var lanes: [String?] = []   // sha each column is currently waiting for
+        var lanes: [String?] = []  // sha each column is currently waiting for
         var rows: [GraphRow] = []
 
         for commit in commits {
-            let before = lanes   // == previous row's `after`
+            let before = lanes  // == previous row's `after`
             let sha = commit.sha
 
             // The node's column: a lane already waiting for it, else a new lane.
@@ -39,9 +39,11 @@ enum GitGraphBuilder {
             if let existing = lanes.firstIndex(of: sha) {
                 col = existing
             } else if let empty = lanes.firstIndex(where: { $0 == nil }) {
-                col = empty; lanes[col] = sha
+                col = empty
+                lanes[col] = sha
             } else {
-                col = lanes.count; lanes.append(sha)
+                col = lanes.count
+                lanes.append(sha)
             }
 
             // Every lane waiting for this sha collapses into the node.
@@ -76,7 +78,8 @@ enum GitGraphParser {
         output.split(separator: "\n", omittingEmptySubsequences: true).compactMap { rawLine in
             let fields = String(rawLine).components(separatedBy: "\u{1f}")
             guard fields.count >= 5 else { return nil }
-            let parents = fields.count >= 6
+            let parents =
+                fields.count >= 6
                 ? fields[5].split(separator: " ").map(String.init)
                 : []
             return GraphCommit(

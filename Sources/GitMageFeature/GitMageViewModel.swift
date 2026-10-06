@@ -1,7 +1,7 @@
-import Foundation
-import Combine
-import AppKit
 import AinkradAppKit
+import AppKit
+import Combine
+import Foundation
 
 @MainActor
 final class GitMageViewModel: ObservableObject {
@@ -114,7 +114,8 @@ final class GitMageViewModel: ObservableObject {
     /// Folds the live editor state back into the active repo config.
     private func syncActiveRepoState() {
         guard let activeRepoID,
-              let index = repos.firstIndex(where: { $0.id == activeRepoID }) else { return }
+            let index = repos.firstIndex(where: { $0.id == activeRepoID })
+        else { return }
         repos[index].draftCommitMessage = draftCommitMessage
         repos[index].lastBranch = selectedBranchName
         repos[index].lastSelectedFileID = selectedChangeID
@@ -139,11 +140,13 @@ final class GitMageViewModel: ObservableObject {
     // MARK: - Library management
 
     func addRepositoryFolder() {
-        guard let url = pickFolder(
-            title: "Add a Git Repository",
-            prompt: "Add Repository",
-            message: "Select a repository root folder."
-        ) else { return }
+        guard
+            let url = pickFolder(
+                title: "Add a Git Repository",
+                prompt: "Add Repository",
+                message: "Select a repository root folder."
+            )
+        else { return }
         let path = url.path
 
         Task { @MainActor in
@@ -185,11 +188,13 @@ final class GitMageViewModel: ObservableObject {
             errorMessage = GitRepositoryError.invalidRemoteURL.errorDescription
             return
         }
-        guard let parent = pickFolder(
-            title: "Choose a Destination Folder",
-            prompt: "Clone Here",
-            message: "Select the folder to clone the repository into."
-        ) else { return }
+        guard
+            let parent = pickFolder(
+                title: "Choose a Destination Folder",
+                prompt: "Clone Here",
+                message: "Select the folder to clone the repository into."
+            )
+        else { return }
 
         isLoading = true
         errorMessage = nil
@@ -275,7 +280,7 @@ final class GitMageViewModel: ObservableObject {
         errorMessage = nil
         Task { @MainActor in
             let loaded = (try? await client.loadBranches(at: path)) ?? []
-            guard repositoryPath == path else { return }   // switched repos mid-load
+            guard repositoryPath == path else { return }  // switched repos mid-load
             branches = loaded
             if let current = loaded.first(where: { $0.isCurrent }) {
                 selectedBranchName = current.name
@@ -294,7 +299,10 @@ final class GitMageViewModel: ObservableObject {
             return
         }
 
-        if loadScope == .basic { refreshBranchesOnly(at: path); return }
+        if loadScope == .basic {
+            refreshBranchesOnly(at: path)
+            return
+        }
 
         isLoading = true
         errorMessage = nil
@@ -332,7 +340,8 @@ final class GitMageViewModel: ObservableObject {
                 // first-file diff: it cost a spawn on every open for a diff the
                 // user may never look at.
                 if let selectedChangeID,
-                   let existingChange = newSnapshot.changes.first(where: { $0.id == selectedChangeID }) {
+                    let existingChange = newSnapshot.changes.first(where: { $0.id == selectedChangeID })
+                {
                     selectChange(existingChange)
                 } else {
                     selectedChangeID = nil
@@ -392,7 +401,10 @@ final class GitMageViewModel: ObservableObject {
 
     private func loadCommitTotal() {
         let path = repositoryPath
-        guard !path.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty else { totalCommits = nil; return }
+        guard !path.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty else {
+            totalCommits = nil
+            return
+        }
         Task { @MainActor in
             totalCommits = try? await client.commitCount(in: path)
         }
@@ -426,7 +438,8 @@ final class GitMageViewModel: ObservableObject {
         Task { @MainActor in
             do {
                 var diff = try await client.loadCommitDiff(sha: commit.id, in: path)
-                diff = GitDiffSnapshot(title: "\(commit.shortSHA) · \(commit.summary)", body: diff.body, isEmpty: diff.isEmpty)
+                diff = GitDiffSnapshot(
+                    title: "\(commit.shortSHA) · \(commit.summary)", body: diff.body, isEmpty: diff.isEmpty)
                 commitDiff = diff
             } catch {
                 commitDiff = GitDiffSnapshot(title: commit.shortSHA, body: error.localizedDescription, isEmpty: true)
@@ -459,11 +472,15 @@ final class GitMageViewModel: ObservableObject {
     }
 
     func applyStash(_ entry: GitStashEntry) {
-        run(context: "apply \(entry.id)", movesHead: false) { [self] in try await client.stashApply(entry, in: repositoryPath) }
+        run(context: "apply \(entry.id)", movesHead: false) { [self] in
+            try await client.stashApply(entry, in: repositoryPath)
+        }
     }
 
     func dropStash(_ entry: GitStashEntry) {
-        run(context: "drop \(entry.id)", movesHead: false) { [self] in try await client.stashDrop(entry, in: repositoryPath) }
+        run(context: "drop \(entry.id)", movesHead: false) { [self] in
+            try await client.stashDrop(entry, in: repositoryPath)
+        }
     }
 
     func selectStash(_ entry: GitStashEntry) {
@@ -507,26 +524,36 @@ final class GitMageViewModel: ObservableObject {
     // MARK: - Staging
 
     func stageAllChanges() {
-        run(context: "stage all changes", movesHead: false) { [self] in try await client.stageAllChanges(in: repositoryPath) }
+        run(context: "stage all changes", movesHead: false) { [self] in
+            try await client.stageAllChanges(in: repositoryPath)
+        }
     }
 
     func unstageAllChanges() {
-        run(context: "unstage all changes", movesHead: false) { [self] in try await client.unstageAllChanges(in: repositoryPath) }
+        run(context: "unstage all changes", movesHead: false) { [self] in
+            try await client.unstageAllChanges(in: repositoryPath)
+        }
     }
 
     func stageSelectedChange() {
         guard let change = selectedChange else { return }
-        run(context: "stage \(change.filePath)", movesHead: false) { [self] in try await client.stage(change: change, in: repositoryPath) }
+        run(context: "stage \(change.filePath)", movesHead: false) { [self] in
+            try await client.stage(change: change, in: repositoryPath)
+        }
     }
 
     func unstageSelectedChange() {
         guard let change = selectedChange else { return }
-        run(context: "unstage \(change.filePath)", movesHead: false) { [self] in try await client.unstage(change: change, in: repositoryPath) }
+        run(context: "unstage \(change.filePath)", movesHead: false) { [self] in
+            try await client.unstage(change: change, in: repositoryPath)
+        }
     }
 
     func discardSelectedChange() {
         guard let change = selectedChange else { return }
-        run(context: "discard \(change.filePath)", movesHead: false) { [self] in try await client.discard(change: change, in: repositoryPath) }
+        run(context: "discard \(change.filePath)", movesHead: false) { [self] in
+            try await client.discard(change: change, in: repositoryPath)
+        }
     }
 
     func commitChanges() {
@@ -548,8 +575,10 @@ final class GitMageViewModel: ObservableObject {
     /// Runs a mutating git action, then refreshes on success or reports on failure.
     /// `movesHead: false` for actions that cannot change history, so the
     /// follow-up refresh keeps the loaded commits instead of reloading them.
-    private func run(context: String, movesHead: Bool = true,
-                     _ action: @escaping () async throws -> Void) {
+    private func run(
+        context: String, movesHead: Bool = true,
+        _ action: @escaping () async throws -> Void
+    ) {
         guard hasActiveRepo else { return }
         isLoading = true
         activeOperation = context
@@ -570,8 +599,9 @@ final class GitMageViewModel: ObservableObject {
                 // not news, a four-minute clone is the thing the user walked
                 // away from.
                 if elapsed >= GitMageSignalReporter.successThreshold {
-                    reporter.operationFinished(operation: context, repository: repository,
-                                               duration: elapsed)
+                    reporter.operationFinished(
+                        operation: context, repository: repository,
+                        duration: elapsed)
                 }
                 // Conflicts are checked AFTER the refresh, on the state the
                 // refresh produced. A conflict is not a thrown error — the
@@ -582,8 +612,9 @@ final class GitMageViewModel: ObservableObject {
                 isLoading = false
                 activeOperation = nil
                 report(error, context: context)
-                reporter.operationFailed(operation: context, repository: repository,
-                                         reason: Self.describe(error))
+                reporter.operationFailed(
+                    operation: context, repository: repository,
+                    reason: Self.describe(error))
             }
         }
     }
@@ -599,8 +630,9 @@ final class GitMageViewModel: ObservableObject {
         let conflicted = snapshot.changes
             .filter { $0.kind == .conflicted }
             .map(\.path)
-        reporter.conflictsDetected(operation: operation, repository: repository,
-                                   files: conflicted)
+        reporter.conflictsDetected(
+            operation: operation, repository: repository,
+            files: conflicted)
     }
 
     /// The same text `report(_:context:)` shows in the UI, so the feed row and

@@ -1,5 +1,5 @@
-import Foundation
 import AinkradAppKit
+import Foundation
 
 /// Errors surfaced by a `GitForgeProvider` implementation, mapped from
 /// transport failures and non-2xx HTTP responses.
@@ -36,7 +36,8 @@ protocol GitForgeProvider {
     func verify() async throws -> ForgeUser
     func listPullRequests(_ repo: RepoRef, state: PRState) async throws -> [PullRequestSummary]
     /// Paginated PR search (text + labels) via the forge search API.
-    func searchPullRequests(_ repo: RepoRef, state: PRState, query: String, labels: [String], page: Int) async throws -> ForgePage<PullRequestSummary>
+    func searchPullRequests(_ repo: RepoRef, state: PRState, query: String, labels: [String], page: Int) async throws
+        -> ForgePage<PullRequestSummary>
     func pullRequest(_ repo: RepoRef, number: Int) async throws -> PullRequestDetail
     func files(_ repo: RepoRef, number: Int) async throws -> [PRFile]
     func pullRequestCommits(_ repo: RepoRef, number: Int) async throws -> [PRCommit]
@@ -46,19 +47,23 @@ protocol GitForgeProvider {
     func submitReview(_ repo: RepoRef, number: Int, event: ReviewEvent, body: String) async throws
     func merge(_ repo: RepoRef, number: Int, method: MergeMethod) async throws
     /// Opens a pull request and returns its number.
-    func createPullRequest(_ repo: RepoRef, title: String, body: String,
-                           head: String, base: String, draft: Bool) async throws -> Int
+    func createPullRequest(
+        _ repo: RepoRef, title: String, body: String,
+        head: String, base: String, draft: Bool
+    ) async throws -> Int
     /// Reopens or closes an existing pull request. `.all` is not a settable state.
     func setPullRequestState(_ repo: RepoRef, number: Int, state: PRState) async throws
 
     func listIssues(_ repo: RepoRef, state: IssueState) async throws -> [IssueSummary]
     /// Paginated issue search (text + labels) via the forge search API.
-    func searchIssues(_ repo: RepoRef, state: IssueState, query: String, labels: [String], page: Int) async throws -> ForgePage<IssueSummary>
+    func searchIssues(_ repo: RepoRef, state: IssueState, query: String, labels: [String], page: Int) async throws
+        -> ForgePage<IssueSummary>
     func issue(_ repo: RepoRef, number: Int) async throws -> IssueDetail
     func issueComments(_ repo: RepoRef, number: Int) async throws -> [ForgeComment]
     func repoLabels(_ repo: RepoRef) async throws -> [IssueLabel]
     func assignableUsers(_ repo: RepoRef) async throws -> [ForgeUser]
-    func createIssue(_ repo: RepoRef, title: String, body: String, labels: [String], assignees: [String]) async throws -> Int
+    func createIssue(_ repo: RepoRef, title: String, body: String, labels: [String], assignees: [String]) async throws
+        -> Int
     func addIssueComment(_ repo: RepoRef, number: Int, body: String) async throws
     func setIssueState(_ repo: RepoRef, number: Int, state: IssueState) async throws
     func setLabels(_ repo: RepoRef, number: Int, labels: [String]) async throws

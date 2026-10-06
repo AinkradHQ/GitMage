@@ -1,5 +1,5 @@
-import Foundation
 import AinkradAppKit
+import Foundation
 
 /// Reference box for `GitMageWorkspaceStore`'s v2 save guard. The store is a
 /// struct held in a `let` whose `loadLibrary` does not mutate, so the flag

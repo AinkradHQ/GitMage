@@ -1,5 +1,5 @@
-import SwiftUI
 import AinkradAppKit
+import SwiftUI
 
 /// Fully-resolved appearance Git Mage renders with. `Equatable` so SwiftUI only
 /// re-applies on real change.

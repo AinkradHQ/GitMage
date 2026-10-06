@@ -1,6 +1,7 @@
-import XCTest
-import Foundation
 import AinkradAppKit
+import Foundation
+import XCTest
+
 @testable import GitMageFeature
 
 @MainActor
@@ -46,10 +47,11 @@ final class GitOpActionHandlerTests: XCTestCase {
         try "hi\n".write(to: repo.appendingPathComponent("README.md"), atomically: true, encoding: .utf8)
         let handler = GitOpActionHandler(client: GitRepositoryClient())
         _ = await handler.run(json(["operation": "stageAll", "repoPath": repo.path]))
-        let result = await handler.run(json([
-            "operation": "commit", "repoPath": repo.path,
-            "args": ["message": "Add README"],
-        ]))
+        let result = await handler.run(
+            json([
+                "operation": "commit", "repoPath": repo.path,
+                "args": ["message": "Add README"],
+            ]))
         XCTAssertFalse(result.isError)
     }
 
@@ -67,10 +69,16 @@ final class GitOpActionHandlerTests: XCTestCase {
         try "a\n".write(to: repo.appendingPathComponent("README.md"), atomically: true, encoding: .utf8)
         let handler = GitOpActionHandler(client: GitRepositoryClient())
         _ = await handler.run(json(["operation": "stageAll", "repoPath": repo.path]))
-        _ = await handler.run(json(["operation": "commit", "repoPath": repo.path,
-                                    "args": ["message": "c1"]]))
-        let result = await handler.run(json(["operation": "reset", "repoPath": repo.path,
-                                             "args": ["ref": "HEAD", "mode": "hard"]]))
+        _ = await handler.run(
+            json([
+                "operation": "commit", "repoPath": repo.path,
+                "args": ["message": "c1"],
+            ]))
+        let result = await handler.run(
+            json([
+                "operation": "reset", "repoPath": repo.path,
+                "args": ["ref": "HEAD", "mode": "hard"],
+            ]))
         XCTAssertFalse(result.isError)
     }
 

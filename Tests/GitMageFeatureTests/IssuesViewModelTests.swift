@@ -1,5 +1,6 @@
-import XCTest
 import AinkradAppKit
+import XCTest
+
 @testable import GitMageFeature
 
 @MainActor
@@ -7,11 +8,14 @@ final class IssuesViewModelTests: XCTestCase {
     private let repo = RepoRef(host: "github.com", owner: "o", name: "r")
 
     private func makeSummary(number: Int = 7) -> IssueSummary {
-        IssueSummary(id: 1, number: number, title: "Bug", author: "alice", state: "open", labelNames: ["bug"], commentCount: 2)
+        IssueSummary(
+            id: 1, number: number, title: "Bug", author: "alice", state: "open", labelNames: ["bug"], commentCount: 2)
     }
 
     private func makeDetail(number: Int = 7, state: String = "open") -> IssueDetail {
-        IssueDetail(number: number, title: "Bug", body: "body", state: state, author: "alice", createdAt: "2026-07-01T00:00:00Z", labels: [IssueLabel(name: "bug", color: "red")], assignees: ["bob"])
+        IssueDetail(
+            number: number, title: "Bug", body: "body", state: state, author: "alice",
+            createdAt: "2026-07-01T00:00:00Z", labels: [IssueLabel(name: "bug", color: "red")], assignees: ["bob"])
     }
 
     func testLoadPopulatesIssuesLabelsAndUsers() async {
@@ -121,7 +125,9 @@ private final class StubIssueForgeProvider: GitForgeProvider {
     }
 
     func listPullRequests(_ repo: RepoRef, state: PRState) async throws -> [PullRequestSummary] { [] }
-    func searchPullRequests(_ repo: RepoRef, state: PRState, query: String, labels: [String], page: Int) async throws -> ForgePage<PullRequestSummary> {
+    func searchPullRequests(_ repo: RepoRef, state: PRState, query: String, labels: [String], page: Int) async throws
+        -> ForgePage<PullRequestSummary>
+    {
         ForgePage(items: [], totalCount: 0)
     }
     func pullRequest(_ repo: RepoRef, number: Int) async throws -> PullRequestDetail { throw ForgeError.notFound }
@@ -132,7 +138,9 @@ private final class StubIssueForgeProvider: GitForgeProvider {
     func addComment(_ repo: RepoRef, number: Int, body: String) async throws {}
     func submitReview(_ repo: RepoRef, number: Int, event: ReviewEvent, body: String) async throws {}
     func merge(_ repo: RepoRef, number: Int, method: MergeMethod) async throws {}
-    func createPullRequest(_ repo: RepoRef, title: String, body: String, head: String, base: String, draft: Bool) async throws -> Int { 0 }
+    func createPullRequest(_ repo: RepoRef, title: String, body: String, head: String, base: String, draft: Bool)
+        async throws -> Int
+    { 0 }
     func setPullRequestState(_ repo: RepoRef, number: Int, state: PRState) async throws {}
 
     func listIssues(_ repo: RepoRef, state: IssueState) async throws -> [IssueSummary] {
@@ -141,7 +149,9 @@ private final class StubIssueForgeProvider: GitForgeProvider {
         return summaries
     }
 
-    func searchIssues(_ repo: RepoRef, state: IssueState, query: String, labels: [String], page: Int) async throws -> ForgePage<IssueSummary> {
+    func searchIssues(_ repo: RepoRef, state: IssueState, query: String, labels: [String], page: Int) async throws
+        -> ForgePage<IssueSummary>
+    {
         searchIssuesCallCount += 1
         if let listIssuesError { throw listIssuesError }
         return ForgePage(items: summaries, totalCount: summaries.count)
@@ -165,7 +175,9 @@ private final class StubIssueForgeProvider: GitForgeProvider {
         users
     }
 
-    func createIssue(_ repo: RepoRef, title: String, body: String, labels: [String], assignees: [String]) async throws -> Int {
+    func createIssue(_ repo: RepoRef, title: String, body: String, labels: [String], assignees: [String]) async throws
+        -> Int
+    {
         createIssueCalls.append((title: title, body: body, labels: labels, assignees: assignees))
         return 42
     }

@@ -1,14 +1,15 @@
 import XCTest
+
 @testable import GitMageFeature
 
 final class GitStatusParserTests: XCTestCase {
     func testParsesBranchAndChanges() {
         let output = """
-        ## main...origin/main [ahead 2, behind 1]
-         M Sources/App.swift
-        ?? Notes/todo.md
-        R  Old.swift -> New.swift
-        """
+            ## main...origin/main [ahead 2, behind 1]
+             M Sources/App.swift
+            ?? Notes/todo.md
+            R  Old.swift -> New.swift
+            """
 
         let snapshot = GitStatusParser.parse(
             statusOutput: output,
@@ -43,10 +44,10 @@ final class GitStatusParserTests: XCTestCase {
 
     func testParsesBranches() {
         let output = """
-        *\tmain\torigin/main\t[ahead 1]
-         \tfeature/login\t\t
-         \trelease/1.0\torigin/release/1.0\t[behind 2]
-        """
+            *\tmain\torigin/main\t[ahead 1]
+             \tfeature/login\t\t
+             \trelease/1.0\torigin/release/1.0\t[behind 2]
+            """
 
         let branches = GitBranchParser.parse(output: output)
 

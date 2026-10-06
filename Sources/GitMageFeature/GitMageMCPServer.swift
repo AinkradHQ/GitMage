@@ -1,5 +1,5 @@
-import Foundation
 import AinkradAppKit
+import Foundation
 
 /// Publishes Git Mage's git operations to the host assistant as MCP tools.
 ///
@@ -90,11 +90,13 @@ enum GitMageMCPServer {
         /// of gating it.
         var injects: [GuardRule] = []
 
-        init(_ name: String, _ operation: String, _ summary: String,
-             route: Route = .git,
-             destructive: Bool = false, readOnly: Bool = false, argsHint: String = "None.",
-             rejects: [GuardRule] = [],
-             injects: [GuardRule] = []) {
+        init(
+            _ name: String, _ operation: String, _ summary: String,
+            route: Route = .git,
+            destructive: Bool = false, readOnly: Bool = false, argsHint: String = "None.",
+            rejects: [GuardRule] = [],
+            injects: [GuardRule] = []
+        ) {
             self.name = name
             self.operation = operation
             self.route = route
@@ -137,7 +139,7 @@ enum GitMageMCPServer {
         func matches(_ any: Any) -> Bool {
             switch self {
             case .string(let s): return (any as? String) == s
-            case .bool(let b):   return (any as? Bool) == b
+            case .bool(let b): return (any as? Bool) == b
             case .approvingReviewEvent:
                 // Resolved through the SINK'S OWN function rather than a
                 // mirrored comparison, because that sink is loose: it does
@@ -154,7 +156,7 @@ enum GitMageMCPServer {
         var foundation: Any {
             switch self {
             case .string(let s): return s
-            case .bool(let b):   return b
+            case .bool(let b): return b
             case .approvingReviewEvent: return ReviewEvent.approve.rawValue
             }
         }
@@ -162,7 +164,7 @@ enum GitMageMCPServer {
         var described: String {
             switch self {
             case .string(let s): return "\"\(s)\""
-            case .bool(let b):   return "\(b)"
+            case .bool(let b): return "\(b)"
             case .approvingReviewEvent: return "an approving review"
             }
         }
@@ -179,8 +181,9 @@ enum GitMageMCPServer {
         Tool("commit", "commit", "Commit the staged changes.", argsHint: "{\"message\": string} (required)"),
         Tool("create_branch", "createBranch", "Create a branch.", argsHint: "{\"name\": string} (required)"),
         Tool("checkout", "checkout", "Check out a branch.", argsHint: "{\"name\": string} (required)"),
-        Tool("delete_branch", "deleteBranch", "Delete a branch.", destructive: true,
-             argsHint: "{\"name\": string} (required)"),
+        Tool(
+            "delete_branch", "deleteBranch", "Delete a branch.", destructive: true,
+            argsHint: "{\"name\": string} (required)"),
         Tool("push", "push", "Push the current branch to its remote.", destructive: true),
         Tool("pull", "pull", "Pull the current branch from its remote."),
         Tool("fetch", "fetch", "Fetch from the remote."),
@@ -189,33 +192,43 @@ enum GitMageMCPServer {
         Tool("stage_all", "stageAll", "Stage every change."),
         Tool("unstage_all", "unstageAll", "Unstage every staged change."),
         Tool("log", "log", "Read the commit log.", readOnly: true, argsHint: "{\"limit\": number} (default 20)"),
-        Tool("rebase", "rebase", "Rebase the current branch onto a ref.", destructive: true,
-             argsHint: "{\"onto\": string (required), \"autostash\": bool}"),
-        Tool("cherry_pick", "cherryPick", "Cherry-pick a commit.", destructive: true,
-             argsHint: "{\"sha\": string} (required)"),
+        Tool(
+            "rebase", "rebase", "Rebase the current branch onto a ref.", destructive: true,
+            argsHint: "{\"onto\": string (required), \"autostash\": bool}"),
+        Tool(
+            "cherry_pick", "cherryPick", "Cherry-pick a commit.", destructive: true,
+            argsHint: "{\"sha\": string} (required)"),
         Tool("revert", "revert", "Revert a commit.", destructive: true, argsHint: "{\"sha\": string} (required)"),
-        Tool("reset", "reset", "Reset to a ref with a non-destructive mode (soft or mixed). "
-             + "Use reset_hard for a hard reset — it discards working-tree changes.",
-             argsHint: "{\"ref\": string (required), \"mode\": \"soft\"|\"mixed\", \"autostash\": bool}",
-             rejects: [GuardRule("mode", .string("hard"))]),
-        Tool("reset_hard", "reset", "Hard-reset to a ref, DISCARDING all working-tree changes.",
-             destructive: true,
-             argsHint: "{\"ref\": string (required), \"autostash\": bool} — mode is always \"hard\".",
-             injects: [GuardRule("mode", .string("hard"))]),
-        Tool("create_tag", "createTag", "Create a tag.",
-             argsHint: "{\"name\": string (required), \"message\": string, \"ref\": string}"),
-        Tool("delete_tag", "deleteTag", "Delete a tag.", destructive: true,
-             argsHint: "{\"name\": string} (required)"),
+        Tool(
+            "reset", "reset",
+            "Reset to a ref with a non-destructive mode (soft or mixed). "
+                + "Use reset_hard for a hard reset — it discards working-tree changes.",
+            argsHint: "{\"ref\": string (required), \"mode\": \"soft\"|\"mixed\", \"autostash\": bool}",
+            rejects: [GuardRule("mode", .string("hard"))]),
+        Tool(
+            "reset_hard", "reset", "Hard-reset to a ref, DISCARDING all working-tree changes.",
+            destructive: true,
+            argsHint: "{\"ref\": string (required), \"autostash\": bool} — mode is always \"hard\".",
+            injects: [GuardRule("mode", .string("hard"))]),
+        Tool(
+            "create_tag", "createTag", "Create a tag.",
+            argsHint: "{\"name\": string (required), \"message\": string, \"ref\": string}"),
+        Tool(
+            "delete_tag", "deleteTag", "Delete a tag.", destructive: true,
+            argsHint: "{\"name\": string} (required)"),
         Tool("tags", "tags", "List the repository's tags.", readOnly: true),
-        Tool("remove_worktree", "removeWorktree", "Remove a clean worktree. "
-             + "Use remove_worktree_force to remove one with uncommitted changes.",
-             argsHint: "{\"path\": string} (required). \"force\" is refused here — "
-             + "call remove_worktree_force to remove a worktree with uncommitted changes.",
-             rejects: [GuardRule("force", .bool(true))]),
-        Tool("remove_worktree_force", "removeWorktree",
-             "Force-remove a worktree, DISCARDING any uncommitted changes in it.",
-             destructive: true, argsHint: "{\"path\": string} (required) — force is always true.",
-             injects: [GuardRule("force", .bool(true))]),
+        Tool(
+            "remove_worktree", "removeWorktree",
+            "Remove a clean worktree. "
+                + "Use remove_worktree_force to remove one with uncommitted changes.",
+            argsHint: "{\"path\": string} (required). \"force\" is refused here — "
+                + "call remove_worktree_force to remove a worktree with uncommitted changes.",
+            rejects: [GuardRule("force", .bool(true))]),
+        Tool(
+            "remove_worktree_force", "removeWorktree",
+            "Force-remove a worktree, DISCARDING any uncommitted changes in it.",
+            destructive: true, argsHint: "{\"path\": string} (required) — force is always true.",
+            injects: [GuardRule("force", .bool(true))]),
         Tool("op_state", "opState", "Report any in-progress merge/rebase/cherry-pick.", readOnly: true),
         Tool("continue_op", "continueOp", "Continue the in-progress operation."),
         Tool("abort_operation", "abortOperation", "Abort the in-progress operation.", destructive: true),
@@ -230,22 +243,26 @@ enum GitMageMCPServer {
     /// Returns the names of any tools `addTool` refused alongside the server: a
     /// dropped tool is a silently missing capability, so the caller must not be
     /// able to ignore it by accident.
-    static func make(appID: String,
-                     forward: @escaping @MainActor @Sendable (String) async -> AgentActionResult,
-                     forwardPR: @escaping @MainActor @Sendable (String) async -> AgentActionResult)
-        -> (server: MCPAppServer, failures: [String]) {
+    static func make(
+        appID: String,
+        forward: @escaping @MainActor @Sendable (String) async -> AgentActionResult,
+        forwardPR: @escaping @MainActor @Sendable (String) async -> AgentActionResult
+    )
+        -> (server: MCPAppServer, failures: [String])
+    {
         let server = MCPAppServer(appID: appID)
         var failures: [String] = []
         for tool in tools {
             let sink = tool.route == .pullRequest ? forwardPR : forward
-            let added = server.addTool(MCPToolSpec(
-                name: tool.name,
-                description: tool.summary,
-                schemaJSON: schemaJSON(for: tool),
-                destructive: tool.destructive,
-                readOnly: tool.readOnly,
-                handler: { arguments in await invoke(tool, arguments: arguments, forward: sink) }
-            ))
+            let added = server.addTool(
+                MCPToolSpec(
+                    name: tool.name,
+                    description: tool.summary,
+                    schemaJSON: schemaJSON(for: tool),
+                    destructive: tool.destructive,
+                    readOnly: tool.readOnly,
+                    handler: { arguments in await invoke(tool, arguments: arguments, forward: sink) }
+                ))
             if !added { failures.append(tool.name) }
         }
         return (server, failures)
@@ -257,11 +274,15 @@ enum GitMageMCPServer {
     /// test-only two-guard `Tool` fixture directly through the real gate/inject
     /// logic, without publishing a fabricated tool through the live server (the
     /// static `tools` table is not something a test should be able to bend).
-    static func invoke(_ tool: Tool, arguments: String,
-                        forward: @MainActor @Sendable (String) async -> AgentActionResult)
-        async -> AgentActionResult {
+    static func invoke(
+        _ tool: Tool, arguments: String,
+        forward: @MainActor @Sendable (String) async -> AgentActionResult
+    )
+        async -> AgentActionResult
+    {
         guard let data = arguments.data(using: .utf8),
-              let object = (try? JSONSerialization.jsonObject(with: data)) as? [String: Any] else {
+            let object = (try? JSONSerialization.jsonObject(with: data)) as? [String: Any]
+        else {
             return AgentActionResult(text: "\(tool.name): malformed arguments", isError: true)
         }
         guard let repoPath = object["repoPath"] as? String, !repoPath.isEmpty else {

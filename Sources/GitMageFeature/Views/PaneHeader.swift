@@ -1,5 +1,5 @@
-import SwiftUI
 import AinkradAppKit
+import SwiftUI
 
 /// The shared context-pane header: a kerned title, a count pill, and optional
 /// trailing actions — the same language as the Changes group headers.
@@ -11,8 +11,10 @@ struct PaneHeader<Trailing: View>: View {
     let tokens: HostThemeTokens
     @ViewBuilder var trailing: () -> Trailing
 
-    init(title: String, count: Int, countText: String? = nil, tokens: HostThemeTokens,
-         @ViewBuilder trailing: @escaping () -> Trailing = { EmptyView() }) {
+    init(
+        title: String, count: Int, countText: String? = nil, tokens: HostThemeTokens,
+        @ViewBuilder trailing: @escaping () -> Trailing = { EmptyView() }
+    ) {
         self.title = title
         self.count = count
         self.countText = countText
@@ -50,4 +52,3 @@ struct GlowRule: View {
         .frame(height: 1)
     }
 }
-

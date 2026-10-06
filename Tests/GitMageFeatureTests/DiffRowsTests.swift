@@ -1,17 +1,18 @@
 import Foundation
 import Testing
+
 @testable import GitMageFeature
 
 @Suite("DiffRows")
 struct DiffRowsTests {
     private let sample = """
-    @@ -1,4 +1,5 @@
-     context line
-    -removed line
-    +added line one
-    +added line two
-     trailing context
-    """
+        @@ -1,4 +1,5 @@
+         context line
+        -removed line
+        +added line one
+        +added line two
+         trailing context
+        """
 
     @Test func countsAdditions() {
         #expect(DiffRows(body: sample, fontSize: 11).additions == 2)
@@ -32,8 +33,9 @@ struct DiffRowsTests {
 
     @Test func codeWidthScalesWithTheLongestLine() {
         let narrow = DiffRows(body: "@@ -1 +1 @@\n+ab", fontSize: 11)
-        let wide = DiffRows(body: "@@ -1 +1 @@\n+" + String(repeating: "x", count: 200),
-                            fontSize: 11)
+        let wide = DiffRows(
+            body: "@@ -1 +1 @@\n+" + String(repeating: "x", count: 200),
+            fontSize: 11)
         #expect(wide.codeWidth > narrow.codeWidth)
     }
 

@@ -57,14 +57,14 @@ struct GitMageLibraryState: Codable, Equatable {
 
 /// A single entry from `git stash list`.
 struct GitStashEntry: Identifiable, Equatable {
-    let id: String        // e.g. "stash@{0}"
+    let id: String  // e.g. "stash@{0}"
     let index: Int
     let message: String
 }
 
 /// One commit from `git log`, for the History area.
 struct GitCommitSummary: Identifiable, Equatable {
-    let id: String        // full SHA
+    let id: String  // full SHA
     let shortSHA: String
     let summary: String
     let author: String
@@ -97,7 +97,7 @@ struct GitRepositorySnapshot: Equatable {
         let pieces = [
             "\(changeCount) changed",
             stagedCount > 0 ? "\(stagedCount) staged" : nil,
-            untrackedCount > 0 ? "\(untrackedCount) untracked" : nil
+            untrackedCount > 0 ? "\(untrackedCount) untracked" : nil,
         ].compactMap { $0 }
         return pieces.joined(separator: " · ")
     }

@@ -24,9 +24,11 @@ struct GitMageSettings: Codable, Equatable {
     /// Monospaced (data/HUD) font family.
     var monoFontName: String = "JetBrains Mono"
 
-    init(backgroundOpacity: Double = 1.0, followThemeAccent: Bool = true,
-         diffFontSize: Double = 12, shortcuts: [String: KeyChord] = GitMageShortcutDefaults.map,
-         textScale: Double = 1.0, displayFontName: String = "Exo 2", monoFontName: String = "JetBrains Mono") {
+    init(
+        backgroundOpacity: Double = 1.0, followThemeAccent: Bool = true,
+        diffFontSize: Double = 12, shortcuts: [String: KeyChord] = GitMageShortcutDefaults.map,
+        textScale: Double = 1.0, displayFontName: String = "Exo 2", monoFontName: String = "JetBrains Mono"
+    ) {
         self.backgroundOpacity = backgroundOpacity
         self.followThemeAccent = followThemeAccent
         self.diffFontSize = diffFontSize

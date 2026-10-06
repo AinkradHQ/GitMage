@@ -1,5 +1,5 @@
-import SwiftUI
 import AinkradAppKit
+import SwiftUI
 
 /// Detail pane for the Advanced area: one page of contextual actions — the
 /// selected commit's ops (cherry-pick / revert / reset / tag-target), a rebase
@@ -88,9 +88,12 @@ struct AdvancedDetailView: View {
                             .foregroundStyle(tokens.foreground)
                             .lineLimit(2)
                         HStack(spacing: 8) {
-                            Text(commit.shortSHA).font(AinkradFont.mono(10, weight: .medium)).foregroundStyle(tokens.accentSecondary)
-                            Text(commit.author).font(AinkradFont.display(10)).foregroundStyle(tokens.foreground.opacity(0.5))
-                            Text(commit.relativeDate).font(AinkradFont.display(10)).foregroundStyle(tokens.foreground.opacity(0.4))
+                            Text(commit.shortSHA).font(AinkradFont.mono(10, weight: .medium)).foregroundStyle(
+                                tokens.accentSecondary)
+                            Text(commit.author).font(AinkradFont.display(10)).foregroundStyle(
+                                tokens.foreground.opacity(0.5))
+                            Text(commit.relativeDate).font(AinkradFont.display(10)).foregroundStyle(
+                                tokens.foreground.opacity(0.4))
                         }
                     }
 
@@ -231,9 +234,11 @@ private struct TagRow: View {
 
     var body: some View {
         HStack(spacing: 8) {
-            Image(systemName: "tag").font(.system(size: 10)).foregroundStyle(tokens.accentSecondary.opacity(0.8)).frame(width: 14)
+            Image(systemName: "tag").font(.system(size: 10)).foregroundStyle(tokens.accentSecondary.opacity(0.8)).frame(
+                width: 14)
             VStack(alignment: .leading, spacing: 2) {
-                Text(tag.name).font(AinkradFont.display(12, weight: .medium)).foregroundStyle(tokens.foreground.opacity(0.9))
+                Text(tag.name).font(AinkradFont.display(12, weight: .medium)).foregroundStyle(
+                    tokens.foreground.opacity(0.9))
                 if let message = tag.message, !message.isEmpty {
                     Text(message)
                         .font(AinkradFont.display(10))

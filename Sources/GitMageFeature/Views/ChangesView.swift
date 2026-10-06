@@ -1,5 +1,5 @@
-import SwiftUI
 import AinkradAppKit
+import SwiftUI
 
 struct ChangesContextPane: View {
     @ObservedObject var model: GitMageViewModel
@@ -69,11 +69,28 @@ struct ChangesContextPane: View {
 
                 ForEach(changes, id: \.id) { change in
                     let rowID = "\(staged ? "staged" : "unstaged"):\(change.id)"
-                    ChangeRow(change: change, isSelected: selectedRowID == rowID, staged: staged, tokens: tokens, accent: accent,
-                              onSelect: { selectedRowID = rowID; model.selectChange(change) },
-                              onStage: { selectedRowID = rowID; model.selectChange(change); model.stageSelectedChange() },
-                              onUnstage: { selectedRowID = rowID; model.selectChange(change); model.unstageSelectedChange() },
-                              onDiscard: { selectedRowID = rowID; model.selectChange(change); model.discardSelectedChange() })
+                    ChangeRow(
+                        change: change, isSelected: selectedRowID == rowID, staged: staged, tokens: tokens,
+                        accent: accent,
+                        onSelect: {
+                            selectedRowID = rowID
+                            model.selectChange(change)
+                        },
+                        onStage: {
+                            selectedRowID = rowID
+                            model.selectChange(change)
+                            model.stageSelectedChange()
+                        },
+                        onUnstage: {
+                            selectedRowID = rowID
+                            model.selectChange(change)
+                            model.unstageSelectedChange()
+                        },
+                        onDiscard: {
+                            selectedRowID = rowID
+                            model.selectChange(change)
+                            model.discardSelectedChange()
+                        })
                 }
             }
         }
@@ -157,7 +174,8 @@ struct ChangeRow: View {
                     AinkradIconButton(systemName: "minus", size: 22, tooltip: "Unstage", action: onUnstage)
                 } else {
                     AinkradIconButton(systemName: "plus", size: 22, tooltip: "Stage", action: onStage)
-                    AinkradIconButton(systemName: "arrow.uturn.backward", size: 22, tooltip: "Discard", action: onDiscard)
+                    AinkradIconButton(
+                        systemName: "arrow.uturn.backward", size: 22, tooltip: "Discard", action: onDiscard)
                 }
             }
             .opacity(hovering ? 1 : 0)
@@ -166,8 +184,10 @@ struct ChangeRow: View {
         .padding(.horizontal, 9).padding(.vertical, 7)
         .background(
             ChamferShape(cut: AinkradRadius.md)
-                .fill(isSelected ? accent.opacity(0.13)
-                      : (hovering ? tokens.surfaceElevated.opacity(0.5) : .clear))
+                .fill(
+                    isSelected
+                        ? accent.opacity(0.13)
+                        : (hovering ? tokens.surfaceElevated.opacity(0.5) : .clear))
         )
         .overlay(alignment: .leading) {
             // Glowing selection spine, matching the nav rail language.
@@ -194,8 +214,8 @@ struct CommitBox: View {
     @FocusState private var editorFocused: Bool
 
     private var canCommit: Bool {
-        !model.isLoading && stagedCount > 0 &&
-        !model.draftCommitMessage.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
+        !model.isLoading && stagedCount > 0
+            && !model.draftCommitMessage.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
     }
 
     var body: some View {
@@ -240,8 +260,9 @@ struct CommitBox: View {
             )
             .overlay(
                 ChamferShape(cut: AinkradRadius.sm)
-                    .strokeBorder(accent.opacity(editorFocused ? 0.6 : 0.2),
-                                  lineWidth: editorFocused ? 1.2 : 1)
+                    .strokeBorder(
+                        accent.opacity(editorFocused ? 0.6 : 0.2),
+                        lineWidth: editorFocused ? 1.2 : 1)
             )
             .shadow(color: editorFocused ? accent.opacity(0.25) : .clear, radius: 8)
 

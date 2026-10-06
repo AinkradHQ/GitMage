@@ -1,6 +1,7 @@
-import Testing
-import Foundation
 import AinkradAppKit
+import Foundation
+import Testing
+
 @testable import GitMageFeature
 
 /// Records every payload the MCP tools forward, and answers with a fixed result
@@ -26,23 +27,27 @@ private final class RecordingForwarder {
 private func listedTools(_ server: MCPAppServer) async -> [[String: Any]] {
     let reply = await server.handle(#"{"jsonrpc":"2.0","id":1,"method":"tools/list"}"#)
     guard let data = reply.data(using: .utf8),
-          let root = (try? JSONSerialization.jsonObject(with: data)) as? [String: Any],
-          let result = root["result"] as? [String: Any],
-          let tools = result["tools"] as? [[String: Any]] else { return [] }
+        let root = (try? JSONSerialization.jsonObject(with: data)) as? [String: Any],
+        let result = root["result"] as? [String: Any],
+        let tools = result["tools"] as? [[String: Any]]
+    else { return [] }
     return tools
 }
 
 @MainActor
-private func call(_ server: MCPAppServer, _ name: String,
-                  arguments: [String: Any]) async -> (text: String, isError: Bool) {
+private func call(
+    _ server: MCPAppServer, _ name: String,
+    arguments: [String: Any]
+) async -> (text: String, isError: Bool) {
     let params: [String: Any] = ["name": name, "arguments": arguments]
     let request: [String: Any] = ["jsonrpc": "2.0", "id": 7, "method": "tools/call", "params": params]
     let data = try! JSONSerialization.data(withJSONObject: request)
     let reply = await server.handle(String(decoding: data, as: UTF8.self))
     guard let replyData = reply.data(using: .utf8),
-          let root = (try? JSONSerialization.jsonObject(with: replyData)) as? [String: Any],
-          let result = root["result"] as? [String: Any],
-          let content = result["content"] as? [[String: Any]] else {
+        let root = (try? JSONSerialization.jsonObject(with: replyData)) as? [String: Any],
+        let result = root["result"] as? [String: Any],
+        let content = result["content"] as? [[String: Any]]
+    else {
         return ("<no result>", true)
     }
     return (content.first?["text"] as? String ?? "", result["isError"] as? Bool ?? false)
@@ -143,11 +148,13 @@ struct GitMageMCPServerTests {
         let listed = await listedTools(server)
         for tool in GitMageMCPServer.gitTools {
             guard let entry = listed.first(where: { $0["name"] as? String == tool.name }) else {
-                Issue.record("tool \(tool.name) was not listed"); continue
+                Issue.record("tool \(tool.name) was not listed")
+                continue
             }
             // The two injecting variants are destructive by construction; every
             // other tool follows the host's operation-token set exactly.
-            let expected = tool.name == "reset_hard" || tool.name == "remove_worktree_force"
+            let expected =
+                tool.name == "reset_hard" || tool.name == "remove_worktree_force"
                 ? true
                 : Self.hostDestructiveOperations.contains(tool.operation)
             #expect(destructiveHint(entry) == expected, "wrong destructiveHint for \(tool.name)")
@@ -163,7 +170,8 @@ struct GitMageMCPServerTests {
     @Test func everyInjectingToolIsDestructive() {
         for tool in GitMageMCPServer.tools {
             for rule in tool.injects {
-                let reason = "\(tool.name) injects args.\(rule.key) = \(rule.value.described) "
+                let reason =
+                    "\(tool.name) injects args.\(rule.key) = \(rule.value.described) "
                     + "but is not destructive: true — it would be ungated"
                 #expect(tool.destructive, Comment(rawValue: reason))
             }
@@ -199,14 +207,17 @@ struct GitMageMCPServerTests {
                     }
                 }
                 guard let twin else {
-                    let reason = "\(tool.name) refuses args.\(rule.key) = \(rule.value.described) "
+                    let reason =
+                        "\(tool.name) refuses args.\(rule.key) = \(rule.value.described) "
                         + "but no tool injects it — the capability is gone, not gated"
                     Issue.record(Comment(rawValue: reason))
                     continue
                 }
-                #expect(listed.contains(twin.name),
-                        Comment(rawValue: "\(twin.name) is the twin for \(tool.name)'s "
-                                + "args.\(rule.key) but was not published"))
+                #expect(
+                    listed.contains(twin.name),
+                    Comment(
+                        rawValue: "\(twin.name) is the twin for \(tool.name)'s "
+                            + "args.\(rule.key) but was not published"))
             }
         }
     }
@@ -216,7 +227,8 @@ struct GitMageMCPServerTests {
         let listed = await listedTools(server)
         for name in ["reset_hard", "remove_worktree_force"] {
             guard let entry = listed.first(where: { $0["name"] as? String == name }) else {
-                Issue.record("missing \(name)"); continue
+                Issue.record("missing \(name)")
+                continue
             }
             #expect(destructiveHint(entry))
         }
@@ -225,8 +237,9 @@ struct GitMageMCPServerTests {
     @Test func callForwardsOperationAndArguments() async {
         let recorder = RecordingForwarder()
         let (server, _) = makeServer(recorder)
-        let outcome = await call(server, "commit",
-                                 arguments: ["repoPath": "/r", "args": ["message": "hello"]])
+        let outcome = await call(
+            server, "commit",
+            arguments: ["repoPath": "/r", "args": ["message": "hello"]])
         #expect(outcome.isError == false)
         #expect(outcome.text == "ok")
         let payload = recorder.lastObject
@@ -238,8 +251,9 @@ struct GitMageMCPServerTests {
     @Test func resetRejectsHardMode() async {
         let recorder = RecordingForwarder()
         let (server, _) = makeServer(recorder)
-        let outcome = await call(server, "reset",
-                                 arguments: ["repoPath": "/r", "args": ["ref": "HEAD~1", "mode": "hard"]])
+        let outcome = await call(
+            server, "reset",
+            arguments: ["repoPath": "/r", "args": ["ref": "HEAD~1", "mode": "hard"]])
         #expect(outcome.isError)
         #expect(recorder.payloads.isEmpty, "a rejected call must never reach the handler")
     }
@@ -247,8 +261,9 @@ struct GitMageMCPServerTests {
     @Test func resetAllowsSafeModes() async {
         let recorder = RecordingForwarder()
         let (server, _) = makeServer(recorder)
-        let outcome = await call(server, "reset",
-                                 arguments: ["repoPath": "/r", "args": ["ref": "HEAD~1", "mode": "soft"]])
+        let outcome = await call(
+            server, "reset",
+            arguments: ["repoPath": "/r", "args": ["ref": "HEAD~1", "mode": "soft"]])
         #expect(outcome.isError == false)
         #expect((recorder.lastObject?["args"] as? [String: Any])?["mode"] as? String == "soft")
     }
@@ -264,8 +279,9 @@ struct GitMageMCPServerTests {
     @Test func removeWorktreeRejectsForce() async {
         let recorder = RecordingForwarder()
         let (server, _) = makeServer(recorder)
-        let outcome = await call(server, "remove_worktree",
-                                 arguments: ["repoPath": "/r", "args": ["path": "/w", "force": true]])
+        let outcome = await call(
+            server, "remove_worktree",
+            arguments: ["repoPath": "/r", "args": ["path": "/w", "force": true]])
         #expect(outcome.isError)
         #expect(recorder.payloads.isEmpty, "a rejected call must never reach the handler")
     }
@@ -273,8 +289,9 @@ struct GitMageMCPServerTests {
     @Test func removeWorktreeForceInjectsForce() async {
         let recorder = RecordingForwarder()
         let (server, _) = makeServer(recorder)
-        _ = await call(server, "remove_worktree_force",
-                       arguments: ["repoPath": "/r", "args": ["path": "/w"]])
+        _ = await call(
+            server, "remove_worktree_force",
+            arguments: ["repoPath": "/r", "args": ["path": "/w"]])
         #expect(recorder.lastObject?["operation"] as? String == "removeWorktree")
         #expect((recorder.lastObject?["args"] as? [String: Any])?["force"] as? Bool == true)
     }
@@ -293,7 +310,7 @@ struct GitMageMCPServerTests {
     /// here so an evasion case is judged by what the SINK would do, not by what
     /// the guard happens to catch.
     private func resolvedMode(_ payload: [String: Any]?) -> ResetMode? {
-        guard let payload else { return nil }   // nothing forwarded → nothing ran
+        guard let payload else { return nil }  // nothing forwarded → nothing ran
         let args = payload["args"] as? [String: Any] ?? [:]
         return ResetMode(rawValue: (args["mode"] as? String) ?? "mixed")
     }
@@ -310,10 +327,12 @@ struct GitMageMCPServerTests {
     func resetNeverPerformsAHardResetHoweverModeIsSpelled(evasion: Evasion) async {
         let recorder = RecordingForwarder()
         let (server, _) = makeServer(recorder)
-        _ = await call(server, "reset",
-                       arguments: ["repoPath": "/r", "args": ["ref": "HEAD~1", "mode": evasion.value()]])
-        #expect(resolvedMode(recorder.lastObject) != .hard,
-                "reset reached a hard reset via \(evasion.label)")
+        _ = await call(
+            server, "reset",
+            arguments: ["repoPath": "/r", "args": ["ref": "HEAD~1", "mode": evasion.value()]])
+        #expect(
+            resolvedMode(recorder.lastObject) != .hard,
+            "reset reached a hard reset via \(evasion.label)")
     }
 
     @Test func resetIgnoresANestedOrDifferentlyCasedModeKey() async {
@@ -321,13 +340,15 @@ struct GitMageMCPServerTests {
         let (server, _) = makeServer(recorder)
 
         // A nested `args.args.mode` — neither the guard nor the sink reads it.
-        _ = await call(server, "reset",
-                       arguments: ["repoPath": "/r", "args": ["ref": "HEAD~1", "args": ["mode": "hard"]]])
+        _ = await call(
+            server, "reset",
+            arguments: ["repoPath": "/r", "args": ["ref": "HEAD~1", "args": ["mode": "hard"]]])
         #expect(resolvedMode(recorder.lastObject) != .hard, "a nested args.mode reached the sink")
 
         // A `"Mode"` key: missed by the guard, and equally missed by the sink.
-        _ = await call(server, "reset",
-                       arguments: ["repoPath": "/r", "args": ["ref": "HEAD~1", "Mode": "hard"]])
+        _ = await call(
+            server, "reset",
+            arguments: ["repoPath": "/r", "args": ["ref": "HEAD~1", "Mode": "hard"]])
         #expect(resolvedMode(recorder.lastObject) != .hard, "a differently-cased Mode key reached the sink")
     }
 
@@ -335,10 +356,12 @@ struct GitMageMCPServerTests {
     func removeWorktreeNeverForcesHoweverForceIsSpelled(evasion: Evasion) async {
         let recorder = RecordingForwarder()
         let (server, _) = makeServer(recorder)
-        _ = await call(server, "remove_worktree",
-                       arguments: ["repoPath": "/r", "args": ["path": "/w", "force": evasion.value()]])
-        #expect(resolvedForce(recorder.lastObject) == false,
-                "remove_worktree reached a forced removal via \(evasion.label)")
+        _ = await call(
+            server, "remove_worktree",
+            arguments: ["repoPath": "/r", "args": ["path": "/w", "force": evasion.value()]])
+        #expect(
+            resolvedForce(recorder.lastObject) == false,
+            "remove_worktree reached a forced removal via \(evasion.label)")
     }
 
     @Test func removeWorktreeRejectsNumericTrueAndIgnoresNearMissKeys() async {
@@ -348,17 +371,20 @@ struct GitMageMCPServerTests {
         // `1` bridges to NSNumber, which `as? Bool` accepts — so BOTH the guard
         // and the sink read it as true. The guard must therefore reject it, and
         // nothing may be forwarded.
-        let numeric = await call(server, "remove_worktree",
-                                 arguments: ["repoPath": "/r", "args": ["path": "/w", "force": 1]])
+        let numeric = await call(
+            server, "remove_worktree",
+            arguments: ["repoPath": "/r", "args": ["path": "/w", "force": 1]])
         #expect(numeric.isError)
         #expect(recorder.payloads.isEmpty, "force: 1 was forwarded instead of rejected")
 
-        _ = await call(server, "remove_worktree",
-                       arguments: ["repoPath": "/r", "args": ["path": "/w", "args": ["force": true]]])
+        _ = await call(
+            server, "remove_worktree",
+            arguments: ["repoPath": "/r", "args": ["path": "/w", "args": ["force": true]]])
         #expect(resolvedForce(recorder.lastObject) == false, "a nested args.force reached the sink")
 
-        _ = await call(server, "remove_worktree",
-                       arguments: ["repoPath": "/r", "args": ["path": "/w", "Force": true]])
+        _ = await call(
+            server, "remove_worktree",
+            arguments: ["repoPath": "/r", "args": ["path": "/w", "Force": true]])
         #expect(resolvedForce(recorder.lastObject) == false, "a differently-cased Force key reached the sink")
     }
 
@@ -378,11 +404,14 @@ struct GitMageMCPServerTests {
     @Test func theResetSinkRejectsEveryNonExactSpellingOfHard() async {
         let handler = GitOpActionHandler(client: GitRepositoryClient())
         for spelling in ["Hard", "HARD", " hard", "hard "] {
-            let payload = #"{"operation":"reset","repoPath":"/nonexistent","args":{"ref":"HEAD~1","mode":"\#(spelling)"}}"#
+            let payload =
+                #"{"operation":"reset","repoPath":"/nonexistent","args":{"ref":"HEAD~1","mode":"\#(spelling)"}}"#
             let result = await handler.run(payload)
             #expect(result.isError, "GitOpActionHandler now accepts mode \"\(spelling)\"")
-            #expect(result.text.contains("must be soft, mixed, or hard"),
-                    "GitOpActionHandler now coerces mode \"\(spelling)\" instead of refusing it — widen GitMageMCPServer's reset guard in lockstep, or the ungated reset tool becomes a live hard reset")
+            #expect(
+                result.text.contains("must be soft, mixed, or hard"),
+                "GitOpActionHandler now coerces mode \"\(spelling)\" instead of refusing it — widen GitMageMCPServer's reset guard in lockstep, or the ungated reset tool becomes a live hard reset"
+            )
         }
         // The exact spelling is the one the guard already refuses, so it must
         // stay the ONLY spelling the sink accepts.
@@ -417,22 +446,29 @@ struct GitMageMCPServerTests {
     private static let fixtureSafe = GitMageMCPServer.Tool(
         "fixture_multi_safe", "fixtureMulti", "test-only two-guard fixture",
         argsHint: "None.",
-        rejects: [GitMageMCPServer.GuardRule("mode", .string("hard")),
-                  GitMageMCPServer.GuardRule("force", .bool(true))])
+        rejects: [
+            GitMageMCPServer.GuardRule("mode", .string("hard")),
+            GitMageMCPServer.GuardRule("force", .bool(true)),
+        ])
 
     /// Its destructive twin, which must inject BOTH values.
     private static let fixtureDestructive = GitMageMCPServer.Tool(
         "fixture_multi_destructive", "fixtureMulti", "test-only two-guard fixture twin",
         destructive: true, argsHint: "None.",
-        injects: [GitMageMCPServer.GuardRule("mode", .string("hard")),
-                  GitMageMCPServer.GuardRule("force", .bool(true))])
+        injects: [
+            GitMageMCPServer.GuardRule("mode", .string("hard")),
+            GitMageMCPServer.GuardRule("force", .bool(true)),
+        ])
 
-    private func invokeFixture(_ tool: GitMageMCPServer.Tool, args: [String: Any],
-                               recorder: RecordingForwarder) async -> (text: String, isError: Bool) {
+    private func invokeFixture(
+        _ tool: GitMageMCPServer.Tool, args: [String: Any],
+        recorder: RecordingForwarder
+    ) async -> (text: String, isError: Bool) {
         let payload: [String: Any] = ["repoPath": "/r", "args": args]
         let data = try! JSONSerialization.data(withJSONObject: payload)
-        let result = await GitMageMCPServer.invoke(tool, arguments: String(decoding: data, as: UTF8.self),
-                                                   forward: { await recorder.forward($0) })
+        let result = await GitMageMCPServer.invoke(
+            tool, arguments: String(decoding: data, as: UTF8.self),
+            forward: { await recorder.forward($0) })
         return (result.text, result.isError)
     }
 
@@ -449,8 +485,9 @@ struct GitMageMCPServerTests {
 
     @Test func fixtureSafeToolRefusesBothGuardedArgumentsTogether() async {
         let recorder = RecordingForwarder()
-        let outcome = await invokeFixture(Self.fixtureSafe, args: ["mode": "hard", "force": true],
-                                          recorder: recorder)
+        let outcome = await invokeFixture(
+            Self.fixtureSafe, args: ["mode": "hard", "force": true],
+            recorder: recorder)
         #expect(outcome.isError)
         #expect(recorder.payloads.isEmpty, "mode: hard + force: true together must be refused")
     }

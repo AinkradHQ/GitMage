@@ -1,5 +1,5 @@
-import Foundation
 import AinkradAppKit
+import Foundation
 
 /// Maps a `{operation, repoPath, args}` PR request to the SAME `GitForgeProvider`
 /// the Pull Requests UI drives — the sibling of `GitOpActionHandler`, which does
@@ -34,8 +34,10 @@ final class PrOpActionHandler {
         return cachedProvider != nil
     }
 
-    init(resolveRepo: @escaping (String) async -> RepoRef?,
-         makeProvider: @escaping () -> GitForgeProvider?) {
+    init(
+        resolveRepo: @escaping (String) async -> RepoRef?,
+        makeProvider: @escaping () -> GitForgeProvider?
+    ) {
         self.resolveRepo = resolveRepo
         self.makeProvider = makeProvider
     }
@@ -51,9 +53,10 @@ final class PrOpActionHandler {
 
     func run(_ json: String) async -> AgentActionResult {
         guard let data = json.data(using: .utf8),
-              let obj = try? JSONSerialization.jsonObject(with: data) as? [String: Any],
-              let operation = obj["operation"] as? String,
-              let repoPath = obj["repoPath"] as? String else {
+            let obj = try? JSONSerialization.jsonObject(with: data) as? [String: Any],
+            let operation = obj["operation"] as? String,
+            let repoPath = obj["repoPath"] as? String
+        else {
             return bad("pr_op: malformed input")
         }
         let args = obj["args"] as? [String: Any] ?? [:]
@@ -80,17 +83,20 @@ final class PrOpActionHandler {
     /// the `nonisolated(unsafe)` opt-out applies to the property access, and
     /// threading the existential through a parameter would put it back into the
     /// main actor's isolation region.
-    private func perform(_ operation: String, repo: RepoRef,
-                         args: [String: Any]) async throws -> AgentActionResult {
+    private func perform(
+        _ operation: String, repo: RepoRef,
+        args: [String: Any]
+    ) async throws -> AgentActionResult {
         guard let provider = cachedProvider else { return bad("pr_op: no forge provider") }
         switch operation {
         case "listPRs":
             let state = PRState(rawValue: (args["state"] as? String) ?? "open") ?? .open
             let items = try await provider.listPullRequests(repo, state: state)
             guard !items.isEmpty else { return ok("No \(state.rawValue) pull requests.") }
-            return ok(items.map {
-                "#\($0.number) \($0.title) — \($0.author) [\($0.state)\($0.isDraft ? ", draft" : "")] \($0.headBranch) → \($0.baseBranch)"
-            }.joined(separator: "\n"))
+            return ok(
+                items.map {
+                    "#\($0.number) \($0.title) — \($0.author) [\($0.state)\($0.isDraft ? ", draft" : "")] \($0.headBranch) → \($0.baseBranch)"
+                }.joined(separator: "\n"))
 
         case "viewPR":
             guard let number = number(args) else { return bad("viewPR requires args.number") }
@@ -105,8 +111,9 @@ final class PrOpActionHandler {
             let detail = try await provider.pullRequest(repo, number: number)
             let runs = try await provider.checks(repo, ref: detail.headBranch)
             guard !runs.isEmpty else { return ok("No check runs for \(detail.headBranch).") }
-            return ok(runs.map { "\($0.name): \($0.status)\($0.conclusion.map { c in " (\(c))" } ?? "")" }
-                .joined(separator: "\n"))
+            return ok(
+                runs.map { "\($0.name): \($0.status)\($0.conclusion.map { c in " (\(c))" } ?? "")" }
+                    .joined(separator: "\n"))
 
         case "createPR":
             guard let title = nonEmpty(args["title"]) else { return bad("createPR requires args.title") }
@@ -128,8 +135,9 @@ final class PrOpActionHandler {
             guard let raw = args["event"] as? String, let event = Self.reviewEvent(raw) else {
                 return bad("reviewPR requires args.event — one of approve, requestChanges, comment")
             }
-            try await provider.submitReview(repo, number: number, event: event,
-                                            body: (args["body"] as? String) ?? "")
+            try await provider.submitReview(
+                repo, number: number, event: event,
+                body: (args["body"] as? String) ?? "")
             return ok("submitted a \(raw) review on #\(number)")
 
         case "mergePR":
@@ -186,8 +194,10 @@ final class PrOpActionHandler {
 
     // MARK: - rendering
 
-    private func describe(_ detail: PullRequestDetail, files: [PRFile],
-                          commits: [PRCommit], comments: [ForgeComment]) -> String {
+    private func describe(
+        _ detail: PullRequestDetail, files: [PRFile],
+        commits: [PRCommit], comments: [ForgeComment]
+    ) -> String {
         var lines = [
             "#\(detail.number) \(detail.title)",
             "\(detail.author) — \(detail.state)\(detail.isDraft ? " (draft)" : "") — \(detail.headBranch) → \(detail.baseBranch)",

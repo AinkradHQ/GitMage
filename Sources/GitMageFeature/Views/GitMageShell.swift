@@ -1,5 +1,5 @@
-import SwiftUI
 import AinkradAppKit
+import SwiftUI
 
 struct GitMageShell: View {
     let host: HostServices
@@ -93,7 +93,8 @@ struct GitMageShell: View {
                 }
             ),
             title: "Initialize a new Git repository?",
-            message: "\(model.pendingInitPath ?? "") is not a Git repository yet. Initialize it and add it to your library?",
+            message:
+                "\(model.pendingInitPath ?? "") is not a Git repository yet. Initialize it and add it to your library?",
             confirmTitle: "Initialize",
             onConfirm: { model.confirmInitPendingRepository() }
         )
@@ -143,15 +144,21 @@ struct GitMageShell: View {
             }
             Spacer()
             if model.hasActiveRepo {
-                AinkradButton(title: "Fetch", style: .secondary, icon: "arrow.down.circle",
-                              isLoading: model.activeOperation == "fetch") { model.fetch() }
-                    .ainkradTooltip(shortcutTooltip("Fetch", hint(.fetch)))
-                AinkradButton(title: "Pull", style: .secondary, icon: "arrow.down.to.line",
-                              isLoading: model.activeOperation == "pull") { model.pull() }
-                    .ainkradTooltip(shortcutTooltip("Pull", hint(.pull)))
-                AinkradButton(title: "Push", style: .primary, icon: "arrow.up.to.line",
-                              isLoading: model.activeOperation == "push") { model.push() }
-                    .ainkradTooltip(shortcutTooltip("Push", hint(.push)))
+                AinkradButton(
+                    title: "Fetch", style: .secondary, icon: "arrow.down.circle",
+                    isLoading: model.activeOperation == "fetch"
+                ) { model.fetch() }
+                .ainkradTooltip(shortcutTooltip("Fetch", hint(.fetch)))
+                AinkradButton(
+                    title: "Pull", style: .secondary, icon: "arrow.down.to.line",
+                    isLoading: model.activeOperation == "pull"
+                ) { model.pull() }
+                .ainkradTooltip(shortcutTooltip("Pull", hint(.pull)))
+                AinkradButton(
+                    title: "Push", style: .primary, icon: "arrow.up.to.line",
+                    isLoading: model.activeOperation == "push"
+                ) { model.push() }
+                .ainkradTooltip(shortcutTooltip("Push", hint(.push)))
             }
         }
         .padding(.horizontal, 16)
@@ -183,7 +190,9 @@ struct GitMageShell: View {
         case .push: model.push()
         default:
             if let area = command.area {
-                withAnimation(reduceMotion ? nil : .spring(response: 0.32, dampingFraction: 0.74)) { model.selectArea(area) }
+                withAnimation(reduceMotion ? nil : .spring(response: 0.32, dampingFraction: 0.74)) {
+                    model.selectArea(area)
+                }
             }
         }
     }
@@ -247,11 +256,13 @@ struct GitMageShell: View {
         case .changes: DiffView(diff: model.diffSnapshot, tokens: tokens, fontSize: appearance.diffFontSize)
         case .history:
             if let commitDiff = model.commitDiff {
-                FileDiffList(files: DiffFileSplitter.split(commitDiff.body), tokens: tokens,
-                            fontSize: appearance.diffFontSize, fallbackTitle: commitDiff.title)
+                FileDiffList(
+                    files: DiffFileSplitter.split(commitDiff.body), tokens: tokens,
+                    fontSize: appearance.diffFontSize, fallbackTitle: commitDiff.title)
             } else {
-                EmptyStateView(icon: "clock.arrow.circlepath", title: "History",
-                               message: "Select a commit to inspect its changed files.", tokens: tokens)
+                EmptyStateView(
+                    icon: "clock.arrow.circlepath", title: "History",
+                    message: "Select a commit to inspect its changed files.", tokens: tokens)
             }
         case .branches:
             EmptyStateView(
@@ -262,8 +273,9 @@ struct GitMageShell: View {
             )
         case .stashes:
             if let selectedStashDiff = model.selectedStashDiff {
-                FileDiffList(files: DiffFileSplitter.split(selectedStashDiff.body), tokens: tokens,
-                            fontSize: appearance.diffFontSize, fallbackTitle: selectedStashDiff.title)
+                FileDiffList(
+                    files: DiffFileSplitter.split(selectedStashDiff.body), tokens: tokens,
+                    fontSize: appearance.diffFontSize, fallbackTitle: selectedStashDiff.title)
             } else {
                 EmptyStateView(
                     icon: "tray.2",
@@ -389,9 +401,11 @@ struct GitMageShell: View {
 
     private var emptyLibraryState: some View {
         VStack(spacing: 12) {
-            Image(systemName: "wand.and.stars").font(.system(size: 34, weight: .light)).foregroundStyle(tokens.accentPrimary.opacity(0.6))
+            Image(systemName: "wand.and.stars").font(.system(size: 34, weight: .light)).foregroundStyle(
+                tokens.accentPrimary.opacity(0.6))
             Text("No repository").font(AinkradFont.display(18, weight: .semibold))
-            Text("Add a local folder or clone one to begin.").font(AinkradFont.display(12)).foregroundStyle(tokens.foreground.opacity(0.5))
+            Text("Add a local folder or clone one to begin.").font(AinkradFont.display(12)).foregroundStyle(
+                tokens.foreground.opacity(0.5))
             HStack {
                 Button("Add…") { model.addRepositoryFolder() }.font(AinkradFont.display(12))
                 Button("Clone…") { model.startClone() }.font(AinkradFont.display(12))
@@ -404,9 +418,11 @@ struct GitMageShell: View {
             Text("Clone a Repository").font(AinkradFont.display(18, weight: .semibold))
             Text("Enter a Git remote URL. You'll then choose a destination folder.")
                 .font(AinkradFont.display(12)).foregroundStyle(tokens.foreground.opacity(0.7))
-            AinkradTextField(text: $model.cloneRemoteURL,
-                             placeholder: "https://github.com/owner/repo.git")
-                .frame(minWidth: 380)
+            AinkradTextField(
+                text: $model.cloneRemoteURL,
+                placeholder: "https://github.com/owner/repo.git"
+            )
+            .frame(minWidth: 380)
             HStack {
                 Spacer()
                 AinkradButton(title: "Cancel", style: .secondary) { model.showClonePrompt = false }

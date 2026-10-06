@@ -1,5 +1,5 @@
-import SwiftUI
 import AinkradAppKit
+import SwiftUI
 
 /// A lightweight GitHub-flavored markdown renderer for PR/issue descriptions
 /// and comments. Handles headings, fenced code blocks, ordered/unordered
@@ -88,9 +88,11 @@ struct MarkdownText: View {
             .textSelection(.enabled)
 
         case .rule:
-            LinearGradient(colors: [.clear, tokens.accentPrimary.opacity(0.3), .clear],
-                           startPoint: .leading, endPoint: .trailing)
-                .frame(height: 1).padding(.vertical, 3)
+            LinearGradient(
+                colors: [.clear, tokens.accentPrimary.opacity(0.3), .clear],
+                startPoint: .leading, endPoint: .trailing
+            )
+            .frame(height: 1).padding(.vertical, 3)
         }
     }
 
@@ -121,24 +123,34 @@ struct MarkdownText: View {
         while i < lines.count {
             let trimmed = lines[i].trimmingCharacters(in: .whitespaces)
 
-            if trimmed.isEmpty { i += 1; continue }
+            if trimmed.isEmpty {
+                i += 1
+                continue
+            }
 
             if trimmed.hasPrefix("```") {
                 var code: [String] = []
                 i += 1
                 while i < lines.count && !lines[i].trimmingCharacters(in: .whitespaces).hasPrefix("```") {
-                    code.append(lines[i]); i += 1
+                    code.append(lines[i])
+                    i += 1
                 }
-                if i < lines.count { i += 1 }   // closing fence
+                if i < lines.count { i += 1 }  // closing fence
                 blocks.append(.code(code.joined(separator: "\n")))
                 continue
             }
 
             if let heading = headingLevel(trimmed) {
-                blocks.append(.heading(level: heading.0, text: heading.1)); i += 1; continue
+                blocks.append(.heading(level: heading.0, text: heading.1))
+                i += 1
+                continue
             }
 
-            if isRule(trimmed) { blocks.append(.rule); i += 1; continue }
+            if isRule(trimmed) {
+                blocks.append(.rule)
+                i += 1
+                continue
+            }
 
             if trimmed.hasPrefix(">") {
                 var quote: [String] = []
@@ -146,9 +158,11 @@ struct MarkdownText: View {
                     var q = lines[i].trimmingCharacters(in: .whitespaces)
                     q.removeFirst()
                     if q.hasPrefix(" ") { q.removeFirst() }
-                    quote.append(q); i += 1
+                    quote.append(q)
+                    i += 1
                 }
-                blocks.append(.quote(quote)); continue
+                blocks.append(.quote(quote))
+                continue
             }
 
             if listMarker(trimmed) != nil {
@@ -158,26 +172,31 @@ struct MarkdownText: View {
                     let lt = lines[i].trimmingCharacters(in: .whitespaces)
                     if let marker = listMarker(lt) {
                         ordered = marker.ordered
-                        items.append(marker.text); i += 1
+                        items.append(marker.text)
+                        i += 1
                     } else if lt.isEmpty {
                         break
                     } else if !items.isEmpty {
-                        items[items.count - 1] += " " + lt; i += 1
+                        items[items.count - 1] += " " + lt
+                        i += 1
                     } else {
                         break
                     }
                 }
-                blocks.append(.list(ordered: ordered, items: items)); continue
+                blocks.append(.list(ordered: ordered, items: items))
+                continue
             }
 
             var paragraph: [String] = []
             while i < lines.count {
                 let lt = lines[i].trimmingCharacters(in: .whitespaces)
                 if lt.isEmpty || lt.hasPrefix("```") || headingLevel(lt) != nil
-                    || isRule(lt) || lt.hasPrefix(">") || listMarker(lt) != nil {
+                    || isRule(lt) || lt.hasPrefix(">") || listMarker(lt) != nil
+                {
                     break
                 }
-                paragraph.append(lines[i]); i += 1
+                paragraph.append(lines[i])
+                i += 1
             }
             blocks.append(.paragraph(paragraph.joined(separator: "\n")))
         }

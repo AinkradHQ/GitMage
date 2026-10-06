@@ -1,5 +1,5 @@
-import SwiftUI
 import AinkradAppKit
+import SwiftUI
 
 /// Context pane for the Advanced area: the commit list. Selecting a commit
 /// drives the contextual actions (cherry-pick / revert / reset / tag) in the
@@ -15,9 +15,11 @@ struct AdvancedContextPane: View {
             }
 
             if model.commits.isEmpty {
-                EmptyStateView(icon: "clock.arrow.circlepath", title: "No commits",
-                               message: "This repository has no history yet.", tokens: tokens)
-                    .frame(maxWidth: .infinity, maxHeight: .infinity)
+                EmptyStateView(
+                    icon: "clock.arrow.circlepath", title: "No commits",
+                    message: "This repository has no history yet.", tokens: tokens
+                )
+                .frame(maxWidth: .infinity, maxHeight: .infinity)
             } else {
                 ScrollView {
                     LazyVStack(alignment: .leading, spacing: 2) {
@@ -58,9 +60,12 @@ struct AdvancedCommitRow: View {
                     .foregroundStyle(tokens.foreground.opacity(isSelected ? 1 : 0.9))
                     .lineLimit(1)
                 HStack(spacing: 8) {
-                    Text(commit.shortSHA).font(AinkradFont.mono(9, weight: .medium)).foregroundStyle(tokens.accentSecondary)
-                    Text(commit.author).font(AinkradFont.display(9)).foregroundStyle(tokens.foreground.opacity(0.5)).lineLimit(1)
-                    Text(commit.relativeDate).font(AinkradFont.display(9)).foregroundStyle(tokens.foreground.opacity(0.4))
+                    Text(commit.shortSHA).font(AinkradFont.mono(9, weight: .medium)).foregroundStyle(
+                        tokens.accentSecondary)
+                    Text(commit.author).font(AinkradFont.display(9)).foregroundStyle(tokens.foreground.opacity(0.5))
+                        .lineLimit(1)
+                    Text(commit.relativeDate).font(AinkradFont.display(9)).foregroundStyle(
+                        tokens.foreground.opacity(0.4))
                 }
             }
             Spacer(minLength: 4)
@@ -68,8 +73,10 @@ struct AdvancedCommitRow: View {
         .padding(.horizontal, 9).padding(.vertical, 7)
         .background(
             ChamferShape(cut: AinkradRadius.md)
-                .fill(isSelected ? tokens.accentPrimary.opacity(0.13)
-                      : (hovering ? tokens.surfaceElevated.opacity(0.5) : .clear))
+                .fill(
+                    isSelected
+                        ? tokens.accentPrimary.opacity(0.13)
+                        : (hovering ? tokens.surfaceElevated.opacity(0.5) : .clear))
         )
         .overlay(alignment: .leading) {
             Capsule().fill(tokens.accentPrimary).frame(width: 3, height: 16)

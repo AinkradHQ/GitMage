@@ -1,5 +1,5 @@
-import SwiftUI
 import AinkradAppKit
+import SwiftUI
 
 /// Detail pane for the Issues area: header, editable labels/assignees, body,
 /// comments, and a composer with close/reopen.
@@ -16,8 +16,9 @@ struct IssueDetailView: View {
                     LazyVStack(alignment: .leading, spacing: 12) {
                         header(detail)
                         editors(detail)
-                        DiscussionCard(author: detail.author, timestamp: detail.createdAt,
-                                       text: detail.body, isPrimary: true, tokens: tokens)
+                        DiscussionCard(
+                            author: detail.author, timestamp: detail.createdAt,
+                            text: detail.body, isPrimary: true, tokens: tokens)
                         if !model.comments.isEmpty {
                             Text("\(model.comments.count) comment\(model.comments.count == 1 ? "" : "s")")
                                 .font(AinkradFont.display(10, weight: .semibold)).kerning(1.5)
@@ -25,17 +26,20 @@ struct IssueDetailView: View {
                                 .padding(.top, 2)
                         }
                         ForEach(model.comments) { comment in
-                            DiscussionCard(author: comment.author, timestamp: comment.createdAt,
-                                           text: comment.body, isPrimary: false, tokens: tokens)
+                            DiscussionCard(
+                                author: comment.author, timestamp: comment.createdAt,
+                                text: comment.body, isPrimary: false, tokens: tokens)
                         }
                     }
                     .padding(16)
                 }
                 composer(detail)
             } else {
-                EmptyStateView(icon: "smallcircle.filled.circle", title: "No issue",
-                               message: "Select an issue to read and respond to it.", tokens: tokens)
-                    .frame(maxWidth: .infinity, maxHeight: .infinity)
+                EmptyStateView(
+                    icon: "smallcircle.filled.circle", title: "No issue",
+                    message: "Select an issue to read and respond to it.", tokens: tokens
+                )
+                .frame(maxWidth: .infinity, maxHeight: .infinity)
             }
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity)
@@ -55,8 +59,9 @@ struct IssueDetailView: View {
                     .font(AinkradFont.mono(12))
                     .foregroundStyle(tokens.accentSecondary)
                 Spacer()
-                StatusPill(text: detail.state.lowercased() == "open" ? "Open" : "Closed",
-                           kind: detail.state.lowercased() == "open" ? .open : .closedMerged, tokens: tokens)
+                StatusPill(
+                    text: detail.state.lowercased() == "open" ? "Open" : "Closed",
+                    kind: detail.state.lowercased() == "open" ? .open : .closedMerged, tokens: tokens)
             }
             Text("opened by \(detail.author) · \(ForgeDate.short(detail.createdAt))")
                 .font(AinkradFont.mono(10))
@@ -74,15 +79,23 @@ struct IssueDetailView: View {
     private func composer(_ detail: IssueDetail) -> some View {
         VStack(alignment: .leading, spacing: 10) {
             GlowRule(tokens: tokens)
-            AinkradTextArea(text: $composerText, placeholder: "Leave a comment…", minHeight: 34, maxHeight: 80,
-                            onSubmit: {
-                                guard !model.isLoading,
-                                      !composerText.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty else { return }
-                                Task { await model.comment(composerText); composerText = "" }
-                            })
+            AinkradTextArea(
+                text: $composerText, placeholder: "Leave a comment…", minHeight: 34, maxHeight: 80,
+                onSubmit: {
+                    guard !model.isLoading,
+                        !composerText.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
+                    else { return }
+                    Task {
+                        await model.comment(composerText)
+                        composerText = ""
+                    }
+                })
             HStack(spacing: 8) {
                 AinkradButton(title: "Comment", style: .secondary, icon: "text.bubble") {
-                    Task { await model.comment(composerText); composerText = "" }
+                    Task {
+                        await model.comment(composerText)
+                        composerText = ""
+                    }
                 }
                 .disabled(model.isLoading)
                 Spacer()

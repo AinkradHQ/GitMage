@@ -1,5 +1,5 @@
-import Foundation
 import AinkradAppKit
+import Foundation
 
 /// Git Mage's notification vocabulary, in one place so the kinds stay
 /// consistent and every emission decision is visible together.
@@ -87,7 +87,8 @@ struct GitMageSignalReporter {
     /// absolute path. A notification title is read at a glance, and a
     /// full path pushes the part that identifies the repo off the end.
     private static func name(of repositoryPath: String) -> String {
-        let trimmed = repositoryPath.hasSuffix("/")
+        let trimmed =
+            repositoryPath.hasSuffix("/")
             ? String(repositoryPath.dropLast())
             : repositoryPath
         let name = (trimmed as NSString).lastPathComponent

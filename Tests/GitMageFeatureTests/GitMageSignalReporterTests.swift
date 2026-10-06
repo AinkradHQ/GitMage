@@ -1,6 +1,7 @@
-import Testing
-import Foundation
 import AinkradAppKit
+import Foundation
+import Testing
+
 @testable import GitMageFeature
 
 @MainActor
@@ -17,15 +18,21 @@ struct GitMageSignalReporterTests {
         }
         var calls: [Call] = []
 
-        func emit(kind: String, severity: SignalSeverity, title: String, body: String?,
-                  importance: SignalImportance, deepLink: SignalDeepLink?,
-                  actions: [SignalAction], dedupeKey: String?) {
-            calls.append(Call(kind: kind, severity: severity, title: title, body: body,
-                              importance: importance, dedupeKey: dedupeKey))
+        func emit(
+            kind: String, severity: SignalSeverity, title: String, body: String?,
+            importance: SignalImportance, deepLink: SignalDeepLink?,
+            actions: [SignalAction], dedupeKey: String?
+        ) {
+            calls.append(
+                Call(
+                    kind: kind, severity: severity, title: title, body: body,
+                    importance: importance, dedupeKey: dedupeKey))
         }
         func own(limit: Int) -> [SignalEvent] { [] }
-        func handleAction(_ actionID: String,
-                          _ handler: @escaping @MainActor () async -> Void) -> AgentActionToken {
+        func handleAction(
+            _ actionID: String,
+            _ handler: @escaping @MainActor () async -> Void
+        ) -> AgentActionToken {
             AgentActionToken()
         }
         func removeActionHandler(_ token: AgentActionToken) {}
@@ -41,9 +48,10 @@ struct GitMageSignalReporterTests {
         // A notification title is read at a glance; an absolute path pushes the
         // part that identifies the repo off the end.
         let (reporter, emitter) = self.reporter()
-        reporter.operationFailed(operation: "push",
-                                 repository: "/Users/x/Home/Projects/Ainkrad/AinkradRaven",
-                                 reason: "rejected: non-fast-forward")
+        reporter.operationFailed(
+            operation: "push",
+            repository: "/Users/x/Home/Projects/Ainkrad/AinkradRaven",
+            reason: "rejected: non-fast-forward")
         #expect(emitter.calls.count == 1)
         #expect(emitter.calls[0].kind == "git.operation-failed")
         #expect(emitter.calls[0].severity == .failure)
@@ -54,8 +62,9 @@ struct GitMageSignalReporterTests {
     @Test("a trailing slash does not produce an empty repo name")
     func trailingSlash() {
         let (reporter, emitter) = self.reporter()
-        reporter.operationFailed(operation: "fetch", repository: "/Users/x/repo/",
-                                 reason: "timeout")
+        reporter.operationFailed(
+            operation: "fetch", repository: "/Users/x/repo/",
+            reason: "timeout")
         #expect(emitter.calls[0].title.contains("repo"))
     }
 
@@ -71,8 +80,9 @@ struct GitMageSignalReporterTests {
         // A conflict is not a failure — the command did what it was asked —
         // but the repository is stuck until a human resolves it.
         let (reporter, emitter) = self.reporter()
-        reporter.conflictsDetected(operation: "pull", repository: "/a/AinkradLore",
-                                   files: ["Sources/A.swift", "Sources/B.swift"])
+        reporter.conflictsDetected(
+            operation: "pull", repository: "/a/AinkradLore",
+            files: ["Sources/A.swift", "Sources/B.swift"])
         #expect(emitter.calls[0].kind == "git.conflict")
         #expect(emitter.calls[0].severity == .warning)
         #expect(emitter.calls[0].importance == .urgent)
@@ -91,8 +101,9 @@ struct GitMageSignalReporterTests {
     @Test("a long conflict list is truncated with a count, not dumped")
     func manyConflicts() {
         let (reporter, emitter) = self.reporter()
-        reporter.conflictsDetected(operation: "rebase", repository: "/a/r",
-                                   files: (1...9).map { "F\($0).swift" })
+        reporter.conflictsDetected(
+            operation: "rebase", repository: "/a/r",
+            files: (1...9).map { "F\($0).swift" })
         #expect(emitter.calls[0].body?.contains("and 4 more") == true)
     }
 
