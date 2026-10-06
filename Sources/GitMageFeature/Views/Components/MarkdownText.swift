@@ -31,7 +31,7 @@ struct MarkdownText: View {
             }
         }
         .frame(maxWidth: .infinity, alignment: .leading)
-        .foregroundStyle(tokens.foreground.opacity(0.85))
+        .foregroundStyle(tokens.foreground.opacity(skin.opacity.o85))
         .tint(tokens.accentPrimary)
     }
 
@@ -54,14 +54,14 @@ struct MarkdownText: View {
 
         case .quote(let lines):
             HStack(spacing: 8) {
-                ChamferShape(cut: AinkradRadius.sm).fill(tokens.accentPrimary.opacity(0.5)).frame(width: 3)
+                ChamferShape(cut: AinkradRadius.sm).fill(tokens.accentPrimary.opacity(skin.opacity.o50)).frame(width: 3)
                 VStack(alignment: .leading, spacing: 2) {
                     ForEach(Array(lines.enumerated()), id: \.offset) { _, line in
                         inline(line, size: baseSize)
                             .frame(maxWidth: .infinity, alignment: .leading)
                     }
                 }
-                .foregroundStyle(tokens.foreground.opacity(0.6))
+                .foregroundStyle(tokens.foreground.opacity(skin.opacity.o60))
             }
             .fixedSize(horizontal: false, vertical: true)
 
@@ -82,7 +82,7 @@ struct MarkdownText: View {
 
         case .rule:
             LinearGradient(
-                colors: [.clear, tokens.accentPrimary.opacity(0.3), .clear],
+                colors: [.clear, tokens.accentPrimary.opacity(skin.opacity.o30), .clear],
                 startPoint: .leading, endPoint: .trailing
             )
             .frame(height: 1).padding(.vertical, 3)

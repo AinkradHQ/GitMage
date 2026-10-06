@@ -67,11 +67,11 @@ struct WorktreeDetailView: View {
                 }
                 HStack(spacing: 6) {
                     Image(systemName: "arrow.triangle.branch").font(skin.font(AinkradFontToken(sizeKey: "t9"))).foregroundStyle(
-                        tokens.foreground.opacity(0.5))
+                        tokens.foreground.opacity(skin.opacity.o50))
                     Text(wt.branch ?? "detached")
                         .font(AinkradFont.mono(skin.type.sizes.t11))
                         .foregroundStyle(
-                            wt.branch != nil ? tokens.accentPrimary.opacity(0.85) : tokens.foreground.opacity(0.55))
+                            wt.branch != nil ? tokens.accentPrimary.opacity(skin.opacity.o85) : tokens.foreground.opacity(skin.opacity.o55))
                 }
             }
             Spacer()
@@ -131,7 +131,7 @@ private struct AddWorktreeSheet: View {
             if let errorMessage = model.errorMessage {
                 Text(errorMessage)
                     .font(AinkradFont.display(skin.type.sizes.t11))
-                    .foregroundStyle(tokens.accentTertiary.opacity(0.9))
+                    .foregroundStyle(tokens.accentTertiary.opacity(skin.opacity.o90))
             }
 
             HStack {
@@ -160,11 +160,11 @@ private struct AddWorktreeSheet: View {
         VStack(alignment: .leading, spacing: 4) {
             Text("DESTINATION")
                 .font(AinkradFont.display(skin.type.sizes.t9, weight: .semibold))
-                .foregroundStyle(tokens.foreground.opacity(0.45))
+                .foregroundStyle(tokens.foreground.opacity(skin.opacity.o45))
             HStack(spacing: 8) {
                 Text(destination.isEmpty ? "No folder chosen" : destination)
                     .font(AinkradFont.mono(skin.type.sizes.t11))
-                    .foregroundStyle(tokens.foreground.opacity(destination.isEmpty ? 0.4 : 0.85))
+                    .foregroundStyle(tokens.foreground.opacity(destination.isEmpty ? skin.opacity.o40 : skin.opacity.o85))
                     .lineLimit(1)
                     .truncationMode(.middle)
                 Spacer()

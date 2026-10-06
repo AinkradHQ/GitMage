@@ -21,11 +21,11 @@ struct GMCommitMeta: View {
                 .foregroundStyle(tokens.accentSecondary)
             Text(author)
                 .font(AinkradFont.display(size ?? skin.type.sizes.t9))
-                .foregroundStyle(tokens.foreground.opacity(0.5))
+                .foregroundStyle(tokens.foreground.opacity(skin.opacity.o50))
                 .lineLimit(limitLines ? 1 : nil)
             Text(date)
                 .font(AinkradFont.display(size ?? skin.type.sizes.t9))
-                .foregroundStyle(tokens.foreground.opacity(0.4))
+                .foregroundStyle(tokens.foreground.opacity(skin.opacity.o40))
                 .lineLimit(limitLines ? 1 : nil)
         }
     }

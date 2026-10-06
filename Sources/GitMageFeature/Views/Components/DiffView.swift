@@ -91,7 +91,7 @@ struct DiffView: View {
             Image(systemName: "doc.text").font(skin.font(AinkradFontToken(sizeKey: "t11"))).foregroundStyle(tokens.accentSecondary)
             Text(title)
                 .font(AinkradFont.mono(skin.type.sizes.t11, weight: .medium))
-                .foregroundStyle(tokens.foreground.opacity(0.75))
+                .foregroundStyle(tokens.foreground.opacity(skin.opacity.o75))
                 .lineLimit(1).truncationMode(.middle)
             Spacer(minLength: 8)
             if parsed.additions > 0 {
@@ -134,7 +134,7 @@ struct DiffView: View {
             .frame(maxWidth: .infinity, maxHeight: .infinity)
         } else {
             Text("No textual changes.")
-                .font(AinkradFont.mono(skin.type.sizes.t10)).foregroundStyle(tokens.foreground.opacity(0.4)).padding(8)
+                .font(AinkradFont.mono(skin.type.sizes.t10)).foregroundStyle(tokens.foreground.opacity(skin.opacity.o40)).padding(8)
         }
     }
 
@@ -147,12 +147,12 @@ struct DiffView: View {
                 Color.clear.frame(width: gutterWidth + signWidth)
                 Text(r.text)
                     .font(AinkradFont.mono(fontSize - 1, weight: .medium))
-                    .foregroundStyle(tokens.accentSecondary.opacity(0.9))
+                    .foregroundStyle(tokens.accentSecondary.opacity(skin.opacity.o90))
                     .lineLimit(1)
                     .frame(width: codeWidth, alignment: .leading)
                     .padding(.leading, 4)
             }
-            .background(tokens.accentSecondary.opacity(0.08))
+            .background(tokens.accentSecondary.opacity(skin.opacity.o08))
         default:
             HStack(spacing: 0) {
                 gutterCell(r.oldNo, r.newNo)
@@ -178,9 +178,9 @@ struct DiffView: View {
                 .frame(width: numberWidth, alignment: .trailing)
         }
         .font(AinkradFont.mono(max(skin.type.sizes.t9, fontSize - 2)))
-        .foregroundStyle(tokens.foreground.opacity(0.3))
+        .foregroundStyle(tokens.foreground.opacity(skin.opacity.o30))
         .padding(.trailing, 8)
-        .background(tokens.foreground.opacity(0.03))
+        .background(tokens.foreground.opacity(skin.opacity.o03))
     }
 
     /// Tab-expanded text for a row (tabs → 4 spaces) so columns align.
@@ -192,14 +192,14 @@ struct DiffView: View {
         switch kind {
         case .add: return GMColor.diffAdd(skin)
         case .remove: return GMColor.diffRemove(skin)
-        default: return tokens.foreground.opacity(0.3)
+        default: return tokens.foreground.opacity(skin.opacity.o30)
         }
     }
 
     private func lineBackground(_ kind: LineKind) -> Color {
         switch kind {
-        case .add: return GMColor.diffAdd(skin).opacity(0.12)
-        case .remove: return GMColor.diffRemove(skin).opacity(0.12)
+        case .add: return GMColor.diffAdd(skin).opacity(skin.opacity.o12)
+        case .remove: return GMColor.diffRemove(skin).opacity(skin.opacity.o12)
         default: return .clear
         }
     }

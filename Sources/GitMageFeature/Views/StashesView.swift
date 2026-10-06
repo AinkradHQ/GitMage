@@ -2,6 +2,7 @@ import AinkradAppKit
 import SwiftUI
 
 struct StashesContextPane: View {
+    @Environment(\.ainkradSkin) private var skin
     @ObservedObject var model: GitMageViewModel
     let tokens: HostThemeTokens
     @State private var selectedStashID: String?
@@ -16,7 +17,7 @@ struct StashesContextPane: View {
                     AinkradIconButton(systemName: "tray.and.arrow.up", size: 22, tooltip: "Pop latest stash") {
                         model.popLatestStash()
                     }
-                    .opacity(model.stashes.isEmpty || model.isLoading ? 0.4 : 1)
+                    .opacity(model.stashes.isEmpty || model.isLoading ? skin.opacity.o40 : 1)
                     .allowsHitTesting(!model.stashes.isEmpty && !model.isLoading)
                 }
             }
@@ -70,7 +71,7 @@ private struct StashRow: View {
             leading: {
                 Image(systemName: "tray.full")
                     .font(skin.font(AinkradFontToken(sizeKey: "t12")))
-                    .foregroundStyle(isSelected ? tokens.accentPrimary : tokens.accentSecondary.opacity(0.7))
+                    .foregroundStyle(isSelected ? tokens.accentPrimary : tokens.accentSecondary.opacity(skin.opacity.o70))
                     .frame(width: 16)
             },
             title: stash.message, subtitle: stash.id,

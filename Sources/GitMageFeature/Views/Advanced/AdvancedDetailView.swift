@@ -63,7 +63,7 @@ struct AdvancedDetailView: View {
             }
             Text("Resolve conflicts in Changes, then Continue.")
                 .font(AinkradFont.display(skin.type.sizes.t11))
-                .foregroundStyle(tokens.foreground.opacity(0.6))
+                .foregroundStyle(tokens.foreground.opacity(skin.opacity.o60))
             HStack(spacing: 8) {
                 AinkradButton(title: "Continue", style: .primary) { Task { await model.continueOperation() } }
                     .disabled(model.isLoading)
@@ -73,8 +73,8 @@ struct AdvancedDetailView: View {
         }
         .padding(12)
         .frame(maxWidth: .infinity, alignment: .leading)
-        .background(ChamferShape(cut: AinkradRadius.md).fill(tokens.accentTertiary.opacity(0.08)))
-        .overlay(ChamferShape(cut: AinkradRadius.md).strokeBorder(tokens.accentTertiary.opacity(0.35)))
+        .background(ChamferShape(cut: AinkradRadius.md).fill(tokens.accentTertiary.opacity(skin.opacity.o08)))
+        .overlay(ChamferShape(cut: AinkradRadius.md).strokeBorder(tokens.accentTertiary.opacity(skin.opacity.o35)))
     }
 
     // MARK: - Commit actions
@@ -120,7 +120,7 @@ struct AdvancedDetailView: View {
             } else {
                 Text("Select a commit from the list to cherry-pick, revert, reset, or tag it.")
                     .font(AinkradFont.display(skin.type.sizes.t12))
-                    .foregroundStyle(tokens.foreground.opacity(0.5))
+                    .foregroundStyle(tokens.foreground.opacity(skin.opacity.o50))
             }
         }
     }
@@ -133,7 +133,7 @@ struct AdvancedDetailView: View {
                 HStack(spacing: 8) {
                     Text("Rebase \(model.currentBranchName) onto")
                         .font(AinkradFont.display(skin.type.sizes.t12))
-                        .foregroundStyle(tokens.foreground.opacity(0.85))
+                        .foregroundStyle(tokens.foreground.opacity(skin.opacity.o85))
                     AinkradSelect(
                         items: model.branchNames,
                         selection: Binding(
@@ -165,7 +165,7 @@ struct AdvancedDetailView: View {
                 if model.tags.isEmpty {
                     Text("No tags yet.")
                         .font(AinkradFont.display(skin.type.sizes.t11))
-                        .foregroundStyle(tokens.foreground.opacity(0.45))
+                        .foregroundStyle(tokens.foreground.opacity(skin.opacity.o45))
                 } else {
                     ScrollView {
                         LazyVStack(alignment: .leading, spacing: 3) {
@@ -179,7 +179,7 @@ struct AdvancedDetailView: View {
 
                 Text("NEW TAG AT \(tagTarget)")
                     .font(AinkradFont.display(skin.type.sizes.t9, weight: .semibold)).kerning(1)
-                    .foregroundStyle(tokens.foreground.opacity(0.45))
+                    .foregroundStyle(tokens.foreground.opacity(skin.opacity.o45))
                 AinkradTextField(text: $model.newTagName, placeholder: "Tag name")
                 AinkradTextField(text: $model.newTagMessage, placeholder: "Message (optional)")
                 AinkradButton(title: "Create tag", style: .primary, icon: "tag") {
@@ -199,8 +199,8 @@ struct AdvancedDetailView: View {
         }
         .padding(14)
         .frame(maxWidth: .infinity, alignment: .leading)
-        .background(ChamferShape(cut: AinkradRadius.md).fill(tokens.surfaceElevated.opacity(0.25)))
-        .overlay(ChamferShape(cut: AinkradRadius.md).strokeBorder(tokens.foreground.opacity(0.07)))
+        .background(ChamferShape(cut: AinkradRadius.md).fill(tokens.surfaceElevated.opacity(skin.opacity.o25)))
+        .overlay(ChamferShape(cut: AinkradRadius.md).strokeBorder(tokens.foreground.opacity(skin.opacity.o07)))
     }
 }
 
@@ -214,7 +214,7 @@ private struct AutostashToggle: View {
         HStack {
             Text("Auto-stash uncommitted changes before rebase/reset")
                 .font(AinkradFont.display(skin.type.sizes.t12))
-                .foregroundStyle(tokens.foreground.opacity(0.85))
+                .foregroundStyle(tokens.foreground.opacity(skin.opacity.o85))
             Spacer()
             AinkradToggle(isOn: $isOn)
         }
@@ -232,7 +232,7 @@ private struct TagRow: View {
         // The kit row owns the hover wash; this one only reveals the trash.
         AinkradListRow(
             leading: {
-                Image(systemName: "tag").font(skin.font(AinkradFontToken(sizeKey: "t10"))).foregroundStyle(tokens.accentSecondary.opacity(0.8))
+                Image(systemName: "tag").font(skin.font(AinkradFontToken(sizeKey: "t10"))).foregroundStyle(tokens.accentSecondary.opacity(skin.opacity.o80))
                     .frame(width: 14)
             },
             title: tag.name,

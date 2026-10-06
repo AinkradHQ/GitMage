@@ -129,11 +129,11 @@ struct ChangeRow: View {
             .frame(width: 20, height: 20)
             .background(
                 ChamferShape(cut: AinkradRadius.sm)
-                    .fill(badgeColor.opacity(0.16))
+                    .fill(badgeColor.opacity(skin.opacity.o16))
             )
             .overlay(
                 ChamferShape(cut: AinkradRadius.sm)
-                    .strokeBorder(badgeColor.opacity(0.35), lineWidth: 0.5)
+                    .strokeBorder(badgeColor.opacity(skin.opacity.o35), lineWidth: 0.5)
             )
     }
 
@@ -189,22 +189,22 @@ struct CommitBox: View {
                 if model.draftCommitMessage.isEmpty {
                     Text("Summary of your changes…")
                         .font(AinkradFont.display(skin.type.sizes.t12))
-                        .foregroundStyle(tokens.foreground.opacity(0.35))
+                        .foregroundStyle(tokens.foreground.opacity(skin.opacity.o35))
                         .padding(.horizontal, 12).padding(.vertical, 15)
                         .allowsHitTesting(false)
                 }
             }
             .background(
                 ChamferShape(cut: AinkradRadius.sm)
-                    .fill(tokens.surfaceElevated.opacity(0.5))
+                    .fill(tokens.surfaceElevated.opacity(skin.opacity.o50))
             )
             .overlay(
                 ChamferShape(cut: AinkradRadius.sm)
                     .strokeBorder(
-                        accent.opacity(editorFocused ? 0.6 : 0.2),
+                        accent.opacity(editorFocused ? skin.opacity.o60 : skin.opacity.o20),
                         lineWidth: editorFocused ? 1.2 : 1)
             )
-            .shadow(color: editorFocused ? accent.opacity(0.25) : .clear, radius: 8)
+            .shadow(color: editorFocused ? accent.opacity(skin.opacity.o25) : .clear, radius: 8)
 
             HStack {
                 Spacer()
@@ -212,10 +212,10 @@ struct CommitBox: View {
                     model.commitChanges()
                 }
                 .disabled(!canCommit)
-                .opacity(canCommit ? 1 : 0.5)
+                .opacity(canCommit ? 1 : skin.opacity.o50)
             }
         }
         .padding(12)
-        .background(tokens.surface.opacity(0.4))
+        .background(tokens.surface.opacity(skin.opacity.o40))
     }
 }

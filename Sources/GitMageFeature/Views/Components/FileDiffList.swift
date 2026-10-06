@@ -138,21 +138,21 @@ struct FileDisclosureRow: View {
             HStack(spacing: 10) {
                 Image(systemName: isExpanded ? "chevron.down" : "chevron.right")
                     .font(skin.font(AinkradFontToken(sizeKey: "t9", weight: "bold")))
-                    .foregroundStyle(tokens.foreground.opacity(0.5))
+                    .foregroundStyle(tokens.foreground.opacity(skin.opacity.o50))
                     .frame(width: 12)
                 Text(badgeLetter)
                     .font(AinkradFont.mono(skin.type.sizes.t10, weight: .bold))
                     .foregroundStyle(badgeColor)
                     .frame(width: 18, height: 18)
-                    .background(ChamferShape(cut: AinkradRadius.sm).fill(badgeColor.opacity(0.16)))
+                    .background(ChamferShape(cut: AinkradRadius.sm).fill(badgeColor.opacity(skin.opacity.o16)))
                 Text(filename.isEmpty ? "(diff)" : filename)
                     .font(AinkradFont.mono(skin.type.sizes.t11))
-                    .foregroundStyle(tokens.foreground.opacity(0.9))
+                    .foregroundStyle(tokens.foreground.opacity(skin.opacity.o90))
                     .lineLimit(1).truncationMode(.middle)
                 Spacer()
             }
             .padding(.horizontal, 10).padding(.vertical, 8)
-            .background(hovering ? tokens.surfaceElevated.opacity(0.5) : .clear)
+            .background(hovering ? tokens.surfaceElevated.opacity(skin.opacity.o50) : .clear)
             .contentShape(Rectangle())
             .onTapGesture(perform: onToggle)
             .onHover { hovering = $0 }
@@ -164,8 +164,8 @@ struct FileDisclosureRow: View {
                 )
             }
         }
-        .background(ChamferShape(cut: AinkradRadius.md).fill(tokens.surfaceElevated.opacity(0.25)))
-        .overlay(ChamferShape(cut: AinkradRadius.md).strokeBorder(tokens.foreground.opacity(0.07)))
+        .background(ChamferShape(cut: AinkradRadius.md).fill(tokens.surfaceElevated.opacity(skin.opacity.o25)))
+        .overlay(ChamferShape(cut: AinkradRadius.md).strokeBorder(tokens.foreground.opacity(skin.opacity.o07)))
         .clipShape(ChamferShape(cut: AinkradRadius.md))
     }
 }

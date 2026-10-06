@@ -53,7 +53,7 @@ struct AdvancedCommitRow: View {
             leading: {
                 Image(systemName: "circle.fill")
                     .font(skin.font(AinkradFontToken(sizeKey: "t6")))
-                    .foregroundStyle(isSelected ? tokens.accentPrimary : tokens.accentSecondary.opacity(0.6))
+                    .foregroundStyle(isSelected ? tokens.accentPrimary : tokens.accentSecondary.opacity(skin.opacity.o60))
                     .frame(width: 12)
             },
             title: commit.summary,

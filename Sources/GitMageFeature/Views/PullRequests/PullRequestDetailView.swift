@@ -70,14 +70,14 @@ struct PullRequestDetailView: View {
             }
             HStack(spacing: 6) {
                 Image(systemName: "arrow.triangle.branch")
-                    .font(skin.font(AinkradFontToken(sizeKey: "t10"))).foregroundStyle(tokens.foreground.opacity(0.5))
+                    .font(skin.font(AinkradFontToken(sizeKey: "t10"))).foregroundStyle(tokens.foreground.opacity(skin.opacity.o50))
                 Text("\(detail.baseBranch) ← \(detail.headBranch)")
                     .font(AinkradFont.mono(skin.type.sizes.t11))
-                    .foregroundStyle(tokens.foreground.opacity(0.6))
+                    .foregroundStyle(tokens.foreground.opacity(skin.opacity.o60))
             }
             Text(statusSummary(detail))
                 .font(AinkradFont.display(skin.type.sizes.t11))
-                .foregroundStyle(tokens.foreground.opacity(0.5))
+                .foregroundStyle(tokens.foreground.opacity(skin.opacity.o50))
         }
         .padding(.horizontal, 16).padding(.top, 14).padding(.bottom, 2)
     }
@@ -211,7 +211,7 @@ private struct PRCommitRow: View {
             leading: {
                 Image(systemName: "circle.fill")
                     .font(skin.font(AinkradFontToken(sizeKey: "t6")))
-                    .foregroundStyle(tokens.accentSecondary.opacity(0.7))
+                    .foregroundStyle(tokens.accentSecondary.opacity(skin.opacity.o70))
                     .frame(width: 14)
             },
             title: commit.message,

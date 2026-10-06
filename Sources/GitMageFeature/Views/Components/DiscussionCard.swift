@@ -17,7 +17,7 @@ struct DiscussionCard: View {
         VStack(alignment: .leading, spacing: 0) {
             HStack(spacing: 8) {
                 ZStack {
-                    Circle().fill(tokens.accentPrimary.opacity(0.18))
+                    Circle().fill(tokens.accentPrimary.opacity(skin.opacity.o18))
                     Text(String(author.prefix(1)).uppercased())
                         .font(AinkradFont.display(skin.type.sizes.t10, weight: .bold))
                         .foregroundStyle(tokens.accentPrimary)
@@ -25,23 +25,23 @@ struct DiscussionCard: View {
                 .frame(width: 22, height: 22)
                 Text(author)
                     .font(AinkradFont.display(skin.type.sizes.t12, weight: .semibold))
-                    .foregroundStyle(tokens.foreground.opacity(0.9))
+                    .foregroundStyle(tokens.foreground.opacity(skin.opacity.o90))
                 Text(ForgeDate.short(timestamp))
                     .font(AinkradFont.mono(skin.type.sizes.t9))
-                    .foregroundStyle(tokens.foreground.opacity(0.45))
+                    .foregroundStyle(tokens.foreground.opacity(skin.opacity.o45))
                 Spacer()
                 if isPrimary {
                     AinkradBadge(text: "AUTHOR", tint: tokens.accentSecondary)
                 }
             }
             .padding(.horizontal, 12).padding(.vertical, 8)
-            .background(tokens.surfaceElevated.opacity(0.5))
+            .background(tokens.surfaceElevated.opacity(skin.opacity.o50))
 
             Group {
                 if text.isEmpty {
                     Text("No description provided.")
                         .font(AinkradFont.display(skin.type.sizes.t12))
-                        .foregroundStyle(tokens.foreground.opacity(0.4))
+                        .foregroundStyle(tokens.foreground.opacity(skin.opacity.o40))
                         .frame(maxWidth: .infinity, alignment: .leading)
                 } else {
                     MarkdownText(markdown: text, tokens: tokens)
@@ -49,11 +49,11 @@ struct DiscussionCard: View {
             }
             .padding(12)
         }
-        .background(tokens.surface.opacity(0.4))
+        .background(tokens.surface.opacity(skin.opacity.o40))
         .clipShape(ChamferShape(cut: AinkradRadius.md))
         .overlay(
             ChamferShape(cut: AinkradRadius.md)
-                .strokeBorder(isPrimary ? tokens.accentPrimary.opacity(0.3) : tokens.foreground.opacity(0.08))
+                .strokeBorder(isPrimary ? tokens.accentPrimary.opacity(skin.opacity.o30) : tokens.foreground.opacity(skin.opacity.o08))
         )
     }
 }

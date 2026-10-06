@@ -67,14 +67,14 @@ private struct CommitRow: View {
             // Git-graph rail: a continuous line with a node per commit.
             ZStack {
                 Rectangle()
-                    .fill(tokens.foreground.opacity(0.14))
+                    .fill(tokens.foreground.opacity(skin.opacity.o14))
                     .frame(width: 1)
                     .padding(.top, isFirst ? 14 : 0)
                     .padding(.bottom, isLast ? 14 : 0)
                 Circle()
-                    .fill(isSelected ? tokens.accentPrimary : tokens.accentSecondary.opacity(0.8))
+                    .fill(isSelected ? tokens.accentPrimary : tokens.accentSecondary.opacity(skin.opacity.o80))
                     .frame(width: 8, height: 8)
-                    .shadow(color: isSelected ? tokens.accentPrimary.opacity(0.8) : .clear, radius: 4)
+                    .shadow(color: isSelected ? tokens.accentPrimary.opacity(skin.opacity.o80) : .clear, radius: 4)
                     .overlay(
                         Circle().stroke(tokens.background, lineWidth: 2)
                             .frame(width: 8, height: 8)
@@ -86,7 +86,7 @@ private struct CommitRow: View {
             VStack(alignment: .leading, spacing: 3) {
                 Text(commit.summary)
                     .font(AinkradFont.display(skin.type.sizes.t12))
-                    .foregroundStyle(tokens.foreground.opacity(isSelected ? 1 : 0.9))
+                    .foregroundStyle(tokens.foreground.opacity(isSelected ? 1 : skin.opacity.o90))
                     .lineLimit(1)
                 GMCommitMeta(
                     sha: commit.shortSHA, author: commit.author, date: commit.relativeDate, tokens: tokens)

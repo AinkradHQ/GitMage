@@ -33,6 +33,7 @@ enum GraphLayout {
 /// Draws one row's slice of the commit graph: pass-through/merge lanes and the
 /// node, using the row's `before`/`after` lane occupancy.
 struct GraphGutter: View {
+    @Environment(\.ainkradSkin) private var skin
     let row: GraphRow
     let isSelected: Bool
     let tokens: HostThemeTokens
@@ -93,7 +94,7 @@ struct GraphGutter: View {
             if isSelected {
                 ctx.stroke(
                     Path(ellipseIn: dot.insetBy(dx: -2.5, dy: -2.5)),
-                    with: .color(tokens.accentPrimary.opacity(0.5)), lineWidth: 1.5)
+                    with: .color(tokens.accentPrimary.opacity(skin.opacity.o50)), lineWidth: 1.5)
             }
         }
     }
@@ -119,7 +120,7 @@ struct GraphCommitRow: View {
             VStack(alignment: .leading, spacing: 1) {
                 Text(row.commit.summary)
                     .font(AinkradFont.display(skin.type.sizes.t12))
-                    .foregroundStyle(tokens.foreground.opacity(isSelected ? 1 : 0.9))
+                    .foregroundStyle(tokens.foreground.opacity(isSelected ? 1 : skin.opacity.o90))
                     .lineLimit(1)
                 GMCommitMeta(
                     sha: row.commit.shortSHA, author: row.commit.author, date: row.commit.relativeDate,

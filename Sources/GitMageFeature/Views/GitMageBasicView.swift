@@ -113,7 +113,7 @@ struct GitMageBasicView: View {
                             .foregroundStyle(
                                 branch.isCurrent
                                     ? tokens.accentPrimary
-                                    : tokens.foreground.opacity(0.35)
+                                    : tokens.foreground.opacity(skin.opacity.o35)
                             )
                             .frame(width: 20)
                         },

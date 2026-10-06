@@ -67,7 +67,7 @@ private struct IssueRow: View {
             VStack(alignment: .leading, spacing: 3) {
                 Text(issue.title)
                     .font(AinkradFont.display(skin.type.sizes.t12))
-                    .foregroundStyle(tokens.foreground.opacity(isSelected ? 1 : 0.9))
+                    .foregroundStyle(tokens.foreground.opacity(isSelected ? 1 : skin.opacity.o90))
                     .lineLimit(1)
                 HStack(spacing: 6) {
                     Text("#\(issue.number)")
@@ -75,11 +75,11 @@ private struct IssueRow: View {
                         .foregroundStyle(tokens.accentSecondary)
                     Text(issue.author)
                         .font(AinkradFont.mono(skin.type.sizes.t9))
-                        .foregroundStyle(tokens.foreground.opacity(0.5)).lineLimit(1)
+                        .foregroundStyle(tokens.foreground.opacity(skin.opacity.o50)).lineLimit(1)
                     if issue.commentCount > 0 {
                         Label("\(issue.commentCount)", systemImage: "bubble.left")
                             .font(AinkradFont.mono(skin.type.sizes.t9))
-                            .foregroundStyle(tokens.foreground.opacity(0.45))
+                            .foregroundStyle(tokens.foreground.opacity(skin.opacity.o45))
                     }
                 }
                 if !issue.labelNames.isEmpty {

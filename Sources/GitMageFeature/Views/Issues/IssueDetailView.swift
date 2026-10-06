@@ -23,7 +23,7 @@ struct IssueDetailView: View {
                         if !model.comments.isEmpty {
                             Text("\(model.comments.count) comment\(model.comments.count == 1 ? "" : "s")")
                                 .font(AinkradFont.display(skin.type.sizes.t10, weight: .semibold)).kerning(1.5)
-                                .foregroundStyle(tokens.foreground.opacity(0.45))
+                                .foregroundStyle(tokens.foreground.opacity(skin.opacity.o45))
                                 .padding(.top, 2)
                         }
                         ForEach(model.comments) { comment in
@@ -66,7 +66,7 @@ struct IssueDetailView: View {
             }
             Text("opened by \(detail.author) · \(ForgeDate.short(detail.createdAt))")
                 .font(AinkradFont.mono(skin.type.sizes.t10))
-                .foregroundStyle(tokens.foreground.opacity(0.5))
+                .foregroundStyle(tokens.foreground.opacity(skin.opacity.o50))
         }
     }
 
@@ -151,7 +151,7 @@ private struct AssigneesEditor: View {
             ForEach(detail.assignees, id: \.self) { login in
                 HStack(spacing: 4) {
                     ZStack {
-                        Circle().fill(tokens.accentSecondary.opacity(0.2))
+                        Circle().fill(tokens.accentSecondary.opacity(skin.opacity.o20))
                         Text(String(login.prefix(1)).uppercased())
                             .font(AinkradFont.display(skin.type.sizes.t8, weight: .bold))
                             .foregroundStyle(tokens.accentSecondary)
@@ -159,10 +159,10 @@ private struct AssigneesEditor: View {
                     .frame(width: 15, height: 15)
                     Text(login)
                         .font(AinkradFont.mono(skin.type.sizes.t10))
-                        .foregroundStyle(tokens.foreground.opacity(0.75))
+                        .foregroundStyle(tokens.foreground.opacity(skin.opacity.o75))
                 }
                 .padding(.horizontal, 6).padding(.vertical, 2)
-                .background(Capsule().fill(tokens.surfaceElevated.opacity(0.5)))
+                .background(Capsule().fill(tokens.surfaceElevated.opacity(skin.opacity.o50)))
             }
         }
     }

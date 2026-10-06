@@ -88,7 +88,7 @@ private struct WorktreeRow: View {
             topLine
             Text(worktree.path)
                 .font(AinkradFont.mono(skin.type.sizes.t9))
-                .foregroundStyle(tokens.foreground.opacity(0.45))
+                .foregroundStyle(tokens.foreground.opacity(skin.opacity.o45))
                 .lineLimit(1).truncationMode(.middle)
             bottomLine
             actionsRow
@@ -118,12 +118,12 @@ private struct WorktreeRow: View {
             if worktree.isLocked {
                 Image(systemName: "lock.fill")
                     .font(skin.font(AinkradFontToken(sizeKey: "t10")))
-                    .foregroundStyle(tokens.foreground.opacity(0.5))
+                    .foregroundStyle(tokens.foreground.opacity(skin.opacity.o50))
             }
             if worktree.isPrunable {
                 Image(systemName: "exclamationmark.triangle")
                     .font(skin.font(AinkradFontToken(sizeKey: "t10")))
-                    .foregroundStyle(tokens.accentTertiary.opacity(0.9))
+                    .foregroundStyle(tokens.accentTertiary.opacity(skin.opacity.o90))
             }
         }
     }
@@ -132,7 +132,7 @@ private struct WorktreeRow: View {
         Text(worktree.branch ?? "detached")
             .font(AinkradFont.display(skin.type.sizes.t10, weight: .medium))
             .foregroundStyle(
-                worktree.branch != nil ? tokens.accentPrimary.opacity(0.85) : tokens.foreground.opacity(0.5))
+                worktree.branch != nil ? tokens.accentPrimary.opacity(skin.opacity.o85) : tokens.foreground.opacity(skin.opacity.o50))
     }
 
     private var actionsRow: some View {

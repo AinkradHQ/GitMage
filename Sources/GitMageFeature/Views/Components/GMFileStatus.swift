@@ -23,7 +23,7 @@ enum GMFileStatus {
         case .deleted: return GMColor.diffRemove(skin)
         case .conflicted, .modified: return tokens.accentTertiary
         case .renamed: return tokens.accentSecondary
-        case .ignored: return tokens.foreground.opacity(0.4)
+        case .ignored: return tokens.foreground.opacity(skin.opacity.o40)
         }
     }
 
