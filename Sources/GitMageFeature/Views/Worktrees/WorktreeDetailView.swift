@@ -37,7 +37,6 @@ struct WorktreeDetailView: View {
     private func graphView(for wt: GitWorktree) -> some View {
         VStack(spacing: 0) {
             header(for: wt)
-            GlowRule(tokens: tokens)
 
             if model.isLoadingGraph {
                 AinkradSpinner(size: 22)
@@ -107,7 +106,6 @@ struct WorktreeDetailView: View {
             .frame(maxWidth: .infinity, maxHeight: .infinity)
 
             if let diff = model.selectedCommitDiff {
-                GlowRule(tokens: tokens)
                 FileDiffList(
                     files: DiffFileSplitter.split(diff.body), tokens: tokens,
                     fontSize: fontSize, fallbackTitle: diff.title

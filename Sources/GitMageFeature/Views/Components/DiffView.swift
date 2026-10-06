@@ -72,7 +72,6 @@ struct DiffView: View {
             VStack(alignment: .leading, spacing: 0) {
                 if showHeader {
                     header(title: diff.title, parsed: parsed)
-                    GlowRule(tokens: tokens)
                 }
                 content(parsed)
             }

@@ -180,13 +180,6 @@ struct CommitBox: View {
 
     var body: some View {
         VStack(alignment: .leading, spacing: 10) {
-            // Glow rule instead of a hard separator.
-            LinearGradient(
-                colors: [.clear, accent.opacity(0.4), .clear],
-                startPoint: .leading, endPoint: .trailing
-            )
-            .frame(height: 1)
-
             HStack {
                 GMHeaderLabel(text: "COMMIT", tokens: tokens)
                 Spacer()

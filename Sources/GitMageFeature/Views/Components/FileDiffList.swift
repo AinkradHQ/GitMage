@@ -157,7 +157,6 @@ struct FileDisclosureRow: View {
             .onHover { hovering = $0 }
 
             if isExpanded {
-                GlowRule(tokens: tokens)
                 DiffView(
                     diff: GitDiffSnapshot(title: filename, body: patch ?? "", isEmpty: patch == nil),
                     tokens: tokens, fontSize: fontSize, embedded: true, showHeader: false

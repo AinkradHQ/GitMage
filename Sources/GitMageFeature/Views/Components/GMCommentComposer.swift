@@ -14,7 +14,6 @@ struct GMCommentComposer<Actions: View>: View {
 
     var body: some View {
         VStack(alignment: .leading, spacing: 10) {
-            GlowRule(tokens: tokens)
             AinkradTextArea(
                 text: $text, placeholder: "Leave a comment…", minHeight: 34, maxHeight: 80,
                 onSubmit: {

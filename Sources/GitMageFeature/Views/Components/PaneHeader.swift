@@ -40,18 +40,6 @@ struct PaneHeader<Trailing: View>: View {
     }
 }
 
-/// Horizontal accent glow rule — the soft separator used across surfaces.
-struct GlowRule: View {
-    let tokens: HostThemeTokens
-    var body: some View {
-        LinearGradient(
-            colors: [.clear, tokens.accentPrimary.opacity(0.4), .clear],
-            startPoint: .leading, endPoint: .trailing
-        )
-        .frame(height: 1)
-    }
-}
-
 /// The small kerned caption above a group: "COMMIT", "STAGED", a pane title.
 struct GMHeaderLabel: View {
     let text: String
