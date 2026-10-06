@@ -4,7 +4,7 @@ import Foundation
 final class GitHubProvider: GitForgeProvider {
     private let token: String
     private let session: URLSession
-    private let base = URL(string: "https://api.github.com")!
+    private let base = URL(string: "https://api.github.com")!  // design-lint: allow force-unwrap constant literal URL, always valid
 
     init(token: String, session: URLSession = .shared) {
         self.token = token
