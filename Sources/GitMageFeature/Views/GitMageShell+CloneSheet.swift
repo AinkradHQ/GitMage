@@ -6,7 +6,7 @@ extension GitMageShell {
         VStack(alignment: .leading, spacing: 16) {
             Text("Clone a Repository").font(AinkradFont.display(skin.type.sizes.t18, weight: .semibold))
             Text("Enter a Git remote URL. You'll then choose a destination folder.")
-                .font(AinkradFont.display(skin.type.sizes.t12)).foregroundStyle(tokens.foreground.opacity(0.7))
+                .font(AinkradFont.display(skin.type.sizes.t12)).foregroundStyle(tokens.foreground.opacity(skin.opacity.o70))
             AinkradTextField(
                 text: $model.cloneRemoteURL,
                 placeholder: "https://github.com/owner/repo.git"

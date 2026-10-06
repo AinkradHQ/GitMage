@@ -66,7 +66,7 @@ struct RepoManagerPanel: View {
                 Spacer()
                 Text("↑↓ navigate   ↩ open   esc close")
                     .font(AinkradFont.mono(skin.type.sizes.t9))
-                    .foregroundStyle(tokens.foreground.opacity(0.35))
+                    .foregroundStyle(tokens.foreground.opacity(skin.opacity.o35))
             }
             .padding(.horizontal, 18)
             .padding(.vertical, 12)
@@ -108,7 +108,7 @@ private struct RepoCard: View {
             HStack {
                 Image(systemName: "folder.fill")
                     .font(skin.font(AinkradFontToken(sizeKey: "t15")))
-                    .foregroundStyle(isActive ? tokens.accentPrimary : tokens.foreground.opacity(0.6))
+                    .foregroundStyle(isActive ? tokens.accentPrimary : tokens.foreground.opacity(skin.opacity.o60))
                 Spacer()
                 if isActive {
                     AinkradBadge(text: "ACTIVE", tint: tokens.accentPrimary)
@@ -124,7 +124,7 @@ private struct RepoCard: View {
                     .foregroundStyle(tokens.foreground).lineLimit(1)
                 Text(repo.path)
                     .font(AinkradFont.mono(skin.type.sizes.t9))
-                    .foregroundStyle(tokens.foreground.opacity(0.45))
+                    .foregroundStyle(skin.color(skin.text.faint))
                     .lineLimit(1).truncationMode(.middle)
             }
         }
@@ -135,15 +135,15 @@ private struct RepoCard: View {
             ChamferShape(cut: AinkradRadius.md)
                 .fill(
                     isActive
-                        ? tokens.accentPrimary.opacity(0.10)
-                        : tokens.surfaceElevated.opacity(hovering || isSelected ? 0.7 : 0.4))
+                        ? tokens.accentPrimary.opacity(skin.opacity.o10)
+                        : tokens.surfaceElevated.opacity(hovering || isSelected ? skin.opacity.o70 : skin.opacity.o40))
         )
         .overlay(
             ChamferShape(cut: AinkradRadius.md)
                 .strokeBorder(
                     isActive
-                        ? tokens.accentPrimary.opacity(0.55)
-                        : tokens.foreground.opacity(hovering ? 0.14 : 0.06),
+                        ? tokens.accentPrimary.opacity(skin.opacity.o55)
+                        : tokens.foreground.opacity(hovering ? skin.opacity.o14 : skin.opacity.o06),
                     lineWidth: isActive ? 1.2 : 1)
         )
         .overlay {

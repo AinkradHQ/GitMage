@@ -52,7 +52,7 @@ struct GitMageShell: View {
                     if model.hasActiveRepo {
                         contextPane
                             .frame(width: 300)
-                            .background(tokens.surface.opacity(0.35))
+                            .background(tokens.surface.opacity(skin.opacity.o35))
                         detailPane
                             .frame(maxWidth: .infinity, maxHeight: .infinity)
                     } else {
@@ -215,10 +215,10 @@ struct GitMageShell: View {
     private var emptyLibraryState: some View {
         VStack(spacing: 12) {
             Image(systemName: "wand.and.stars").font(skin.font(AinkradFontToken(sizeKey: "t34", weight: "light"))).foregroundStyle(
-                tokens.accentPrimary.opacity(0.6))
+                tokens.accentPrimary.opacity(skin.opacity.o60))
             Text("No repository").font(AinkradFont.display(skin.type.sizes.t18, weight: .semibold))
             Text("Add a local folder or clone one to begin.").font(AinkradFont.display(skin.type.sizes.t12)).foregroundStyle(
-                tokens.foreground.opacity(0.5))
+                tokens.foreground.opacity(skin.opacity.o50))
             HStack {
                 AinkradButton(title: "Add…", style: .primary, icon: "plus") { model.addRepositoryFolder() }
                 AinkradButton(title: "Clone…", style: .secondary, icon: "arrow.down.doc") { model.startClone() }

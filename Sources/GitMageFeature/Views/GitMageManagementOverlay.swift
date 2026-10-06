@@ -22,7 +22,7 @@ struct GitMageManagementOverlay: View {
     var body: some View {
         GeometryReader { geo in
             ZStack {
-                Color.black.opacity(0.42)
+                skin.color(.palette("black", skin.chrome.overlay.backdropOpacity))
                     .ignoresSafeArea()
                     .contentShape(Rectangle())
                     .onTapGesture(perform: dismiss)

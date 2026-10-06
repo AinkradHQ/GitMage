@@ -12,7 +12,7 @@ struct SectionLabel: View {
         Text(text)
             .font(AinkradFont.mono(skin.type.sizes.t9, weight: .medium))
             .kerning(2.5)
-            .foregroundStyle(tokens.foreground.opacity(0.4))
+            .foregroundStyle(tokens.foreground.opacity(skin.opacity.o40))
             .padding(.horizontal, 18)
             .padding(.top, 14)
             .padding(.bottom, 6)

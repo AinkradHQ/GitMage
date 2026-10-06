@@ -70,7 +70,7 @@ struct BranchManagerPanel: View {
                 Spacer()
                 Text("↑↓ navigate   ↩ checkout   esc close")
                     .font(AinkradFont.mono(skin.type.sizes.t9))
-                    .foregroundStyle(tokens.foreground.opacity(0.35))
+                    .foregroundStyle(tokens.foreground.opacity(skin.opacity.o35))
             }
             .padding(.horizontal, 18)
             .padding(.vertical, 12)
@@ -149,10 +149,10 @@ private struct BranchRow: View {
     private var dot: some View {
         ZStack {
             Circle()
-                .fill(branch.isCurrent ? tokens.accentPrimary : tokens.foreground.opacity(0.25))
+                .fill(branch.isCurrent ? tokens.accentPrimary : tokens.foreground.opacity(skin.opacity.o25))
                 .frame(width: 8, height: 8)
             if branch.isCurrent {
-                Circle().stroke(tokens.accentPrimary.opacity(0.4), lineWidth: 4).frame(width: 8, height: 8)
+                Circle().stroke(tokens.accentPrimary.opacity(skin.opacity.o40), lineWidth: 4).frame(width: 8, height: 8)
             }
         }
         .frame(width: 16)

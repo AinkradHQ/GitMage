@@ -22,7 +22,8 @@ private struct HUDButtonSurface: ViewModifier {
         content
             .background(fill.clipShape(shape))
             .overlay(
-                shape.strokeBorder(tokens.accentSecondary.opacity(hovering ? 0.6 : 0.3), lineWidth: 1)
+                shape.strokeBorder(
+                    tokens.accentSecondary.opacity(hovering ? skin.opacity.o60 : skin.opacity.o30), lineWidth: 1)
             )
             .shadow(color: glowColor, radius: glowRadius, y: hovering ? 3 : 1)
     }
@@ -32,8 +33,8 @@ private struct HUDButtonSurface: ViewModifier {
         case .chip:
             LinearGradient(
                 colors: [
-                    tokens.surfaceElevated.opacity(hovering ? 0.85 : 0.5),
-                    tokens.surfaceElevated.opacity(hovering ? 0.55 : 0.28),
+                    tokens.surfaceElevated.opacity(hovering ? skin.opacity.o85 : skin.opacity.o50),
+                    tokens.surfaceElevated.opacity(hovering ? skin.opacity.o55 : skin.opacity.o28),
                 ],
                 startPoint: .top, endPoint: .bottom
             )
@@ -42,7 +43,7 @@ private struct HUDButtonSurface: ViewModifier {
 
     private var glowColor: Color {
         switch kind {
-        case .chip: return tokens.accentPrimary.opacity(hovering ? 0.32 : 0.06)
+        case .chip: return tokens.accentPrimary.opacity(hovering ? skin.opacity.o32 : skin.opacity.o06)
         }
     }
 

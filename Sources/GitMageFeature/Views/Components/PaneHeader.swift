@@ -28,9 +28,9 @@ struct PaneHeader<Trailing: View>: View {
             GMHeaderLabel(text: title, tokens: tokens)
             Text(countText ?? "\(count)")
                 .font(AinkradFont.mono(skin.type.sizes.t9, weight: .medium))
-                .foregroundStyle(tokens.foreground.opacity(0.5))
+                .foregroundStyle(tokens.foreground.opacity(skin.opacity.o50))
                 .padding(.horizontal, 5).padding(.vertical, 1)
-                .background(Capsule().fill(tokens.surfaceElevated.opacity(0.6)))
+                .background(Capsule().fill(tokens.surfaceElevated.opacity(skin.opacity.o60)))
             Spacer()
             trailing()
         }
@@ -61,6 +61,6 @@ struct GMHeaderLabel: View {
     var body: some View {
         Text(text)
             .font(AinkradFont.display(skin.type.sizes.t10, weight: .semibold)).kerning(2)
-            .foregroundStyle(tokens.foreground.opacity(0.5))
+            .foregroundStyle(tokens.foreground.opacity(skin.opacity.o50))
     }
 }
