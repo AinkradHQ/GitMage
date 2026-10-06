@@ -22,32 +22,48 @@ extension GitMageShell {
         let repoID: String?
     }
 
+    /// What the Pull Requests and Issues models both start from: the repo's
+    /// remote, whether it is on GitHub, and the stored token's provider.
+    struct ForgeSetup {
+        let remote: RepoRef?
+        let hasGitHubRemote: Bool
+        let auth: GitForgeAuth
+        let provider: GitForgeProvider?
+
+        /// A remote and a token are both there, so listing can start.
+        var canLoad: Bool { remote != nil && provider != nil }
+    }
+
+    func makeForgeSetup() async -> ForgeSetup {
+        let remote = await model.currentRemote()
+        let auth = GitForgeAuth(secrets: host.secrets)
+        return ForgeSetup(
+            remote: remote,
+            hasGitHubRemote: remote?.host.lowercased().contains("github.com") == true,
+            auth: auth,
+            provider: auth.token().map { GitHubProvider(token: $0) })
+    }
+
     func buildPRModelIfNeeded() async {
         guard model.selectedArea == .pullRequests else { return }
-        let remote = await model.currentRemote()
-        prHasGitHubRemote = remote?.host.lowercased().contains("github.com") == true
-        let auth = GitForgeAuth(secrets: host.secrets)
-        let token = auth.token()
-        let provider: GitForgeProvider? = token.map { GitHubProvider(token: $0) }
-        let newModel = PullRequestsViewModel(repo: remote, provider: provider, auth: auth)
+        let setup = await makeForgeSetup()
+        prHasGitHubRemote = setup.hasGitHubRemote
+        let newModel = PullRequestsViewModel(repo: setup.remote, provider: setup.provider, auth: setup.auth)
         prModel = newModel
         await newModel.verify()
-        if remote != nil && token != nil {
+        if setup.canLoad {
             await newModel.load()
         }
     }
 
     func buildIssuesModelIfNeeded() async {
         guard model.selectedArea == .issues else { return }
-        let remote = await model.currentRemote()
-        issuesHasGitHubRemote = remote?.host.lowercased().contains("github.com") == true
-        let auth = GitForgeAuth(secrets: host.secrets)
-        let token = auth.token()
-        let provider: GitForgeProvider? = token.map { GitHubProvider(token: $0) }
-        let newModel = IssuesViewModel(repo: remote, provider: provider, auth: auth)
+        let setup = await makeForgeSetup()
+        issuesHasGitHubRemote = setup.hasGitHubRemote
+        let newModel = IssuesViewModel(repo: setup.remote, provider: setup.provider, auth: setup.auth)
         issuesModel = newModel
         await newModel.verify()
-        if remote != nil && token != nil {
+        if setup.canLoad {
             await newModel.load()
         }
     }
