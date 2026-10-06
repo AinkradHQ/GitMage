@@ -8,19 +8,16 @@ struct BranchManagerPanel: View {
     let tokens: HostThemeTokens
     let dismiss: () -> Void
 
-    @State private var query = ""
-    @State private var selected = 0
+    @State private var picker = OverlaySelection()
     @FocusState private var focused: Bool
 
     private var filtered: [GitBranchSummary] {
-        let q = query.trimmingCharacters(in: .whitespaces).lowercased()
-        guard !q.isEmpty else { return model.branches }
-        return model.branches.filter { $0.name.lowercased().contains(q) }
+        picker.filter(model.branches) { [$0.name] }
     }
 
     /// When the search matches nothing, the query becomes a create candidate.
     private var createName: String {
-        query.trimmingCharacters(in: .whitespaces)
+        picker.query.trimmingCharacters(in: .whitespaces)
     }
     private var canCreate: Bool {
         !createName.isEmpty && !model.branches.contains { $0.name == createName }
@@ -31,8 +28,8 @@ struct BranchManagerPanel: View {
         VStack(alignment: .leading, spacing: 0) {
             OverlaySearchField(
                 placeholder: "Search or name a new branch…",
-                text: $query, tokens: tokens, focus: $focused,
-                onMove: { move($0, count: results.count) },
+                text: $picker.query, tokens: tokens, focus: $focused,
+                onMove: { picker.move($0, count: results.count) },
                 onActivate: { activate(results) },
                 onEscape: dismiss
             )
@@ -47,10 +44,10 @@ struct BranchManagerPanel: View {
                         ForEach(Array(results.enumerated()), id: \.element.id) { index, branch in
                             BranchRow(
                                 branch: branch,
-                                isSelected: index == selected,
+                                isSelected: index == picker.selected,
                                 tokens: tokens,
                                 onCheckout: {
-                                    selected = index
+                                    picker.selected = index
                                     activate(results)
                                 },
                                 onDelete: { model.deleteBranch(branch.name) }
@@ -82,7 +79,7 @@ struct BranchManagerPanel: View {
         }
         .hudPanelChrome(tokens)
         .onAppear { focused = true }
-        .onChange(of: query) { _, _ in selected = 0 }
+        .onChange(of: picker.query) { _, _ in picker.selected = 0 }
     }
 
     private var emptyState: some View {
@@ -97,11 +94,6 @@ struct BranchManagerPanel: View {
         .frame(maxWidth: .infinity, minHeight: 150)
     }
 
-    private func move(_ delta: Int, count: Int) {
-        guard count > 0 else { return }
-        selected = (selected + delta + count) % count
-    }
-
     /// Return key: if the query matches branches, checkout the selected one;
     /// otherwise treat the query as a new branch name.
     private func activate(_ results: [GitBranchSummary]) {
@@ -109,8 +101,8 @@ struct BranchManagerPanel: View {
             create()
             return
         }
-        guard results.indices.contains(selected) else { return }
-        let branch = results[selected]
+        guard results.indices.contains(picker.selected) else { return }
+        let branch = results[picker.selected]
         guard !branch.isCurrent else { return }
         model.selectedBranchName = branch.name
         model.checkoutSelectedBranch()
