@@ -4,13 +4,10 @@ import SwiftUI
 /// Lane colors for the commit graph — theme accents first, then a few fixed
 /// hues for deeper branch nesting (data viz, like label colors).
 enum GraphPalette {
-    static func color(_ index: Int, _ tokens: HostThemeTokens) -> Color {
-        let base: [Color] = [
-            tokens.accentPrimary, tokens.accentSecondary, tokens.accentTertiary,
-            Color(red: 0.38, green: 0.80, blue: 0.52),  // design-lint: allow raw-color token-gap graphLane
-            Color(red: 0.92, green: 0.62, blue: 0.32),  // design-lint: allow raw-color token-gap graphLane
-            Color(red: 0.60, green: 0.52, blue: 0.92),  // design-lint: allow raw-color token-gap graphLane
-        ]
+    static func color(_ index: Int, _ tokens: HostThemeTokens, _ skin: AinkradSkin) -> Color {
+        let base: [Color] =
+            [tokens.accentPrimary, tokens.accentSecondary, tokens.accentTertiary]
+            + skin.colors.graphLanes.map { skin.color($0) }
         return base[((index % base.count) + base.count) % base.count]
     }
 }
@@ -69,12 +66,12 @@ struct GraphGutter: View {
                 if entry == sha {
                     ctx.stroke(
                         connector(CGPoint(x: x(c), y: 0), CGPoint(x: x(row.col), y: center)),
-                        with: .color(GraphPalette.color(c, tokens)), lineWidth: 2)
+                        with: .color(GraphPalette.color(c, tokens, skin)), lineWidth: 2)
                 } else {
                     let bcol = row.after.firstIndex(of: entry) ?? c
                     ctx.stroke(
                         connector(CGPoint(x: x(c), y: 0), CGPoint(x: x(bcol), y: h)),
-                        with: .color(GraphPalette.color(bcol, tokens)), lineWidth: 2)
+                        with: .color(GraphPalette.color(bcol, tokens, skin)), lineWidth: 2)
                 }
             }
 
@@ -83,11 +80,11 @@ struct GraphGutter: View {
                 let bcol = row.after.firstIndex(of: parent) ?? row.col
                 ctx.stroke(
                     connector(CGPoint(x: x(row.col), y: center), CGPoint(x: x(bcol), y: h)),
-                    with: .color(GraphPalette.color(bcol, tokens)), lineWidth: 2)
+                    with: .color(GraphPalette.color(bcol, tokens, skin)), lineWidth: 2)
             }
 
             // The commit node.
-            let nodeColor = isSelected ? tokens.accentPrimary : GraphPalette.color(row.col, tokens)
+            let nodeColor = isSelected ? tokens.accentPrimary : GraphPalette.color(row.col, tokens, skin)
             let r: CGFloat = isSelected ? skin.size.s5 : skin.size.s4
             let dot = CGRect(x: x(row.col) - r, y: center - r, width: 2 * r, height: 2 * r)
             ctx.fill(Path(ellipseIn: dot), with: .color(nodeColor))
