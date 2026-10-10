@@ -73,8 +73,8 @@ struct AdvancedDetailView: View {
         }
         .padding(skin.spacing.md)
         .frame(maxWidth: .infinity, alignment: .leading)
-        .background(ChamferShape(cut: AinkradRadius.md).fill(tokens.accentTertiary.opacity(skin.opacity.o08)))
-        .overlay(ChamferShape(cut: AinkradRadius.md).strokeBorder(tokens.accentTertiary.opacity(skin.opacity.o35)))
+        .background(skin.shape(cut: AinkradRadius.md).fill(tokens.accentTertiary.opacity(skin.opacity.o08)))
+        .overlay(skin.shape(cut: AinkradRadius.md).strokeBorder(tokens.accentTertiary.opacity(skin.opacity.o35)))
     }
 
     // MARK: - Commit actions
@@ -199,8 +199,8 @@ struct AdvancedDetailView: View {
         }
         .padding(skin.size.s14)
         .frame(maxWidth: .infinity, alignment: .leading)
-        .background(ChamferShape(cut: AinkradRadius.md).fill(tokens.surfaceElevated.opacity(skin.opacity.o25)))
-        .overlay(ChamferShape(cut: AinkradRadius.md).strokeBorder(tokens.foreground.opacity(skin.opacity.o07)))
+        .background(skin.shape(cut: AinkradRadius.md).fill(tokens.surfaceElevated.opacity(skin.opacity.o25)))
+        .overlay(skin.shape(cut: AinkradRadius.md).strokeBorder(tokens.foreground.opacity(skin.opacity.o07)))
     }
 }
 

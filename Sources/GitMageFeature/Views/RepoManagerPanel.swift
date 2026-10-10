@@ -134,14 +134,14 @@ private struct RepoCard: View {
         .frame(height: skin.size.s96, alignment: .topLeading)
         .frame(maxWidth: .infinity)
         .background(
-            ChamferShape(cut: AinkradRadius.md)
+            skin.shape(cut: AinkradRadius.md)
                 .fill(
                     isActive
                         ? tokens.accentPrimary.opacity(skin.opacity.o10)
                         : tokens.surfaceElevated.opacity(hovering || isSelected ? skin.opacity.o70 : skin.opacity.o40))
         )
         .overlay(
-            ChamferShape(cut: AinkradRadius.md)
+            skin.shape(cut: AinkradRadius.md)
                 .strokeBorder(
                     isActive
                         ? tokens.accentPrimary.opacity(skin.opacity.o55)

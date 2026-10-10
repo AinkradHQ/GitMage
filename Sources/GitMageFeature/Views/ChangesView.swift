@@ -129,11 +129,11 @@ struct ChangeRow: View {
             .foregroundStyle(badgeColor)
             .frame(width: skin.size.s20, height: skin.size.s20)
             .background(
-                ChamferShape(cut: AinkradRadius.sm)
+                skin.shape(cut: AinkradRadius.sm)
                     .fill(badgeColor.opacity(skin.opacity.o16))
             )
             .overlay(
-                ChamferShape(cut: AinkradRadius.sm)
+                skin.shape(cut: AinkradRadius.sm)
                     .strokeBorder(badgeColor.opacity(skin.opacity.o35), lineWidth: 0.5)
             )
     }
@@ -196,11 +196,11 @@ struct CommitBox: View {
                 }
             }
             .background(
-                ChamferShape(cut: AinkradRadius.sm)
+                skin.shape(cut: AinkradRadius.sm)
                     .fill(tokens.surfaceElevated.opacity(skin.opacity.o50))
             )
             .overlay(
-                ChamferShape(cut: AinkradRadius.sm)
+                skin.shape(cut: AinkradRadius.sm)
                     .strokeBorder(
                         accent.opacity(editorFocused ? skin.opacity.o60 : skin.opacity.o20),
                         lineWidth: editorFocused ? 1.2 : 1)
