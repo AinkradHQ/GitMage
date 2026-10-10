@@ -54,7 +54,7 @@ struct MarkdownText: View {
 
         case .quote(let lines):
             HStack(spacing: skin.spacing.sm) {
-                ChamferShape(cut: AinkradRadius.sm).fill(tokens.accentPrimary.opacity(skin.opacity.o50)).frame(width: skin.size.s3)
+                skin.shape(cut: AinkradRadius.sm).fill(tokens.accentPrimary.opacity(skin.opacity.o50)).frame(width: skin.size.s3)
                 VStack(alignment: .leading, spacing: skin.size.s2) {
                     ForEach(Array(lines.enumerated()), id: \.offset) { _, line in
                         inline(line, size: baseSize)

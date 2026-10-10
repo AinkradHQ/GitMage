@@ -50,9 +50,9 @@ struct DiscussionCard: View {
             .padding(skin.spacing.md)
         }
         .background(tokens.surface.opacity(skin.opacity.o40))
-        .clipShape(ChamferShape(cut: AinkradRadius.md))
+        .clipShape(skin.shape(cut: AinkradRadius.md))
         .overlay(
-            ChamferShape(cut: AinkradRadius.md)
+            skin.shape(cut: AinkradRadius.md)
                 .strokeBorder(isPrimary ? tokens.accentPrimary.opacity(skin.opacity.o30) : tokens.foreground.opacity(skin.opacity.o08))
         )
     }

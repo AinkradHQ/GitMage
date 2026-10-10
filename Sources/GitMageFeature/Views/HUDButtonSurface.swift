@@ -13,7 +13,7 @@ private struct HUDButtonSurface: ViewModifier {
 
     // Single choke point: chamfering here cascades to every top-bar chip /
     // repo/branch switcher that finishes with `.hudButtonSurface`.
-    private var shape: ChamferShape { ChamferShape(cut: AinkradRadius.sm) }
+    private var shape: AinkradSkinShape { skin.shape(cut: AinkradRadius.sm) }
 
     // Flat kit chamfer surface — the bespoke gloss gradient, gradient rim, and
     // "powered edge" capsule were removed so the chip reads like `AinkradButton`
