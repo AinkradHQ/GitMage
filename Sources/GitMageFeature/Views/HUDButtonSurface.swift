@@ -18,7 +18,17 @@ private struct HUDButtonSurface: ViewModifier {
     // Flat kit chamfer surface — the bespoke gloss gradient, gradient rim, and
     // "powered edge" capsule were removed so the chip reads like `AinkradButton`
     // (chamfer fill + a single accent border + a hover-only accent glow).
-    func body(content: Content) -> some View {
+    @ViewBuilder func body(content: Content) -> some View {
+        if #available(macOS 26, *), skin.usesNativeGlass {
+            // Liquid Glass: a toolbar-style glass capsule; the glass answers
+            // hover and press itself.
+            content.glassEffect(.regular.interactive(), in: .capsule)
+        } else {
+            kitBody(content)
+        }
+    }
+
+    private func kitBody(_ content: Content) -> some View {
         content
             .background(fill.clipShape(shape))
             .overlay(

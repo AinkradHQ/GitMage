@@ -11,6 +11,9 @@ struct GMCommitMeta: View {
     var size: CGFloat? = nil
     /// Truncate the author and date to one line (rows); the detail card lets them wrap.
     var limitLines = true
+    /// Sits on the macOS accent selection (Liquid Glass): the SHA drops its
+    /// accent, which would vanish on the accent fill.
+    var onSelection = false
 
     @Environment(\.ainkradSkin) private var skin
 
@@ -18,7 +21,7 @@ struct GMCommitMeta: View {
         HStack(spacing: skin.spacing.sm) {
             Text(sha)
                 .font(AinkradFont.mono(size ?? skin.type.sizes.t9, weight: .medium))
-                .foregroundStyle(tokens.accentSecondary)
+                .foregroundStyle(onSelection ? tokens.foreground : tokens.accentSecondary)
             Text(author)
                 .font(AinkradFont.display(size ?? skin.type.sizes.t9))
                 .foregroundStyle(tokens.foreground.opacity(skin.opacity.o50))

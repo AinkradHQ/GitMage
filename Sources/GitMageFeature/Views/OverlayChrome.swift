@@ -9,9 +9,9 @@ struct SectionLabel: View {
     let tokens: HostThemeTokens
     @Environment(\.ainkradSkin) private var skin
     var body: some View {
-        Text(text)
+        Text(skin.gmLabel(text))
             .font(AinkradFont.mono(skin.type.sizes.t9, weight: .medium))
-            .kerning(2.5)
+            .kerning(skin.gmKerning(2.5))
             .foregroundStyle(tokens.foreground.opacity(skin.opacity.o40))
             .padding(.horizontal, skin.size.s18)
             .padding(.top, skin.size.s14)
