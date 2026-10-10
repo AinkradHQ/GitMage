@@ -24,7 +24,8 @@ struct TopBarChip: View {
                     .font(skin.font(AinkradFontToken(sizeKey: "t12", weight: "semibold")))
                     .foregroundStyle(tokens.accentSecondary)
                     .shadow(
-                        color: tokens.accentSecondary.opacity(hovering ? skin.opacity.o80 : skin.opacity.o40),
+                        color: skin.usesNativeGlass
+                            ? .clear : tokens.accentSecondary.opacity(hovering ? skin.opacity.o80 : skin.opacity.o40),
                         radius: hovering ? skin.size.s5 : skin.size.s2)
                 Text(label)
                     .font(AinkradFont.display(skin.type.sizes.t13, weight: .medium))

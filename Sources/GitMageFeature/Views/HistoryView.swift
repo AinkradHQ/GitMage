@@ -75,7 +75,9 @@ private struct CommitRow: View {
                 Circle()
                     .fill(isSelected ? tokens.accentPrimary : tokens.accentSecondary.opacity(skin.opacity.o80))
                     .frame(width: skin.size.s8, height: skin.size.s8)
-                    .shadow(color: isSelected ? tokens.accentPrimary.opacity(skin.opacity.o80) : .clear, radius: skin.size.s4)
+                    .shadow(
+                        color: isSelected && !skin.usesNativeGlass ? tokens.accentPrimary.opacity(skin.opacity.o80) : .clear,
+                        radius: skin.size.s4)
                     .overlay(
                         Circle().stroke(tokens.background, lineWidth: 2)
                             .frame(width: skin.size.s8, height: skin.size.s8)
@@ -90,7 +92,8 @@ private struct CommitRow: View {
                     .foregroundStyle(tokens.foreground.opacity(isSelected ? 1 : skin.opacity.o90))
                     .lineLimit(1)
                 GMCommitMeta(
-                    sha: commit.shortSHA, author: commit.author, date: commit.relativeDate, tokens: tokens)
+                    sha: commit.shortSHA, author: commit.author, date: commit.relativeDate, tokens: tokens,
+                    onSelection: isSelected && skin.usesNativeGlass)
             }
             .padding(.vertical, skin.size.s7)
             Spacer(minLength: 4)

@@ -132,7 +132,7 @@ private struct BranchRow: View {
             subtitle: branch.subtitle,
             trailing: {
                 if branch.isCurrent {
-                    AinkradBadge(text: "CURRENT", tint: tokens.accentPrimary)
+                    AinkradBadge(text: "CURRENT", tint: onSelection ? tokens.foreground : tokens.accentPrimary)
                 } else if hovering {
                     AinkradIconButton(
                         systemName: "trash", size: skin.size.s24, tooltip: "Delete branch", action: onDelete)
@@ -145,14 +145,18 @@ private struct BranchRow: View {
         .onHover { h in withAnimation(reduceMotion ? nil : .easeOut(duration: skin.motion.durations.d0_14)) { hovering = h } }
     }
 
+    /// On the macOS accent selection (Liquid Glass), accent marks would vanish.
+    private var onSelection: Bool { isSelected && skin.usesNativeGlass }
+    private var currentColor: Color { onSelection ? tokens.foreground : tokens.accentPrimary }
+
     /// Filled accent dot with a halo for the checked-out branch, a dim dot otherwise.
     private var dot: some View {
         ZStack {
             Circle()
-                .fill(branch.isCurrent ? tokens.accentPrimary : tokens.foreground.opacity(skin.opacity.o25))
+                .fill(branch.isCurrent ? currentColor : tokens.foreground.opacity(skin.opacity.o25))
                 .frame(width: skin.size.s8, height: skin.size.s8)
             if branch.isCurrent {
-                Circle().stroke(tokens.accentPrimary.opacity(skin.opacity.o40), lineWidth: 4)
+                Circle().stroke(currentColor.opacity(skin.opacity.o40), lineWidth: 4)
                     .frame(width: skin.size.s8, height: skin.size.s8)
             }
         }

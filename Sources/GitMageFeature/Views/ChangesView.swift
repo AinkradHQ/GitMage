@@ -205,7 +205,9 @@ struct CommitBox: View {
                         accent.opacity(editorFocused ? skin.opacity.o60 : skin.opacity.o20),
                         lineWidth: editorFocused ? 1.2 : 1)
             )
-            .shadow(color: editorFocused ? accent.opacity(skin.opacity.o25) : .clear, radius: skin.size.s8)
+            .shadow(
+                color: editorFocused && !skin.usesNativeGlass ? accent.opacity(skin.opacity.o25) : .clear,
+                radius: skin.size.s8)
 
             HStack {
                 Spacer()

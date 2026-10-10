@@ -43,8 +43,17 @@ struct GMHeaderLabel: View {
     @Environment(\.ainkradSkin) private var skin
 
     var body: some View {
-        Text(text)
-            .font(AinkradFont.display(skin.type.sizes.t10, weight: .semibold)).kerning(2)
+        Text(skin.gmLabel(text))
+            .font(AinkradFont.display(skin.type.sizes.t10, weight: .semibold)).kerning(skin.gmKerning(2))
             .foregroundStyle(tokens.foreground.opacity(skin.opacity.o50))
     }
+}
+
+extension AinkradSkin {
+    /// A caps caption as the theme wants it: as written while labels are
+    /// uppercased, title case when `type.labelCase` is `none` (Liquid Glass).
+    func gmLabel(_ text: String) -> String { type.labelCase == "none" ? text.capitalized : text }
+
+    /// Caps tracking, dropped when the theme does not uppercase labels.
+    func gmKerning(_ tracking: CGFloat) -> CGFloat { type.labelCase == "none" ? 0 : tracking }
 }
