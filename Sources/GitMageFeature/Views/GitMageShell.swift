@@ -107,7 +107,10 @@ struct GitMageShell: View {
         )
         .background(tokens.surface.opacity(appearance.backgroundOpacity))
         .foregroundStyle(tokens.foreground)
-        .task { model.bootstrapIfNeeded() }
+        .task {
+            model.bootstrapIfNeeded()
+            model.handleLaunch(host.apps.takePendingLaunch())
+        }
         .onAppear { contextBridge.setActiveSource(model) }
         .onDisappear { contextBridge.clearActiveSource(model) }
         .task(id: PRTaskKey(area: model.selectedArea, repoID: model.activeRepoID)) {
