@@ -79,6 +79,9 @@ struct GitMageBasicView: View {
         .task {
             model.loadScope = .basic
             model.bootstrapIfNeeded()
+            // Forge's "Open in Git Mage" opens whichever mode the user picked; basic must take the launch too,
+            // or it shows "No repository" for a repo the library doesn't have yet (E0 FD18).
+            model.handleLaunch(host.apps.takePendingLaunch())
         }
         // The agent asks about "the repo" — without this it would read whichever
         // pane appeared last, which is the class of bug `PluginFocus` exists to
