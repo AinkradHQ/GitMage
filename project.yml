@@ -26,7 +26,8 @@ packages:
     # bdf3b0d: Grimoire E1 — AinkradMarkdownText, AinkradDiffReview, AinkradDecisionBar, AinkradComposer (#108–#110).
     # 41cd9d9: markdown pipe tables and block quotes in AinkradMarkdownText (#111).
     # 51655c2: AinkradMenuButton.kitMenuUnderGlass() opt-in (#112, Forge FD20).
-    revision: 51655c243aab09146e8db97df9b72ee0ba5cc52c
+    # 7481510: DiffReview hidesHeader/sideBySide/keepUndo, empty-state secondaryAction, AinkradAgent colours, PluginAppAvailability (#113).
+    revision: 74815106e95885d35b56729d51a788d447f84343
 
 targets:
   GitMageFeature:
